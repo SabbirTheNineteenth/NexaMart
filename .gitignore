@@ -1,0 +1,9 @@
+client/node_modules/
+client/.next/
+client/tsconfig.tsbuildinfo
+server/node_modules/
+server/dist/
+.env*
+!client/.env.example
+!server/.env.example
+.vercel/

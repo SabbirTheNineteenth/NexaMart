@@ -1,0 +1,3 @@
+.resultsGrid{justify-content:start;gap:10px;background:transparent;border:0}
+.storeCard{width:100%;max-width:320px;min-height:184px;border:1px solid var(--nx-border);background:var(--nx-surface-panel);padding:18px}
+@media(max-width:760px){.resultsGrid{gap:8px}.storeCard{max-width:none;min-height:0;padding:16px}}

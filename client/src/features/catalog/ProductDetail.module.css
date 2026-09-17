@@ -1,0 +1,12 @@
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid var(--nx-border);background:var(--nx-surface-control)}
+.facts div{min-width:0;border:0;padding:9px 10px}
+.facts div+div{border-left:1px solid var(--nx-border)}
+.facts :is(dt,dd){min-width:0;overflow-wrap:anywhere}
+.facts dt{color:var(--nx-text-muted);font-family:"DM Mono",monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+.facts dd{color:var(--nx-text);font-size:11px}
+@media(max-width:760px){.facts{grid-template-columns:1fr}.facts div+div{border-top:1px solid var(--nx-border);border-left:0}}
+
+.variantPanel{width:100%;margin:18px 0 0;border:1px solid var(--nx-border);background:var(--nx-surface-control);padding:12px}
+.variantPanel ul{border:1px solid var(--nx-border);background:var(--nx-surface-panel)}
+.variantPanel li{min-width:0;padding:10px}
+@media(max-width:760px){.variantPanel{padding:10px}}

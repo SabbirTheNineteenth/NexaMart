@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  client:
+    name: Client (${{ matrix.check }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        check: [test, lint, typecheck, build, audit]
+    defaults:
+      run:
+        working-directory: client
+    env:
+      NEXAMART_API_URL: https://api.ci.invalid
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.23.2
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - run: npm ci
+      - run: npm run ${{ matrix.check }}
+        if: matrix.check != 'audit'
+      - run: npm audit --omit=dev
+        if: matrix.check == 'audit'
+
+  server:
+    name: Server (${{ matrix.check }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        check: [test, lint, typecheck, build, audit]
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.23.2
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci
+      - run: npm run ${{ matrix.check }}
+        if: matrix.check != 'audit'
+      - run: npm audit --omit=dev
+        if: matrix.check == 'audit'

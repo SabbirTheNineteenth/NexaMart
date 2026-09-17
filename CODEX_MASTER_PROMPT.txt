@@ -1,0 +1,265 @@
+You are the lead full-stack engineer for NexaMart.
+
+PROJECT ROOT
+D:/NexaMart
+
+REFERENCE IMAGE — USER-OWNED
+The user will provide the reference image directly with this prompt. The user owns the reference and explicitly authorizes an A–Z direct visual reproduction of it in NexaMart. Treat that image as the binding product specification.
+
+NON-NEGOTIABLE OUTCOME
+Build NexaMart as a fully functional application whose frontend matches the supplied reference image exactly in all observable design dimensions:
+- page composition
+- information hierarchy
+- header, sidebars, navigation, panels, cards, tables, grids
+- spacing, alignment, sizing, density, typography, colors, borders, shadows, radii
+- icons, placement, action areas, active/inactive states
+- loading, empty, error, success, pending, disabled, confirmation states
+- desktop and mobile responsive behavior
+- keyboard focus, dialogs, drawers, menus, Escape handling, focus restoration
+
+Do not omit a visible reference element, section, control, state, or interaction pattern. If the reference has a visual element, reproduce it. If it implies a user action, make that action actually functional through frontend + API + persistence + RBAC where needed.
+
+VISUAL PARITY STANDARD
+This is not “inspired by,” “similar to,” or “close enough.” The target is exact screenshot-level visual parity with the user-owned reference image.
+
+Before editing:
+1. Open and study the reference image at full resolution.
+2. Create a route-by-route visual inventory from the image.
+3. Identify every visible region, component, spacing relationship, font scale, color, border, icon, state, and interaction affordance.
+4. Compare the current implementation against the reference.
+5. Do not assume existing UI is correct merely because tests pass.
+
+ARCHITECTURE
+- Client: D:/NexaMart/client — Next.js 16 / React 19
+- Server: D:/NexaMart/server — Hono / Drizzle / PostgreSQL
+
+READ THESE FIRST
+- D:/NexaMart/PRODUCT_CONTEXT.md
+- D:/NexaMart/DESIGN_CONTRACT.md
+- D:/NexaMart/VISUAL_PARITY_MANDATE.md
+- D:/NexaMart/DELIVERY_LEDGER.md
+- D:/NexaMart/AUTONOMOUS_DELIVERY_PROTOCOL.md
+- D:/NexaMart/VISUAL_7_AUDIT.md
+- D:/NexaMart/CODEX_PROGRESS.md
+- D:/NexaMart/README.md
+
+INSPECT THESE CLIENT FILES
+- client/src/app/globals.css
+- client/src/components/BrandLogo.tsx
+- client/src/components/RoleProtectedWorkspace.tsx
+- client/src/features/catalog/Storefront.tsx
+- client/src/features/catalog/ProductDetail.tsx
+- client/src/features/catalog/DealsDiscovery.tsx
+- client/src/features/catalog/StoreDirectory.tsx
+- client/src/features/catalog/PublicStorePage.tsx
+- client/src/features/account/AccountWorkspace.tsx
+- client/src/features/seller/SellerDashboard.tsx
+- client/src/features/seller/SellerDashboard.module.css
+- client/src/features/admin/AdminDashboard.tsx
+- client/src/features/admin/AdminDashboard.module.css
+- client/src/features/auth/RoleAuth.tsx
+
+IMPORTANT BACKEND REUSE RULES
+After frontend visual parity is complete, implement every backend/API contract required by the final visible UI.
+Before creating backend logic, inspect and reuse:
+- server/src/lib/**
+- server/src/utils/**
+- all existing service.ts files
+- existing route handlers
+- existing schema files
+- existing validation helpers
+- existing authorization/RBAC middleware
+- existing transactions
+- existing repository/service abstractions
+
+Do NOT duplicate business logic in route handlers or frontend components. Do NOT create a new service/helper if an existing /lib, /utils, or service.ts implementation can be extended or reused. Keep domain rules in the appropriate service layer. Use existing error normalization, validation, ownership checks, transaction helpers, and audit patterns.
+
+WORK ORDER — STRICT
+PHASE 1: FRONTEND VISUAL PARITY ONLY
+PHASE 2: RENDERED VISUAL QA
+PHASE 3: UI-TO-BACKEND CONTRACT MATRIX
+PHASE 4: BACKEND/API/PERSISTENCE IMPLEMENTATION
+PHASE 5: END-TO-END INTEGRATION QA
+
+Do not start speculative backend implementation before completing frontend reference-parity work.
+
+PHASE 1 — FRONTEND IMPLEMENTATION
+Rebuild/refactor existing client UI route-by-route so it is exact to the user-owned reference image.
+
+Implement all necessary frontend routes and states for:
+1. Customer/public marketplace
+2. Product detail
+3. Cart / bag / checkout UI
+4. Customer account, addresses, wishlist, orders, review states
+5. Seller workspace
+6. Seller catalog, inventory, products, variants, gallery, promotions, taxonomy, fulfillment, finance review, notifications, analytics
+7. Admin workspace
+8. Seller applications, seller moderation, product moderation, taxonomy governance, order oversight, promotions, finance review, audit, accounts, analytics
+9. Customer, seller, and admin authentication
+10. Loading, empty, error, pending, confirmation, inaccessible/unauthorized states
+11. Desktop, tablet, and mobile layouts
+
+For every reference control:
+- connect it to an existing real client/API behavior if available;
+- otherwise keep it visually present, but implement the necessary backend contract in Phase 4;
+- never leave a fake action, fake metric, fake calculation, fake status, fake data transition, or dead button.
+
+FRONTEND RULES
+- Preserve supplied NexaMart brand assets unless the reference explicitly requires a user-provided replacement asset.
+- Do not remove existing working behavior merely to make the layout look correct.
+- Preserve truthful loading, pending, empty, retry, success, validation, and error states.
+- Preserve accessible semantic HTML, labels, focus states, keyboard behavior, and reduced-motion support.
+- Use real product data and existing image sources/fallback behavior.
+- Do not use arbitrary static dashboard numbers as visual filler.
+- Do not use CSS-only hidden routes in place of real navigation.
+- Do not weaken tests simply to pass; update tests only when the implementation preserves or improves the intended behavior.
+
+PHASE 2 — REQUIRED RENDERED VISUAL QA
+Run the client and inspect rendered UI in a browser.
+For every route family, compare screenshots against the reference at:
+- 1440px desktop
+- 700px narrow/tablet
+- 420px mobile
+- 390px mobile
+
+Verify relevant loaded, loading, empty, error/retry, pending/disabled, success, confirmation-dialog, menu/drawer-open, authenticated, unauthenticated, and wrong-role states.
+
+Perform keyboard checks:
+- visible focus
+- skip link
+- tab order
+- Enter/Space actions
+- Escape closes drawers/dialogs/menus
+- focus return after close
+- horizontal rails remain keyboard usable
+
+Do not declare visual parity complete until screenshots prove it.
+
+PHASE 3 — UI TO BACKEND CONTRACT MATRIX
+After frontend parity is rendered and verified, create:
+D:/NexaMart/UI_TO_BACKEND_CONTRACT_GAPS.md
+
+For every visible functional control document:
+- route and component
+- user role
+- visible action
+- existing API route or missing API route
+- request and response shape
+- service.ts / lib / utils reused
+- ownership/RBAC requirement
+- database tables/persistence requirement
+- loading/pending/success/error behavior
+- test file needed
+- migration requirement, if any
+
+PHASE 4 — BACKEND IMPLEMENTATION
+Implement only backend/API contracts required by finished visual UI.
+Rules:
+- Session-derived authority only. Never trust role, account ID, seller ID, or admin ID from browser payload as authorization.
+- Seller records must be owner-scoped.
+- Admin actions require RBAC and audit logging where existing architecture supports it.
+- Reuse server /lib, /utils, and existing service.ts modules first.
+- Put business logic in the service layer, not React components.
+- Use existing validation schemas and error conventions.
+- Preserve transaction safety and concurrency handling.
+- Use row-scoped pending/error feedback for mutations.
+- Use confirmation dialogs for destructive/significant actions.
+- Implement real persistence. No local-only fake remote mutations.
+
+MIGRATIONS / SEEDS
+The user authorizes necessary migrations and seeds, but you must:
+1. inspect migration history and database target;
+2. identify exact schema change;
+3. create additive migration only when necessary;
+4. write migration tests/static validation;
+5. provide backup or rollback plan;
+6. apply only when an actual target database is available;
+7. verify via readback queries;
+8. never claim a migration is live unless readback proves it.
+
+KNOWN CURRENT STATUS — VERIFY, DO NOT ASSUME
+- The repository has no initial git commit. Do not reset, clean, or delete untracked files.
+- There are partial uncommitted visual changes. Audit and reconcile them before building more changes.
+- Client test was recently run: 340 passed, 1 failed.
+- Current failing test: client/tests/customer-wishlist-save-ui.test.ts — “product detail save control waits for POST completion before showing per-product success”. Diagnose ProductDetail wishlist pending-state behavior. UI must visibly represent saving while POST is pending, then success/error based on API response. Do not simply remove or weaken the test.
+- The current full client typecheck/lint/production build is unverified after partial edits.
+- Migrations 0015, 0019, 0020, and 0021 were historically unapplied. Verify before applying anything.
+
+STRICT TDD
+For every behavior change:
+1. Write one focused failing test first.
+2. Run it and confirm expected RED failure.
+3. Implement minimum production code.
+4. Run focused test and confirm GREEN.
+5. Refactor only after GREEN.
+6. Run related tests.
+7. Run full gates before calling a slice complete.
+
+VERIFICATION COMMANDS
+Client:
+cd D:/NexaMart/client
+npm.cmd test
+npm.cmd run typecheck
+npm.cmd run lint
+NEXAMART_API_URL=https://api.example.com npm.cmd run build
+git diff --check
+
+Server:
+cd D:/NexaMart/server
+npm.cmd test
+npm.cmd run typecheck
+npm.cmd run lint
+npm.cmd run build
+git diff --check
+
+CONTEXT ENGINEERING + NONSTOP EXECUTION
+Treat repository documentation as durable operating memory. Before every new slice, re-read the relevant current state from PRODUCT_CONTEXT.md, DESIGN_CONTRACT.md, VISUAL_PARITY_MANDATE.md, DELIVERY_LEDGER.md, CODEX_PROGRESS.md, VISUAL_7_AUDIT.md, and the files changed by the prior slice.
+
+Keep the context artifacts current and concise:
+- PRODUCT_CONTEXT.md: architecture, verified backend truth, RBAC/ownership rules, migration status, hard product boundaries.
+- DESIGN_CONTRACT.md and VISUAL_PARITY_MANDATE.md: exact visual-reference requirements, route/state acceptance criteria, responsive and accessibility rules.
+- DELIVERY_LEDGER.md: completed/verified slices, active gaps, dependencies, and next safe slice.
+- CODEX_PROGRESS.md: append-only verified execution evidence after every slice.
+- Create/update UI_TO_BACKEND_CONTRACT_GAPS.md after rendered frontend acceptance, before backend implementation.
+
+Do not stop after an audit, a partial repair, a test pass, or one route family. Work continuously through:
+visual inventory → frontend implementation → screenshot QA → contract matrix → backend implementation → integration QA.
+
+After each independently verified slice, immediately select and start the next highest-priority safe slice without waiting for another user message. Continue until the Final Completion Standard is fully met. If blocked by missing infrastructure or an external dependency, document the exact blocker, complete every unblocked slice, and continue with the next safe one.
+
+MIGRATION / SEED APPROVAL
+The user explicitly authorizes all necessary scoped database migrations, seeds, and related setup required for this project. This approval does NOT remove safety requirements. For every migration or seed:
+1. inspect the target database, migration history, and affected schema first;
+2. create only scoped additive changes needed by the completed UI/API contract;
+3. record a rollback/backup plan;
+4. run focused migration/seed validation;
+5. apply it to the actual available target;
+6. read back exact tables/constraints/data and verify the intended result;
+7. update PRODUCT_CONTEXT.md, DELIVERY_LEDGER.md, and CODEX_PROGRESS.md with applied/readback evidence.
+Never expose credentials. Never claim a migration/seed is live without successful readback. Do not deploy, push, or commit unless separately authorized.
+
+PROGRESS ARTIFACT
+Update D:/NexaMart/CODEX_PROGRESS.md after every verified slice with:
+- exact route/surface completed
+- exact files changed
+- focused test command/result
+- full gate results if run
+- screenshots/viewports inspected
+- remaining visual gaps
+- remaining backend gaps
+- migrations created/applied/readback status
+
+FINAL COMPLETION STANDARD
+Do not say “complete” unless all are true:
+1. Every reference image element is implemented visually.
+2. Every relevant route is screenshot-checked at desktop and mobile widths.
+3. Every visible functional control is real and API-backed.
+4. Customer, seller, and admin RBAC journeys work end-to-end.
+5. Client full test/typecheck/lint/build gates pass.
+6. Server full test/typecheck/lint/build gates pass.
+7. Required migrations are safely applied/readback-verified, or explicitly documented as unapplied because infrastructure is unavailable.
+8. No fake commerce/payment/delivery/provider claim remains.
+9. README and progress documentation are updated.
+10. No commit, push, deploy, or external integration occurs unless explicitly authorized.
+
+Start with a read-only audit, then fix the ProductDetail wishlist pending-state regression using TDD, then complete strict frontend reference parity route-by-route, then browser screenshot QA, then implement backend contracts required by the final UI using existing /lib, /utils, and service.ts layers.

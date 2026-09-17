@@ -1,0 +1,40 @@
+{
+  "name": "nexamart-server",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.vercel.json",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "admin:create": "tsx src/scripts/create-admin.ts",
+    "seller:provision": "tsx src/scripts/provision-seller.ts",
+    "demo:seed": "tsx src/scripts/demo-seed.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.vercel.json",
+    "lint": "eslint .",
+    "test": "node --import tsx --test \"tests/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.1",
+    "@upstash/redis": "^1.38.4",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.13.0",
+    "pg": "^8.23.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^22.10.0",
+    "@types/pg": "^8.23.1",
+    "@vercel/node": "^13.0.0",
+    "drizzle-kit": "^0.31.10",
+    "eslint": "^9.39.5",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.70.0"
+  }
+}

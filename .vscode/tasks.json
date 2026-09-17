@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "NexaMart: Autonomous Codex",
+      "type": "shell",
+      "command": "node scripts/autonomous-codex-runner.mjs",
+      "options": { "cwd": "${workspaceFolder}" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false },
+      "runOptions": { "instanceLimit": 1 }
+    },
+    {
+      "label": "NexaMart: Stop Autonomous Codex After Current Session",
+      "type": "shell",
+      "command": "node -e \"require('fs').writeFileSync('.nexamart-autonomous.stop','stop\\n')\"",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    }
+  ]
+}
