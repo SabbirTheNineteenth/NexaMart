@@ -46,6 +46,7 @@ export function ProductDetail({ slug }: { slug: string }) {
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [galleryImageFailed, setGalleryImageFailed] = useState(false);
   const [error, setError] = useState("");
+  const [errorSlug, setErrorSlug] = useState("");
   const [detailReloadNonce, setDetailReloadNonce] = useState(0);
   const [detailRetryPending, setDetailRetryPending] = useState(false);
   const [wishlistSave, setWishlistSave] = useState<WishlistSaveState | undefined>(undefined);
@@ -69,6 +70,7 @@ export function ProductDetail({ slug }: { slug: string }) {
       if (requestTokenRef.current !== requestToken) return;
       setProduct(null);
       setError("");
+      setErrorSlug("");
       setWishlistSave(undefined);
       setCartAdd(undefined);
       setSelectedImage(0);
@@ -86,6 +88,7 @@ export function ProductDetail({ slug }: { slug: string }) {
       .catch((reason: unknown) => {
         if (requestTokenRef.current === requestToken) {
           setError(reason instanceof Error ? reason.message : "Unable to load this product");
+          setErrorSlug(slug);
           setDetailRetryPending(false);
         }
       });
@@ -132,7 +135,8 @@ export function ProductDetail({ slug }: { slug: string }) {
   };
 
   const currentProduct = product?.slug === slug ? product : null;
-  if (error) return <main className="product-detail-shell orchid-explore"><DetailHeader authenticated={cart.authenticated} totalItems={cart.totalItems} /><section className="product-detail-state" aria-label="Product loading error"><div className="message" role="alert"><p>{error}</p><button type="button" disabled={detailRetryPending} aria-busy={detailRetryPending} onClick={() => { setDetailRetryPending(true); setDetailReloadNonce((value) => value + 1); }}>{detailRetryPending ? "Retrying product\u2026" : "Try again"}</button></div></section></main>;
+  const activeError = errorSlug === slug ? error : "";
+  if (activeError) return <main className="product-detail-shell orchid-explore"><DetailHeader authenticated={cart.authenticated} totalItems={cart.totalItems} /><section className="product-detail-state" aria-label="Product loading error"><div className="message" role="alert"><p>{activeError}</p><button type="button" disabled={detailRetryPending} aria-busy={detailRetryPending} onClick={() => { setDetailRetryPending(true); setDetailReloadNonce((value) => value + 1); }}>{detailRetryPending ? "Retrying product\u2026" : "Try again"}</button></div></section></main>;
   if (!currentProduct) return <main className="product-detail-shell orchid-explore"><DetailHeader authenticated={cart.authenticated} totalItems={cart.totalItems} /><section className="product-detail-state" aria-label="Product loading"><p className="seller-state" role="status">Loading product\u2026</p></section></main>;
   product = currentProduct;
 
