@@ -33,6 +33,42 @@ test("AUTH-LINT-01 defers initial API-authoritative session resolution outside t
   assert.match(gate, /return \(\) => \{\s*window\.clearTimeout\(initialResolution\);\s*\};/);
 });
 
+test("AUTH-02 keeps the generic workspace unavailable until the current session is verified", () => {
+  const gate = readFileSync(gatePath, "utf8");
+
+  assert.match(gate, /role="status" aria-live="polite">Checking protected workspace access…/);
+  assert.match(gate, /aria-busy="true"/);
+  assert.match(gate, /if \(state\.kind === "ready"\) return <>{children}<\/>;/);
+});
+
+test("AUTH-03 gives an unresolved session a truthful retryable recovery instead of treating it as signed out", () => {
+  const gate = readFileSync(gatePath, "utf8");
+
+  assert.match(gate, /\| \{ kind: "session-error" \}/);
+  assert.match(gate, /setState\(\{ kind: "session-error" \}\);/);
+  assert.match(gate, /We couldn’t verify your signed-in session\./);
+  assert.match(gate, /Try checking access again/);
+  assert.doesNotMatch(gate, /Your session is no longer available/);
+});
+
+test("AUTH-04 redirects only a confirmed signed-out session to the requested role sign-in", () => {
+  const gate = readFileSync(gatePath, "utf8");
+
+  assert.match(gate, /reason instanceof ApiError && reason\.status === 401/);
+  assert.match(gate, /router\.replace\(`\/login\/\$\{role\}`\);/);
+});
+
+test("AUTH-05 makes wrong-role recovery announced and moves focus to its heading", () => {
+  const gate = readFileSync(gatePath, "utf8");
+
+  assert.match(gate, /const recoveryHeadingRef = useRef<HTMLHeadingElement>\(null\);/);
+  assert.match(gate, /if \(state\.kind !== "wrong-role"\) return;/);
+  assert.match(gate, /recoveryHeadingRef\.current\?\.focus\(\);/);
+  assert.match(gate, /role="alert" aria-labelledby="workspace-role-heading"/);
+  assert.match(gate, /ref=\{recoveryHeadingRef\} tabIndex=\{-1\}/);
+  assert.match(gate, /Sign in with a \{roleLabel\(role\)\} account/);
+});
+
 test("AUTH-01 applies the shared gate to root and section seller/admin workspaces", () => {
   for (const route of [sellerRoute, sellerSectionRoute]) {
     assert.match(readFileSync(route, "utf8"), /<RoleProtectedWorkspace role="seller">/);

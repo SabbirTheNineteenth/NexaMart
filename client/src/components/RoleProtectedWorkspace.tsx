@@ -7,7 +7,7 @@ import { ApiError, getJSON } from "@/lib/api";
 import type { Account } from "@/types/account";
 
 type WorkspaceRole = "seller" | "admin";
-type GateState = { kind: "checking" } | { kind: "ready" } | { kind: "wrong-role"; account: Account } | { kind: "access-error"; status: 401 | 403 };
+type GateState = { kind: "checking" } | { kind: "ready" } | { kind: "wrong-role"; account: Account } | { kind: "session-error" };
 
 function roleLabel(role: Account["role"]): string {
   return role === "admin" ? "administrator" : role;
@@ -26,8 +26,9 @@ export function RoleProtectedWorkspace({ role, children }: { role: WorkspaceRole
   const router = useRouter();
   const [state, setState] = useState<GateState>({ kind: "checking" });
   const recoveryPending = useRef(false);
+  const recoveryHeadingRef = useRef<HTMLHeadingElement>(null);
 
-  const recoverSession = useCallback(async (status: 401 | 403) => {
+  const recoverSession = useCallback(async (_status: 401 | 403) => {
     if (recoveryPending.current) return;
     recoveryPending.current = true;
     setState({ kind: "checking" });
@@ -37,13 +38,13 @@ export function RoleProtectedWorkspace({ role, children }: { role: WorkspaceRole
         setState({ kind: "wrong-role", account });
         return;
       }
-      setState(status === 403 ? { kind: "access-error", status } : { kind: "ready" });
+      setState({ kind: "ready" });
     } catch (reason) {
       if (reason instanceof ApiError && reason.status === 401) {
         router.replace(`/login/${role}`);
         return;
       }
-      setState({ kind: "access-error", status });
+      setState({ kind: "session-error" });
     } finally {
       recoveryPending.current = false;
     }
@@ -57,6 +58,11 @@ export function RoleProtectedWorkspace({ role, children }: { role: WorkspaceRole
       window.clearTimeout(initialResolution);
     };
   }, [recoverSession]);
+
+  useEffect(() => {
+    if (state.kind !== "wrong-role") return;
+    recoveryHeadingRef.current?.focus();
+  }, [state.kind]);
 
   useEffect(() => {
     if (state.kind !== "ready") return;
@@ -76,7 +82,7 @@ export function RoleProtectedWorkspace({ role, children }: { role: WorkspaceRole
   }, [recoverSession, state.kind]);
 
   if (state.kind === "ready") return <>{children}</>;
-  if (state.kind === "checking") return <main className="app-state-shell" aria-busy="true"><section className="app-state-card"><p role="status">Checking workspace access…</p></section></main>;
-  if (state.kind === "wrong-role") return <main className="app-state-shell"><section className="app-state-card" aria-labelledby="workspace-role-heading"><p className="app-state-kicker">Access state</p><h1 id="workspace-role-heading">This workspace requires a {role} account.</h1><p>You are signed in as a {roleLabel(state.account.role)}. Workspace access is determined by your current session.</p><div className="app-state-actions"><Link className="primary-button" href={`/login/${role}`}>Sign in as {roleLabel(role)}</Link><Link className="text-link" href="/">Return to marketplace</Link></div></section></main>;
-  return <main className="app-state-shell"><section className="app-state-card" aria-labelledby="workspace-access-heading"><p className="app-state-kicker">Access state</p><h1 id="workspace-access-heading">Workspace access needs attention.</h1><p>{state.status === 401 ? "Your session is no longer available. Sign in to continue." : "The API did not grant access to this workspace. Check your assigned access or sign in again."}</p><div className="app-state-actions"><button className="primary-button" type="button" onClick={() => void recoverSession(state.status)}>Check access again</button><Link className="text-link" href={`/login/${role}`}>Go to {role} sign in</Link></div></section></main>;
+  if (state.kind === "checking") return <main className="app-state-shell" aria-busy="true"><section className="app-state-card"><p role="status" aria-live="polite">Checking protected workspace access…</p></section></main>;
+  if (state.kind === "wrong-role") return <main className="app-state-shell"><section className="app-state-card" role="alert" aria-labelledby="workspace-role-heading"><p className="app-state-kicker">Access state</p><h1 id="workspace-role-heading" ref={recoveryHeadingRef} tabIndex={-1}>This workspace requires a {role} account.</h1><p>You are signed in as a {roleLabel(state.account.role)}. Sign in with a {roleLabel(role)} account to continue.</p><div className="app-state-actions"><Link className="primary-button" href={`/login/${role}`}>Sign in with a {roleLabel(role)} account</Link><Link className="text-link" href="/">Return to marketplace</Link></div></section></main>;
+  return <main className="app-state-shell"><section className="app-state-card" role="alert" aria-labelledby="workspace-access-heading"><p className="app-state-kicker">Access state</p><h1 id="workspace-access-heading">We couldn’t verify your signed-in session.</h1><p>Your protected workspace has not been loaded. Check your connection and try again.</p><div className="app-state-actions"><button className="primary-button" type="button" onClick={() => void recoverSession(401)}>Try checking access again</button><Link className="text-link" href={`/login/${role}`}>Go to {role} sign in</Link></div></section></main>;
 }
