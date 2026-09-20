@@ -13,7 +13,7 @@ test("reference-style Admin sidebar separates seller applications from the Selle
 
 test("reference-style overview provides live action queues and never invents SLA or messaging controls", () => {
   assert.match(dashboard, /Pending seller applications/);
-  assert.match(dashboard, /Latest audit activity/);
+  assert.match(dashboard, /Recent Admin Audit/);
   assert.match(dashboard, /Products needing attention/);
   assert.doesNotMatch(dashboard, /SLA|Message seller|Message<\/button>/);
 });
