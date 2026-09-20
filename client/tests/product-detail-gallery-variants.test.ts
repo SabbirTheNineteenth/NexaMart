@@ -28,7 +28,7 @@ test("product detail exposes purchasable public variant IDs and lets customers s
   const types = readFileSync(catalogTypes, "utf8");
 
   assert.match(types, /variants:\s*ProductVariant\[\]/);
-  assert.match(source, /<section className="product-variants" aria-labelledby="variant-availability-heading">/);
+  assert.match(source, /<section className=\{`product-variants \$\{styles\.variantPanel\}`\} aria-labelledby="variant-availability-heading">/);
   assert.match(source, /<h2 id="variant-availability-heading">Available variants<\/h2>/);
   assert.match(types, /id: string;\s*sku: string;/);
   assert.match(source, /const \[selectedVariantId, setSelectedVariantId\] = useState<string \| null>\(null\)/);
