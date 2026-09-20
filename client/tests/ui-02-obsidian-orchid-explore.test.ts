@@ -7,7 +7,7 @@ const detail = readFileSync(new URL("../src/features/catalog/ProductDetail.tsx",
 const styles = readFileSync(new URL("../src/app/globals.css", import.meta.url), "utf8");
 
 test("UI-02 gives the customer catalog an Obsidian Orchid explore surface without unsupported commerce claims", () => {
-  assert.match(storefront, /className="storefront customer-experience orchid-explore"/);
+  assert.match(storefront, /className="storefront customer-experience orchid-explore reference-explore-layout"/);
   assert.match(detail, /className="product-detail-shell orchid-explore"/);
   assert.match(styles, /\/\* UI-02 Obsidian Orchid customer explore surface \*\//);
 

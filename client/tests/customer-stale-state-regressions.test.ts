@@ -8,9 +8,9 @@ const detail = readFileSync(new URL("../src/features/catalog/ProductDetail.tsx",
 test("catalog hides prior empty assertions while every new filter request is unsettled", () => {
   assert.match(
     storefront,
-    /useEffect\(\(\) => \{\n    const controller = new AbortController\(\);\n    setCatalogLoaded\(false\);\n    setError\(""\);[\s\S]*?getJSON<CatalogPayload>/,
+    /useEffect\(\(\) => \{\r?\n    const controller = new AbortController\(\);\r?\n    setCatalogLoaded\(false\);\r?\n    setError\(""\);[\s\S]*?getJSON<CatalogPayload>/,
   );
-  assert.match(storefront, /catalogLoaded && !catalog\.products\.length/);
+  assert.match(storefront, /catalogLoaded && !visibleProducts\.length/);
 });
 
 test("slug navigation never renders or mutates a prior product while the next slug is unresolved", () => {

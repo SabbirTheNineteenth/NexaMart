@@ -8,7 +8,7 @@ const styles = readFileSync(new URL("../src/app/globals.css", import.meta.url), 
 test("shopping bag drawer closes when Escape is pressed", () => {
   assert.match(storefront, /onKeyDown=\{handleDrawerKeyDown\}/);
   assert.match(storefront, /if \(event\.key === "Escape"\) \{/);
-  assert.match(storefront, /closeCart\(\);\n      return;/);
+  assert.match(storefront, /closeCart\(\);\r?\n      return;/);
 });
 
 test("shopping bag drawer focuses its close control and restores the opener", () => {
@@ -37,8 +37,8 @@ test("storefront controls have visible keyboard focus indicators", () => {
 });
 
 test("the first storefront focus target skips navigation to the programmatically focusable collection heading", () => {
-  assert.match(storefront, /return <main className="storefront customer-experience orchid-explore" aria-labelledby="explore-heading">\n    <a className="storefront-skip-link" href="#collection-heading" onClick=\{skipToCollection\}>Skip to collection<\/a>/);
-  assert.match(storefront, /const skipToCollection = \(event: MouseEvent<HTMLAnchorElement>\) => \{\n    event\.preventDefault\(\);\n    collectionHeadingRef\.current\?\.focus\(\);\n  \};/);
+  assert.match(storefront, /return <main className="storefront customer-experience orchid-explore reference-explore-layout" aria-labelledby="explore-heading">\r?\n    <a className="storefront-skip-link" href="#collection-heading" onClick=\{skipToCollection\}>Skip to collection<\/a>/);
+  assert.match(storefront, /const skipToCollection = \(event: MouseEvent<HTMLAnchorElement>\) => \{\r?\n    event\.preventDefault\(\);\r?\n    collectionHeadingRef\.current\?\.focus\(\);\r?\n  \};/);
   assert.match(storefront, /<h2 id="collection-heading" ref=\{collectionHeadingRef\} tabIndex=\{-1\}>Browse catalog products\.<\/h2>/);
   assert.match(styles, /\.storefront-skip-link\{position:absolute;z-index:30;top:-64px/);
   assert.match(styles, /\.storefront-skip-link:focus\{top:16px\}/);

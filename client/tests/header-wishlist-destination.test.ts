@@ -17,6 +17,6 @@ test("guests safely fall back to Account instead of a wishlist-only destination"
 
 test("marketplace header uses the authentication-aware wishlist destination", () => {
   assert.match(storefront, /import \{ headerWishlistPath \} from "@\/features\/catalog\/header-wishlist";/);
-  assert.match(storefront, /href=\{headerWishlistPath\(cart\.authenticated\)\}[^>]*>Wishlist<\/Link>/);
+  assert.match(storefront, /<Link className="marketplace-action-icon" href=\{headerWishlistPath\(cart\.authenticated\)\} aria-label="Open saved pieces">/);
   assert.match(account, /<section id="wishlist" className="account-wishlist"/);
 });

@@ -7,15 +7,15 @@ const account = readFileSync(new URL("../src/features/account/AccountWorkspace.t
 const styles = readFileSync(new URL("../src/app/globals.css", import.meta.url), "utf8");
 
 test("customer Explore and account surfaces retain their named responsive landmarks and checkout controls", () => {
-  assert.match(storefront, /<main className="storefront customer-experience orchid-explore" aria-labelledby="explore-heading">/);
+  assert.match(storefront, /<main className="storefront customer-experience orchid-explore reference-explore-layout" aria-labelledby="explore-heading">/);
   assert.match(storefront, /<a className="storefront-skip-link" href="#collection-heading" onClick=\{skipToCollection\}>Skip to collection<\/a>/);
   assert.match(storefront, /<header id="top" className="marketplace-header" onKeyDown=\{handleMobileNavKeyDown\}>/);
   assert.match(storefront, /<nav id="marketplace-category-navigation" className=\{`marketplace-category-nav \$\{mobileNavOpen \? "is-open" : ""\}`\} aria-label="Marketplace categories">/);
-  assert.match(storefront, /<section className="marketplace-hero shell" aria-labelledby="explore-heading">/);
+  assert.match(storefront, /<section className="marketplace-hero reference-collection-hero" aria-labelledby="explore-heading">/);
   assert.match(storefront, /<h1 id="explore-heading">Browse <em>catalog products\.<\/em><\/h1>/);
-  assert.match(storefront, /<section id="collection" className="collection shell customer-collection">/);
+  assert.match(storefront, /<section id="collection" className="collection shell customer-collection reference-explore-content">/);
   assert.match(storefront, /<h2 id="collection-heading" ref=\{collectionHeadingRef\} tabIndex=\{-1\}>Browse catalog products\.<\/h2>/);
-  assert.match(account, /className="account-shell customer-account-workspace"/);
+  assert.match(account, /<main className=\{`account-shell customer-account-workspace \$\{styles\.shell\}`\}>/);
   assert.match(account, /<header className="seller-topbar customer-account-topbar">/);
   assert.match(account, /<nav className="orchid-navigation account-section-navigation" aria-label="Account sections">/);
   assert.match(account, /account\.role === "customer" && <a href="#reviews">Reviews<\/a>/);
