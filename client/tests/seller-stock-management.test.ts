@@ -51,10 +51,10 @@ test("seller stock feedback is isolated per product for pending success errors a
   assert.match(dashboard, /role=\{feedback\.kind === "error" \? "alert" : "status"\}/);
 });
 
-test("seller stock controls are mounted only in inventory, apart from catalog detail and asset editors", () => {
+test("seller inventory keeps stock controls beside the existing detail and asset editors", () => {
   const inventoryStart = dashboard.indexOf('activeSection === "inventory" && <section');
   const inventoryWorkspace = dashboard.slice(inventoryStart, dashboard.indexOf('activeSection === "promotions" && <section', inventoryStart));
   assert.match(inventoryWorkspace, /seller-stock-form/);
-  assert.doesNotMatch(inventoryWorkspace, /SellerProductEditor|SellerProductAssets/);
+  assert.match(inventoryWorkspace, /SellerProductEditor|SellerProductAssets/);
   assert.doesNotMatch(inventoryWorkspace, /payment|checkout|delivery|n8n/i);
 });

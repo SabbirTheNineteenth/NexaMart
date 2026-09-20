@@ -16,7 +16,7 @@ test("seller routes render and load only their active workspace", () => {
   assert.match(dashboard, /activeSection === "finance"[\s\S]*?"\/seller\/finance"/);
 });
 
-test("catalog editing assets and stock control mount in separate active workspaces", () => {
+test("catalog and inventory both expose real product editing while stock saving remains in inventory", () => {
   const catalogStart = dashboard.indexOf('activeSection === "catalog" && <section');
   const inventoryStart = dashboard.indexOf('activeSection === "inventory" && <section');
   const catalogWorkspace = dashboard.slice(catalogStart, inventoryStart);
@@ -27,5 +27,7 @@ test("catalog editing assets and stock control mount in separate active workspac
   assert.doesNotMatch(catalogWorkspace, /seller-stock-form|Save stock/);
   assert.match(inventoryWorkspace, /seller-stock-form/);
   assert.match(inventoryWorkspace, /Save stock/);
-  assert.doesNotMatch(inventoryWorkspace, /SellerProductEditor|SellerProductAssets|SellerProductForm/);
+  assert.match(inventoryWorkspace, /SellerProductEditor/);
+  assert.match(inventoryWorkspace, /SellerProductAssets/);
+  assert.doesNotMatch(inventoryWorkspace, /SellerProductForm/);
 });

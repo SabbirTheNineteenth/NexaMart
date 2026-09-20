@@ -396,19 +396,33 @@ export function SellerDashboard() {
     {activeSection === "catalog" && <SellerProductForm onCreated={(product) => setProducts((items) => [product, ...items])} open={createTarget === "product"} onOpenChange={(open) => setCreateTarget(open ? "product" : null)} />}
     {activeSection === "inventory" && <section className="seller-queue" aria-labelledby="seller-inventory-heading">
       <div className="seller-queue-head"><div><p className="eyebrow">Stock control</p><h2 id="seller-inventory-heading">Inventory</h2><p className="seller-form-note">Update the available stock for products you own.</p></div></div>
-      {products.length ? <div className="seller-list">{products.map((product) => {
+      {products.length ? <>
+        <div className={styles.inventoryFilters} aria-label="Filter your inventory">
+          <label>Search<input type="search" value={productFilters.query} onChange={(event) => setProductFilters((filters) => ({ ...filters, query: event.target.value }))} aria-label="Search your inventory" placeholder="Search name or brand" /></label>
+          <label>Category<select value={productFilters.categoryId} onChange={(event) => setProductFilters((filters) => ({ ...filters, categoryId: event.target.value }))}><option value="all">All categories</option>{categoryIds.map((categoryId) => <option key={categoryId} value={categoryId}>Category {categoryId}</option>)}<option value="uncategorized">Uncategorized</option></select></label>
+          <label>Status<select value={productFilters.status} onChange={(event) => setProductFilters((filters) => ({ ...filters, status: event.target.value as SellerProductFilters["status"] }))}><option value="all">All statuses</option><option value="published">Published</option><option value="draft">Draft</option></select></label>
+          {hasActiveProductFilters && <button type="button" onClick={() => setProductFilters({ query: "", categoryId: "all", status: "all" })}>Clear filters</button>}
+        </div>
+        <p className={`${styles.inventoryCount} seller-state`} role="status" aria-live="polite">Showing {filteredProducts.length} of {products.length} products</p>
+        {filteredProducts.length ? <div className={styles.inventoryTableWrap}><table className={styles.inventoryTable}>
+          <thead><tr><th scope="col">Product</th><th scope="col">Category</th><th scope="col">Status</th><th scope="col">Stock</th><th scope="col">Actions</th></tr></thead>
+          <tbody>{filteredProducts.map((product) => {
         const feedback = stockFeedback[product.id];
         const savingStock = feedback?.kind === "pending";
-        return <article className="seller-row" key={product.id}>
-          <div><strong>{product.name}</strong><small>{product.isPublished ? "Live in the collection" : "Draft — not visible to customers"}</small></div>
-          <form className="seller-stock-form" aria-label={`Update stock for ${product.name}`} aria-busy={stockFeedback[product.id]?.kind === "pending"} onSubmit={(event) => void saveStock(event, product)}>
-            <label>Stock<input name="stock" type="number" min="0" step="1" inputMode="numeric" defaultValue={product.stock} disabled={savingStock} /></label>
+        return <tr key={product.id}>
+          <td><strong>{product.name}</strong><small>{product.brand ?? "No brand"}</small></td>
+          <td>{product.categoryId ? `Category ${product.categoryId}` : "Uncategorized"}</td>
+          <td><span className={`status ${product.isPublished ? "live" : "draft"}`}>{product.isPublished ? "Published" : "Draft"}</span></td>
+          <td><form className="seller-stock-form" aria-label={`Update stock for ${product.name}`} aria-busy={stockFeedback[product.id]?.kind === "pending"} onSubmit={(event) => void saveStock(event, product)}>
+            <label className="sr-only">Stock for {product.name}<input name="stock" type="number" min="0" step="1" inputMode="numeric" defaultValue={product.stock} disabled={savingStock} /></label>
             <button type="submit" disabled={savingStock}>{savingStock ? "Saving stock…" : "Save stock"}</button>
             {feedback && <p className={`seller-stock-feedback ${feedback.kind}`} role={feedback.kind === "error" ? "alert" : "status"}>{feedback.message}</p>}
-          </form>
-          {product.isPublished && <span className="status live">Published</span>}
-        </article>;
-      })}</div> : <div className="seller-empty"><h3>Your inventory is clear.</h3><p>Add products in your catalog before updating stock.</p><Link className="primary-button" href="/seller/catalog">Manage catalog</Link></div>}
+          </form></td>
+          <td><div className={styles.inventoryActions}><SellerProductEditor product={product} onSaved={(details) => setProducts((items) => items.map((item) => item.id === product.id ? { ...item, ...details } : item))} /><SellerProductAssets product={product} /></div></td>
+        </tr>;
+      })}</tbody>
+        </table></div> : <div className="seller-empty"><h3>No products match these filters.</h3><p>Adjust or clear the filters to see products in your loaded inventory.</p><button type="button" onClick={() => setProductFilters({ query: "", categoryId: "all", status: "all" })}>Clear filters</button></div>}
+      </> : <div className="seller-empty"><h3>Your inventory is clear.</h3><p>Add products in your catalog before updating stock.</p><Link className="primary-button" href="/seller/catalog">Manage catalog</Link></div>}
     </section>}
     {activeSection === "taxonomy" && <SellerTaxonomyManagement products={products} onClassified={(updatedProduct) => setProducts((items) => items.map((item) => item.id === updatedProduct.id ? { ...item, ...updatedProduct, isPublished: false } : item))} />}
     {activeSection === "promotions" && <section className="seller-promotions" aria-labelledby="seller-promotions-heading">
