@@ -10,7 +10,7 @@ test("seller workspace uses a dedicated compact marketplace operations shell", (
   assert.match(dashboard, /className=\{styles\.operationsHeader\}/);
   assert.match(dashboard, /aria-label="Seller sections"/);
   assert.match(dashboard, /href=\{`\/seller\/\$\{item\.section\}`\}/);
-  assert.match(dashboard, /activeSection === "overview" && <div className=\{styles\.priorityGrid\}/);
+  assert.match(dashboard, /activeSection === "overview" && <>\s*<div className=\{styles\.priorityGrid\}/);
   assert.match(dashboard, /className=\{styles\.inventorySignal\}/);
 });
 
