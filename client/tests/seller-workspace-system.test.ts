@@ -32,3 +32,13 @@ test("VISUAL-SELLER-01 keeps the Operate command rail, context row, dense panels
   assert.doesNotMatch(styles, /\.sellerNavigation a\{[^}]*font-size:0/);
   assert.doesNotMatch(dashboard, /(carrier|tracking|payment status|payout sent|settled)/i);
 });
+
+test("seller overview frames real inventory records without inventing a notification side feed", () => {
+  assert.match(dashboard, /const inventoryAttention = useMemo/);
+  assert.match(dashboard, /id="seller-inventory-attention-heading"/);
+  assert.match(dashboard, /Inventory attention/);
+  assert.match(dashboard, /href="\/seller\/inventory"/);
+  assert.match(dashboard, /product\.stock === 0/);
+  assert.match(dashboard, /product\.stock > 0 && product\.stock < 6/);
+  assert.doesNotMatch(dashboard, /activeSection === "overview"[\s\S]{0,2400}notifications\.map/);
+});
