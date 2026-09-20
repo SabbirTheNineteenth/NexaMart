@@ -17,6 +17,14 @@ test("role authentication routes retain real customer, seller, and administrator
   assert.match(auth(), /router\.replace\(destination\)/);
 });
 
+test("wrong-role sign-in feedback provides the matching real role route", () => {
+  const source = auth();
+
+  assert.match(source, /const \[wrongRole, setWrongRole\] = useState<AuthRouteRole \| null>\(null\);/);
+  assert.match(source, /setWrongRole\(account\.role\);/);
+  assert.match(source, /\{wrongRole && <Link className="role-auth-recovery-link" href=\{roleRoute\("login", wrongRole\)\}>Continue to \{roleNames\[wrongRole\]\} sign in<\/Link>\}/);
+});
+
 test("RoleAuth owns the reference-matched split composition instead of global auth styling", () => {
   const source = auth();
   const styles = css();

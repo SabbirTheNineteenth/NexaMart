@@ -94,6 +94,7 @@ export function RoleAuth({ mode, role }: RoleAuthProps) {
   const context = roleContexts[role];
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [wrongRole, setWrongRole] = useState<AuthRouteRole | null>(null);
   const [success, setSuccess] = useState("");
   const [formState, setFormState] = useState(initialFormState);
   const isAdminRegistration = mode === "register" && role === "admin";
@@ -110,6 +111,7 @@ export function RoleAuth({ mode, role }: RoleAuthProps) {
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
+    setWrongRole(null);
     setSuccess("");
     setSaving(true);
     const form = new FormData(event.currentTarget);
@@ -126,6 +128,7 @@ export function RoleAuth({ mode, role }: RoleAuthProps) {
         const destination = roleDestinations[account.role];
         if (account.role !== role) {
           setError(`This account is a ${roleNames[account.role]} account. Use the ${roleNames[account.role]} sign-in route instead.`);
+          setWrongRole(account.role);
           return;
         }
         router.replace(destination);
@@ -187,6 +190,7 @@ export function RoleAuth({ mode, role }: RoleAuthProps) {
             <label htmlFor="auth-password">Password<input id="auth-password" required name="password" value={formState.password} onChange={updateFormField} type="password" minLength={8} autoComplete={mode === "login" ? "current-password" : "new-password"} disabled={saving} /></label>
             {isSellerRegistration && <fieldset className="role-auth-store-fields"><legend>Store application</legend><label htmlFor="store-name">Store name<input id="store-name" required name="storeName" value={formState.storeName} onChange={updateFormField} minLength={2} maxLength={120} disabled={saving} /></label><label htmlFor="store-slug">Store URL slug<input id="store-slug" required name="storeSlug" value={formState.storeSlug} onChange={updateFormField} minLength={2} maxLength={100} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" aria-describedby="store-slug-help" disabled={saving} /></label><small id="store-slug-help">Use lowercase letters, numbers, and hyphens only.</small><label htmlFor="store-description">Store description (optional)<textarea id="store-description" name="description" value={formState.description} onChange={updateFormField} minLength={10} maxLength={2000} rows={4} disabled={saving} /></label></fieldset>}
             {error && <p className="seller-error" role="alert">{error}</p>}
+            {wrongRole && <Link className="role-auth-recovery-link" href={roleRoute("login", wrongRole)}>Continue to {roleNames[wrongRole]} sign in</Link>}
             {success && <p className="seller-profile-success" role="status">{success}</p>}
             <button className="primary-button" type="submit" disabled={saving}>{saving ? "Please wait…" : mode === "login" ? `Sign in as ${roleNames[role]}` : isSellerRegistration ? "Submit seller application" : "Create customer account"}</button>
           </form>
