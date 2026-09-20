@@ -55,24 +55,26 @@ export function createAuditRequestTracker() {
 
 type AdminSection = "overview" | "applications" | "orders" | "feedback" | "finance" | "analytics" | "audit" | "sellers" | "products" | "taxonomy" | "promotions" | "accounts";
 
-type AdminSectionDefinition = { section: AdminSection; label: string; group: "Operate" | "Configure"; icon: string };
+type AdminSectionDefinition = { section: AdminSection; label: string; railLabel?: string; group: "Operate" | "Configure"; icon: string };
 
 const adminSections: AdminSectionDefinition[] = [
   { section: "overview", label: "Overview", group: "Operate", icon: "▦" },
-  { section: "applications", label: "Seller applications", group: "Operate", icon: "◫" },
+  { section: "applications", label: "Seller applications", railLabel: "Seller Review", group: "Operate", icon: "◫" },
   { section: "orders", label: "Orders", group: "Operate", icon: "□" },
   { section: "feedback", label: "Feedback", group: "Operate", icon: "◌" },
-  { section: "finance", label: "Finance", group: "Operate", icon: "$" },
+  { section: "finance", label: "Finance", railLabel: "Payout Review", group: "Operate", icon: "$" },
   { section: "analytics", label: "Analytics", group: "Operate", icon: "⌁" },
-  { section: "audit", label: "Audit trail", group: "Operate", icon: "≡" },
+  { section: "audit", label: "Audit trail", railLabel: "Admin Audit", group: "Operate", icon: "≡" },
   { section: "sellers", label: "Sellers", group: "Configure", icon: "♙" },
-  { section: "products", label: "Products", group: "Configure", icon: "◇" },
+  { section: "products", label: "Products", railLabel: "Product Moderation", group: "Configure", icon: "◇" },
   { section: "taxonomy", label: "Taxonomy", group: "Configure", icon: "⌘" },
   { section: "promotions", label: "Promotions", group: "Configure", icon: "✦" },
-  { section: "accounts", label: "Accounts", group: "Configure", icon: "◉" },
+  { section: "accounts", label: "Accounts", railLabel: "Settings", group: "Configure", icon: "◉" },
 ];
 
-const adminControlRoomOrder: AdminSection[] = ["overview", "applications", "sellers", "products", "taxonomy", "orders", "feedback", "finance", "analytics", "audit", "promotions", "accounts"];
+const adminPrimaryWorkflowOrder: AdminSection[] = ["overview", "applications", "products", "taxonomy", "finance", "audit", "accounts"];
+const adminSecondaryWorkflowOrder: AdminSection[] = ["sellers", "orders", "feedback", "analytics", "promotions"];
+const adminControlRoomOrder: AdminSection[] = [...adminPrimaryWorkflowOrder, ...adminSecondaryWorkflowOrder];
 
 const isAdminSection = (value: string | undefined): value is AdminSection => adminSections.some((item) => item.section === value);
 
@@ -575,7 +577,7 @@ export function AdminDashboard() {
         {adminControlRoomOrder.map((section) => {
           const item = adminSections.find((candidate) => candidate.section === section)!;
           const isActive = item.section === activeSection;
-          return <div key={item.section} className="admin-nav-item"><Link href={`/admin/${item.section}`} aria-label={item.label} aria-current={isActive ? "page" : undefined} className={isActive ? "is-active" : undefined}><AdminNavIcon symbol={item.icon} /><span>{item.label}</span></Link>{item.section === "products" && isActive && <div className="admin-products-subnav" aria-label="Products workspace pages">{adminProductLinks.map((child) => {
+          return <div key={item.section} className="admin-nav-item"><Link href={`/admin/${item.section}`} aria-label={item.label} aria-current={isActive ? "page" : undefined} className={isActive ? "is-active" : undefined}><AdminNavIcon symbol={item.icon} /><span>{item.railLabel ?? item.label}</span></Link>{item.section === "products" && isActive && <div className="admin-products-subnav" aria-label="Products workspace pages">{adminProductLinks.map((child) => {
             const isProductChildActive = pathname === child.href;
             return <Link key={child.href} href={child.href} aria-current={isProductChildActive ? "page" : undefined} className={isProductChildActive ? "is-active" : undefined}>{child.label}</Link>;
           })}</div>}</div>;
@@ -588,20 +590,14 @@ export function AdminDashboard() {
       <header className="admin-utility-bar admin-command-bar"><div className="admin-command-context"><nav className="admin-breadcrumb" aria-label="Breadcrumb"><Link href="/">NexaMart</Link><span aria-hidden="true">/</span><span aria-current="page">Administration</span></nav><span className="admin-command-scope">Monitor / operate</span></div><Link className="admin-command-link" href="/admin/audit">Audit trail <span aria-hidden="true">→</span></Link></header>
       {activeSection === "overview" && <>
       <section className="admin-overview-briefing" aria-labelledby="admin-workspace-title">
-        <section className="admin-context-header" aria-labelledby="admin-workspace-title"><div><p className="eyebrow">Marketplace operations</p><h1 id="admin-workspace-title">Keep the marketplace accountable.</h1><p>Review moderation, taxonomy governance, order records, and administrative history from one working view.</p></div><Link className="admin-context-link" href="/admin/feedback">Open feedback queue <span aria-hidden="true">→</span></Link></section>
-        <div className="admin-overview-command-deck" aria-label="Governance queues" aria-live="polite" aria-busy={sellerLoading || productLoading || financeLoading}>
-          <article><span>Seller applications</span><strong>{sellerLoading ? "—" : sellers.filter((seller) => seller.status === "pending").length}</strong><small>{sellerLoading ? "Loading applications" : "awaiting moderation"}</small><Link href="/admin/applications">Review applications <span aria-hidden="true">→</span></Link></article>
-          <article><span>Product moderation</span><strong>{productLoading ? "—" : productError ? "!" : attentionProducts.length}</strong><small>{productLoading ? "Loading catalog" : productError ? "Catalog unavailable" : "records needing attention"}</small><Link href="/admin/products">Review products <span aria-hidden="true">→</span></Link></article>
-          <article><span>Taxonomy governance</span><strong aria-hidden="true">→</strong><small>Categories, subcategories, and brands</small><Link href="/admin/taxonomy">Manage taxonomy <span aria-hidden="true">→</span></Link></article>
-          <article><span>Payout review</span><strong>{financeLoading ? "—" : financeError ? "!" : finance ? finance.payouts.filter((payout) => payout.status === "pending").length : 0}</strong><small>{financeLoading ? "Loading review requests" : financeError ? "Review requests unavailable" : "requests awaiting review"}</small><Link href="/admin/finance">Open review queue <span aria-hidden="true">→</span></Link></article>
+        <section className="admin-context-header" aria-labelledby="admin-workspace-title"><div><p className="eyebrow">Marketplace operations</p><h1 id="admin-workspace-title">Keep the marketplace accountable.</h1><p>Review live governance queues and recent administrative activity from one working view.</p></div><Link className="admin-context-link" href="/admin/feedback">Open feedback queue <span aria-hidden="true">→</span></Link></section>
+        <div className="admin-overview-command-deck" aria-label="Governance queues" aria-live="polite" aria-busy={sellerLoading || productLoading || financeLoading || auditLoading}>
+          <article><span>Seller Review</span><strong>{sellerLoading ? "—" : sellers.filter((seller) => seller.status === "pending").length}</strong><small>{sellerLoading ? "Loading applications" : "awaiting moderation"}</small><Link href="/admin/applications">Review applications <span aria-hidden="true">→</span></Link></article>
+          <article><span>Product Moderation</span><strong>{productLoading ? "—" : productError ? "!" : attentionProducts.length}</strong><small>{productLoading ? "Loading catalog" : productError ? "Catalog unavailable" : "records needing attention"}</small><Link href="/admin/products">Review products <span aria-hidden="true">→</span></Link></article>
+          <article><span>Payout Review</span><strong>{financeLoading ? "—" : financeError ? "!" : finance ? finance.payouts.filter((payout) => payout.status === "pending").length : 0}</strong><small>{financeLoading ? "Loading review requests" : financeError ? "Review requests unavailable" : "requests awaiting review"}</small><Link href="/admin/finance">Open review queue <span aria-hidden="true">→</span></Link></article>
+          <article><span>Admin Audit</span><strong>{auditLoading ? "—" : auditError ? "!" : data.auditRecords.length}</strong><small>{auditLoading ? "Loading audit activity" : auditError ? "Audit activity unavailable" : "recent records"}</small><Link href="/admin/audit">View audit trail <span aria-hidden="true">→</span></Link></article>
         </div>
       </section>
-    <section className="admin-metrics" aria-label="Marketplace summary"><div className="admin-queue-deck">
-      <article><span>Seller applications</span><strong>{sellerLoading ? "—" : sellers.filter((seller) => seller.status === "pending").length}</strong><small>{sellerLoading ? "Loading applications" : "awaiting moderation"}</small></article>
-      <article><span>Product reviews</span><strong>{reviewLoading ? "—" : reviewLoadError ? "!" : data.reviews.length}</strong><small>{reviewLoading ? "Loading review queue" : reviewLoadError ? "Reviews unavailable" : "customer feedback records"}</small></article>
-      <article><span>Catalog risks</span><strong>{productLoading ? "—" : productError ? "!" : attentionProducts.length}</strong><small>{productLoading ? "Loading catalog" : productError ? "Catalog unavailable" : "draft or unavailable products"}</small></article>
-      <article><span>Open orders</span><strong>{orderLoading ? "—" : orderError ? "!" : overview.pendingOrders}</strong><small>{orderLoading ? "Loading orders" : orderError ? "Orders unavailable" : "awaiting confirmation"}</small></article>
-    </div></section>
     <section className="admin-grid">
       <section className="admin-panel admin-moderation" aria-labelledby="moderation-heading">
         <div className="admin-panel-head"><div><p className="eyebrow">Moderation queue</p><h2 id="moderation-heading">Products needing attention</h2></div><span>{productLoading ? "Loading" : `${attentionProducts.length} queued`}</span></div>

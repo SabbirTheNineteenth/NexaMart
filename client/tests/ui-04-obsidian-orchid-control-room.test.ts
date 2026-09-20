@@ -6,16 +6,16 @@ const dashboard = readFileSync(new URL("../src/features/admin/AdminDashboard.tsx
 const styles = readFileSync(new URL("../src/features/admin/AdminDashboard.module.css", import.meta.url), "utf8");
 
 test("UI-04 orders the persistent control-room navigation around real governance workflows", () => {
-  const order = ["applications", "sellers", "products", "taxonomy", "orders", "feedback", "finance", "analytics", "audit", "promotions", "accounts"];
-  const navOrder = dashboard.match(/const adminControlRoomOrder: AdminSection\[\] = \[([^\]]+)\]/)?.[1] ?? "";
+  const order = ["overview", "applications", "products", "taxonomy", "finance", "audit", "accounts"];
+  const navOrder = dashboard.match(/const adminPrimaryWorkflowOrder: AdminSection\[\] = \[([^\]]+)\]/)?.[1] ?? "";
   let cursor = -1;
   for (const section of order) {
     const next = navOrder.indexOf(`\"${section}\"`);
     assert.ok(next > cursor, `${section} follows the prior control-room workflow`);
     cursor = next;
   }
-  assert.match(dashboard, /Seller applications/);
-  assert.match(dashboard, /Audit trail/);
+  assert.match(dashboard, /railLabel: "Seller Review"/);
+  assert.match(dashboard, /railLabel: "Admin Audit"/);
 });
 
 test("UI-04 keeps dense dark surfaces, active orchid navigation, mobile reflow, and reduced motion", () => {
