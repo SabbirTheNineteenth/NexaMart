@@ -8,6 +8,7 @@ import { millisecondsUntilNextDealRefresh } from "@/features/catalog/deals-refre
 import { productImageSource } from "@/features/catalog/product-presentation";
 import { getJSON } from "@/lib/api";
 import type { Product } from "@/types/catalog";
+import styles from "./DealsDiscovery.module.css";
 
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 type DealsState = "loading" | "loaded" | "error";
@@ -45,7 +46,7 @@ export function DealsDiscovery() {
   }, [reloadNonce]);
 
   return <main className="deals-discovery customer-experience orchid-explore">
-    <a className="storefront-skip-link" href="#deals-heading">Skip to active deals</a>
+    <a className={`storefront-skip-link ${styles.skipLink}`} href="#deals-heading">Skip to active deals</a>
     <ExploreHeader active="deals" />
     {/*
       <div className="marketplace-utility"><div className="shell"><span>Browse catalog products and stores.</span><div><Link href="/stores">Browse stores</Link><Link href="/register/seller">Sell with NexaMart</Link></div></div></div>
