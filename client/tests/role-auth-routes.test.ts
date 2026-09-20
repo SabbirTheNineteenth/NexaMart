@@ -34,12 +34,12 @@ test("RoleAuth owns the reference-matched split composition instead of global au
   assert.match(source, /<div className="role-auth-media">[\s\S]*?<Image className=\{`role-auth-photo/);
   assert.match(source, /<section className="role-auth-panel"/);
   assert.match(source, /<nav className="role-auth-tabs" aria-label="Choose account role">/);
-  assert.match(styles, /\.shell :global\(\.role-auth-layout\)\{[^}]*grid-template-columns:minmax\(0,1\.08fr\) minmax\(360px,\.92fr\)/);
-  assert.match(styles, /\.shell :global\(\.role-auth-context-content\)\{[^}]*padding:clamp\(28px,4\.2vw,54px\)/);
+  assert.match(styles, /\.shell :global\(\.role-auth-layout\)\{[^}]*grid-template-columns:minmax\(0,1\.12fr\) minmax\(360px,\.88fr\)/);
+  assert.match(styles, /\.shell :global\(\.role-auth-context-content\)\{[^}]*padding:clamp\(28px,4\.2vw,52px\)/);
   assert.match(styles, /\.shell :global\(\.role-auth-media\)\{[^}]*position:absolute[^}]*inset:0/);
-  assert.match(styles, /\.shell :global\(\.role-auth-panel\)\{[^}]*background:rgba\(20,14,38,\.76\)/);
-  assert.match(styles, /\.shell :global\(\.role-auth-panel-content\)\{[^}]*width:min\(100%,390px\)[^}]*border:1px solid rgba\(194,169,246,\.28\)/);
-  assert.match(styles, /\.shell :global\(\.role-auth-panel form\)\{[^}]*gap:18px/);
+  assert.match(styles, /\.shell :global\(\.role-auth-panel\)\{[^}]*background:rgba\(20,14,38,\.86\)/);
+  assert.match(styles, /\.shell :global\(\.role-auth-panel-content\)\{[^}]*width:min\(100%,400px\)/);
+  assert.match(styles, /\.shell :global\(\.role-auth-panel form\)\{[^}]*gap:14px/);
 });
 
 test("RoleAuth keeps a compact three-role selector, local editorial imagery, and a mobile single-column fallback", () => {
@@ -47,13 +47,30 @@ test("RoleAuth keeps a compact three-role selector, local editorial imagery, and
   const styles = css();
 
   assert.match(source, /aria-current=\{tab\.role === role \? "page" : undefined\}/);
-  assert.match(source, /<BrandLogo className="role-auth-reference-logo" priority \/>/);
+  assert.match(source, /<BrandLogo monogram className="role-auth-monogram" priority \/>/);
   for (const asset of ["customer-panel.png", "seller-panel.png", "admin-panel.png"]) {
     assert.equal(existsSync(new URL(`../public/auth/${asset}`, import.meta.url)), true, `${asset} should be local`);
   }
   assert.match(styles, /\.shell :global\(\.role-auth-tabs\)\{[^}]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
   assert.match(styles, /@media\(max-width:760px\)\{[\s\S]*?\.role-auth-layout\)\{[^}]*grid-template-columns:1fr/);
-  assert.match(styles, /@media\(max-width:760px\)\{[\s\S]*?\.role-auth-context\)\{[^}]*min-height:clamp\(300px,62vw,430px\)/);
+  assert.match(styles, /@media\(max-width:760px\)\{[\s\S]*?\.role-auth-context\)\{[^}]*min-height:clamp\(250px,56vw,340px\)/);
+});
+
+test("RoleAuth uses the bounded panel-04 editorial/form composition with a compact role-card hierarchy", () => {
+  const source = auth();
+  const styles = css();
+
+  assert.match(source, /<main className="role-auth-shell" data-role=\{role\}>/);
+  assert.match(source, /<aside className="role-auth-context"[\s\S]*?<div className="role-auth-editorial">/);
+  assert.match(source, /<p className="role-auth-vertical-tagline" aria-hidden="true">\{sharedAuthReference\.closingLine\}<\/p>/);
+  assert.match(source, /<BrandLogo monogram className="role-auth-monogram" priority \/>/);
+  assert.match(source, /<nav className="role-auth-tabs" aria-label="Choose account role">/);
+  assert.match(styles, /\.shell :global\(\.role-auth-layout\)\{[^}]*grid-template-columns:minmax\(0,1\.12fr\) minmax\(360px,\.88fr\)/);
+  assert.match(styles, /\.shell :global\(\.role-auth-tabs a\)\{[^}]*min-height:58px/);
+  assert.match(styles, /\.shell :global\(\.role-auth-tabs a\)\{[^}]*min-width:0[^}]*overflow-wrap:anywhere/);
+  assert.match(styles, /\.shell :global\(\.role-auth-panel input\),\.shell :global\(\.role-auth-panel textarea\)\{[^}]*box-sizing:border-box[^}]*max-width:100%/);
+  assert.match(styles, /\.shell :global\(\.role-auth-vertical-tagline\)\{[^}]*writing-mode:vertical-rl/);
+  assert.match(styles, /@media\(max-width:760px\)\{[\s\S]*?\.role-auth-layout\)\{[^}]*grid-template-columns:1fr[^}]*grid-template-areas:"form" "editorial"/);
 });
 
 test("role auth preserves loading, error, success, focus, and reduced-motion states", () => {

@@ -35,10 +35,10 @@ const roleNames: Record<AuthRouteRole, string> = {
   admin: "administrator",
 };
 
-const roleTabs: Array<{ role: AuthRouteRole; label: string }> = [
-  { role: "customer", label: "Customer" },
-  { role: "seller", label: "Seller" },
-  { role: "admin", label: "Admin" },
+const roleTabs: Array<{ role: AuthRouteRole; label: string; detail: string }> = [
+  { role: "customer", label: "Customer", detail: "Shop & orders" },
+  { role: "seller", label: "Seller", detail: "Apply & manage" },
+  { role: "admin", label: "Admin", detail: "Provisioned only" },
 ];
 
 const roleContexts: Record<AuthRouteRole, RoleContext> = {
@@ -56,7 +56,7 @@ function roleRoute(mode: AuthMode, role: AuthRouteRole): string {
 
 function RoleTabs({ mode, role }: Pick<RoleAuthProps, "mode" | "role">) {
   return <nav className="role-auth-tabs" aria-label="Choose account role">
-    {roleTabs.map((tab) => <Link key={tab.role} href={roleRoute(mode, tab.role)} aria-current={tab.role === role ? "page" : undefined}>{tab.label}</Link>)}
+    {roleTabs.map((tab) => <Link key={tab.role} href={roleRoute(mode, tab.role)} aria-current={tab.role === role ? "page" : undefined}><span>{tab.label}</span><small>{tab.detail}</small></Link>)}
   </nav>;
 }
 
@@ -70,21 +70,23 @@ function AuthContext({ role }: Pick<RoleAuthProps, "role">) {
     </div>
     <div className="role-auth-context-content">
       <Link className="role-auth-wordmark" href="/" aria-label="NexaMart home">
-        <BrandLogo className="role-auth-reference-logo" priority />
+        <BrandLogo monogram className="role-auth-monogram" priority />
       </Link>
-      <div className="role-auth-context-copy">
+      <div className="role-auth-editorial">
+        <div className="role-auth-context-copy">
         <p className="role-auth-kicker">NexaMart</p>
         <p className="role-auth-context-role">{context.label}</p>
         <h2>{context.heading}<br /><em>{context.emphasizedHeading}</em></h2>
         <p className="role-auth-panel-detail">{context.panelDetail}</p>
+        </div>
+        <ul className="role-auth-capabilities">
+          {context.capabilities.map((capability) => <li key={capability.label}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 9.2 16.5 19 6.8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            <span><strong>{capability.label}</strong><small>{capability.detail}</small></span>
+          </li>)}
+        </ul>
       </div>
-      <ul className="role-auth-capabilities">
-        {context.capabilities.map((capability) => <li key={capability.label}>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 9.2 16.5 19 6.8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          <span><strong>{capability.label}</strong><small>{capability.detail}</small></span>
-        </li>)}
-      </ul>
-      <p className="role-auth-tagline">{sharedAuthReference.closingLine}</p>
+      <p className="role-auth-vertical-tagline" aria-hidden="true">{sharedAuthReference.closingLine}</p>
     </div>
   </aside>;
 }
@@ -162,7 +164,7 @@ export function RoleAuth({ mode, role }: RoleAuthProps) {
       <AuthContext role={role} />
       <section className="role-auth-panel" aria-labelledby="admin-provisioning-heading">
         <div className="role-auth-panel-content">
-          <Link className="brand role-auth-mobile-brand" href="/"><BrandLogo /></Link>
+          <Link className="role-auth-mobile-brand" href="/" aria-label="NexaMart home"><BrandLogo monogram className="role-auth-monogram" priority /></Link>
           <RoleTabs mode={mode} role={role} />
           <p className="eyebrow">Admin access</p>
           <h1 id="admin-provisioning-heading">Admin accounts are not self-registered.</h1>
@@ -179,15 +181,15 @@ export function RoleAuth({ mode, role }: RoleAuthProps) {
       <AuthContext role={role} />
       <section className="role-auth-panel" aria-labelledby="role-auth-heading">
         <div className="role-auth-panel-content">
-          <Link className="brand role-auth-mobile-brand" href="/"><BrandLogo /></Link>
+          <Link className="role-auth-mobile-brand" href="/" aria-label="NexaMart home"><BrandLogo monogram className="role-auth-monogram" priority /></Link>
           <RoleTabs mode={mode} role={role} />
           <p className="eyebrow">{roleNames[role]} {mode}</p>
           <h1 id="role-auth-heading">{title}</h1>
           <p className="role-auth-intro">{formIntro}</p>
           <form onSubmit={submit} aria-busy={saving}>
             {mode === "register" && <label htmlFor="auth-name">Name<input id="auth-name" required name="name" value={formState.name} onChange={updateFormField} minLength={2} autoComplete="name" disabled={saving} /></label>}
-            <label htmlFor="auth-email">Email<input id="auth-email" required name="email" value={formState.email} onChange={updateFormField} type="email" autoComplete="email" disabled={saving} /></label>
-            <label htmlFor="auth-password">Password<input id="auth-password" required name="password" value={formState.password} onChange={updateFormField} type="password" minLength={8} autoComplete={mode === "login" ? "current-password" : "new-password"} disabled={saving} /></label>
+            <div className="role-auth-credentials"><label htmlFor="auth-email">Email<input id="auth-email" required name="email" value={formState.email} onChange={updateFormField} type="email" autoComplete="email" disabled={saving} /></label>
+            <label htmlFor="auth-password">Password<input id="auth-password" required name="password" value={formState.password} onChange={updateFormField} type="password" minLength={8} autoComplete={mode === "login" ? "current-password" : "new-password"} disabled={saving} /></label></div>
             {isSellerRegistration && <fieldset className="role-auth-store-fields"><legend>Store application</legend><label htmlFor="store-name">Store name<input id="store-name" required name="storeName" value={formState.storeName} onChange={updateFormField} minLength={2} maxLength={120} disabled={saving} /></label><label htmlFor="store-slug">Store URL slug<input id="store-slug" required name="storeSlug" value={formState.storeSlug} onChange={updateFormField} minLength={2} maxLength={100} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" aria-describedby="store-slug-help" disabled={saving} /></label><small id="store-slug-help">Use lowercase letters, numbers, and hyphens only.</small><label htmlFor="store-description">Store description (optional)<textarea id="store-description" name="description" value={formState.description} onChange={updateFormField} minLength={10} maxLength={2000} rows={4} disabled={saving} /></label></fieldset>}
             {error && <p className="seller-error" role="alert">{error}</p>}
             {wrongRole && <Link className="role-auth-recovery-link" href={roleRoute("login", wrongRole)}>Continue to {roleNames[wrongRole]} sign in</Link>}
