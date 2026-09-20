@@ -11,4 +11,5 @@ test("C07 keeps the no-result hero visually neutral without inventing a featured
   assert.match(styles, /:global\(\.deals-discovery \.hero-placeholder\)/);
   assert.match(styles, /color: transparent;/);
   assert.match(styles, /font-size: 0;/);
+  assert.doesNotMatch(styles, /\.skipLink\s*\{\s*isolation: isolate;\s*\}\s*background:/);
 });

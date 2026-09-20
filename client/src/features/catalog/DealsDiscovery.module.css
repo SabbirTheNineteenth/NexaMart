@@ -9,7 +9,3 @@
 .skipLink {
   isolation: isolate;
 }
-  background:
-    linear-gradient(135deg, rgb(255 255 255 / 0.025), transparent 48%),
-    var(--orchid-surface);
-}
