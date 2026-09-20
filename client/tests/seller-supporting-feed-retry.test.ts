@@ -6,10 +6,11 @@ const dashboard = readFileSync(new URL("../src/features/seller/SellerDashboard.t
 
 const supportingFeed = (name: "Reviews" | "Analytics") => {
   const start = dashboard.indexOf(`const load${name} = useCallback`);
-  const end = dashboard.indexOf(name === "Reviews" ? "\n\n  const loadAnalytics" : "\n\n  const loadWorkspace", start);
+  const nextDeclaration = name === "Reviews" ? "loadAnalytics" : "loadWorkspace";
   assert.notEqual(start, -1, `load${name} is defined`);
+  const end = dashboard.slice(start).search(new RegExp(`\\r?\\n\\r?\\n  const ${nextDeclaration}`));
   assert.notEqual(end, -1, `load${name} ends before the next declaration`);
-  return dashboard.slice(start, end);
+  return dashboard.slice(start, start + end);
 };
 
 test("seller review retry reloads only reviews and prevents duplicate pending requests", () => {
