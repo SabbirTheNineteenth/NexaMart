@@ -6,6 +6,7 @@ import { deleteJSON, getJSON, postJSON } from "@/lib/api";
 import { ApiError, patchJSON } from "@/lib/api";
 import { productImageSource } from "@/features/catalog/product-presentation";
 import { BrandLogo } from "@/components/BrandLogo";
+import styles from "./AccountWorkspace.module.css";
 import { customerOrderItemSummary, customerTrackingEmptyMessage, customerTrackingErrorMessage, customerTrackingTimelineEvents } from "./customer-order.utils";
 import { buildAddressUpdate, validateAddressUpdate, type AddressEditFields } from "./address-editing";
 import type { Account, CustomerOrder, CustomerOrderTracking, CustomerReviewEligibility, ShippingAddress, WishlistItem } from "@/types/account";
@@ -21,6 +22,7 @@ type AddressRemovalState = { state: "confirming" } | { state: "removing" } | { s
 type OrdersState = { state: "loading" } | { state: "loaded"; items: CustomerOrder[] } | { state: "error"; message: string };
 type AddressesState = { state: "loading" } | { state: "loaded"; items: ShippingAddress[] } | { state: "error"; message: string };
 type LogoutState = { state: "idle" } | { state: "pending" } | { state: "error"; message: string };
+type AccountResolutionState = { state: "loading" } | { state: "authenticated" } | { state: "signed-out" } | { state: "error"; message: string };
 
 function WishlistMedia({ item }: { item: WishlistItem }) {
   const source = productImageSource(item.image, item.id);
@@ -32,6 +34,8 @@ function WishlistMedia({ item }: { item: WishlistItem }) {
 
 export function AccountWorkspace() {
   const [account, setAccount] = useState<Account | null>(null);
+  const [accountResolution, setAccountResolution] = useState<AccountResolutionState>({ state: "loading" });
+  const [accountRefreshNonce, setAccountRefreshNonce] = useState(0);
   const [ordersState, setOrdersState] = useState<OrdersState>({ state: "loading" });
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [wishlistState, setWishlistState] = useState<WishlistState>({ state: "loading" });
@@ -46,7 +50,6 @@ export function AccountWorkspace() {
   const [reviewSuccess, setReviewSuccess] = useState("");
   const reviewLoadInFlight = useRef(false);
 
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [addressCreateSuccess, setAddressCreateSuccess] = useState("");
@@ -73,21 +76,27 @@ export function AccountWorkspace() {
   useEffect(() => {
     let active = true;
     const initialize = async () => {
+      setAccountResolution({ state: "loading" });
       try {
         const { account: current } = await getJSON<{ account: Account }>("/auth/me");
         if (!active) return;
         setAccount(current);
+        setAccountResolution({ state: "authenticated" });
         void loadOrders();
         void loadAddresses();
-      } catch {
-        if (active) setAccount(null);
-      } finally {
-        if (active) setLoading(false);
+      } catch (reason) {
+        if (!active) return;
+        setAccount(null);
+        if (reason instanceof ApiError && reason.status === 401) {
+          setAccountResolution({ state: "signed-out" });
+          return;
+        }
+        setAccountResolution({ state: "error", message: reason instanceof Error ? reason.message : "Unable to load your account." });
       }
     };
     void initialize();
     return () => { active = false; };
-  }, []);
+  }, [accountRefreshNonce]);
 
   const loadWishlist = async () => {
     setWishlistState({ state: "loading" });
@@ -153,6 +162,7 @@ export function AccountWorkspace() {
     try {
       await postJSON<void>("/auth/logout", {});
       setAccount(null);
+      setAccountResolution({ state: "signed-out" });
       setOrdersState({ state: "loading" });
       setWishlist([]);
       setWishlistState({ state: "loading" });
@@ -243,10 +253,12 @@ export function AccountWorkspace() {
     }
   };
 
-  if (loading) return <main className="account-shell"><p className="seller-state">Loading your account…</p></main>;
-  if (!account) return <main className="account-shell"><Link className="marketplace-brand" href="/"><BrandLogo monogram className="marketplace-brand-mark" priority /><span>NexaMart</span></Link><section className="account-auth" aria-labelledby="account-entry-heading"><p className="eyebrow">Your NexaMart account</p><h1 id="account-entry-heading">Welcome back.</h1><p>Sign in to keep orders and favorites in one considered place.</p><div className="role-auth-actions"><Link className="primary-button" href="/login">Sign in</Link><Link className="account-switch" href="/register">Create an account</Link></div></section></main>;
+  if (accountResolution.state === "loading") return <main className={`account-shell customer-account-workspace ${styles.shell}`}><section className={styles.statePanel} aria-live="polite"><p className="eyebrow">Account</p><h1>Loading your account…</h1><p className="seller-state">Checking your current session.</p></section></main>;
+  if (accountResolution.state === "error") return <main className={`account-shell customer-account-workspace ${styles.shell}`}><section className={styles.statePanel} role="alert" aria-labelledby="account-load-error-heading"><p className="eyebrow">Account unavailable</p><h1 id="account-load-error-heading">We could not load your account.</h1><p>{accountResolution.message}</p><button className="primary-button" type="button" onClick={() => setAccountRefreshNonce((current) => current + 1)}>Retry loading your account</button></section></main>;
+  if (accountResolution.state === "signed-out") return <main className={`account-shell customer-account-workspace ${styles.shell}`}><header className="seller-topbar customer-account-topbar"><Link className="marketplace-brand" href="/"><BrandLogo monogram className="marketplace-brand-mark" priority /><span>NexaMart</span></Link><Link className="account-switch" href="/">Continue browsing</Link></header><section className={`${styles.statePanel} account-auth`} aria-labelledby="account-entry-heading"><p className="eyebrow">Your NexaMart account</p><h1 id="account-entry-heading">Welcome back.</h1><p>Sign in to view orders, saved pieces, and shipping addresses tied to your session.</p><div className="role-auth-actions"><Link className="primary-button" href="/login">Sign in</Link><Link className="account-switch" href="/register">Create an account</Link></div></section></main>;
+  if (!account) return null;
 
-  return <main className="account-shell customer-account-workspace">
+  return <main className={`account-shell customer-account-workspace ${styles.shell}`}>
     <header className="seller-topbar customer-account-topbar"><Link className="marketplace-brand" href="/"><BrandLogo monogram className="marketplace-brand-mark" priority /><span>NexaMart</span></Link><div><button className="account-switch" type="button" onClick={() => void logout()} disabled={logoutState.state === "pending"}>{logoutState.state === "pending" ? "Signing out…" : "Sign out"}</button>{logoutState.state === "error" && <div role="alert"><p className="seller-error">{logoutState.message}</p><button className="account-switch" type="button" onClick={() => void logout()}>Try signing out again</button></div>}</div></header>
     <section className="account-hero"><p className="eyebrow">Your NexaMart account</p><h1>Hi, {account.name}.</h1><p>{account.email} · {account.role}</p></section>
     <nav className="orchid-navigation account-section-navigation" aria-label="Account sections"><a href="#orders">Orders</a>{account.role === "customer" && <a href="#reviews">Reviews</a>}<a href="#addresses">Addresses</a>{account.role === "customer" && <a href="#wishlist">Saved pieces</a>}</nav>

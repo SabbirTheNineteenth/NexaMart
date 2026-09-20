@@ -1,0 +1,6 @@
+.shell{width:min(100% - 32px,1240px);padding-bottom:48px}
+.statePanel{display:grid;gap:14px;max-width:620px;margin:clamp(46px,10vw,132px) auto;padding:clamp(24px,5vw,52px);border:1px solid var(--nx-border);border-radius:var(--orchid-radius);background:var(--nx-surface-panel)}
+.statePanel h1{max-width:13ch;margin:0;font-size:clamp(32px,5vw,58px);letter-spacing:-.06em;line-height:1.02}
+.statePanel p{max-width:52ch;margin:0;color:var(--nx-text-muted);line-height:1.65}
+.statePanel :global(.primary-button){width:max-content;margin-top:6px}
+@media(max-width:760px){.shell{width:min(100% - 24px,1240px);padding-bottom:32px}.statePanel{margin:28px 0;padding:24px 18px}.statePanel :global(.primary-button){width:100%}}
