@@ -43,6 +43,14 @@ test("public store pages load the verified slug contract and retain safe error r
   assert.match(storePage, /storeReloadNonce/);
 });
 
+test("PARITY-C09 keeps every public-store state inside the compact Explore frame", () => {
+  assert.match(storePage, /import styles from "\.\/PublicStorePage\.module\.css";/);
+  assert.match(storePage, /className=\{styles\.stateFrame\}/);
+  assert.match(storePage, /<p className=\{styles\.context\}>01 \/ Store collection<\/p>/);
+  assert.match(storePage, /className=\{styles\.collection\} aria-busy=\{state === "loading"\}/);
+  assert.match(storePage, /className=\{styles\.productGrid\}/);
+});
+
 test("store discovery remains responsive and uses dedicated marketplace styling", () => {
   assert.match(styles, /\.store-directory/);
   assert.match(styles, /\.public-store-page/);

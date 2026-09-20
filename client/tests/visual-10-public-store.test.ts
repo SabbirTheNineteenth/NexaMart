@@ -3,6 +3,17 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const storePage = readFileSync(new URL("../src/features/catalog/PublicStorePage.tsx", import.meta.url), "utf8");
+const storeStyles = readFileSync(new URL("../src/features/catalog/PublicStorePage.module.css", import.meta.url), "utf8");
+
+test("C09 public store keeps its real catalog in a bounded responsive customer frame", () => {
+  assert.match(storePage, /import styles from "\.\/PublicStorePage\.module\.css"/);
+  assert.match(storePage, /className=\{`shell public-store-hero \$\{styles\.storeFrame\}`\}/);
+  assert.match(storePage, /className=\{styles\.productGrid\}/);
+  assert.match(storePage, /className=\{styles\.productCard\}/);
+  assert.match(storeStyles, /\.storeFrame\{[^}]*border:1px solid var\(--nx-border\)/);
+  assert.match(storeStyles, /\.productGrid\{[^}]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+  assert.match(storeStyles, /@media\(max-width:760px\)\{[\s\S]*\.productGrid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+});
 
 test("VISUAL-10 public store uses the Explore header and returned store collection hierarchy", () => {
   assert.match(storePage, /href="#store-products-heading">Skip to store products<\/a>/);
