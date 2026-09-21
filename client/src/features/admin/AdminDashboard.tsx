@@ -596,7 +596,7 @@ export function AdminDashboard() {
           })}</div>}</div>;
         })}
       </nav>
-      <div className="admin-sidebar-session">
+      <div className="admin-sidebar-session" aria-live="polite">
         <div className="admin-sidebar-profile"><span className="admin-sidebar-avatar" aria-hidden="true">A</span><div><strong>Admin workspace</strong><small>Protected administration workspace</small></div></div>
         <button className="admin-sidebar-logout" type="button" onClick={() => void logout()} disabled={logoutState.state === "pending"}>{logoutState.state === "pending" ? "Signing out…" : "Sign out"}</button>
         {logoutState.state === "error" && <div className="admin-sidebar-logout-error" role="alert"><span>{logoutState.message}</span><button className="admin-sidebar-logout-retry" type="button" onClick={() => void logout()}>Try signing out again</button></div>}

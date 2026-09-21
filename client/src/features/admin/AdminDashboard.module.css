@@ -60,3 +60,39 @@
 @media(min-width:901px){:global(.admin-workspace-content){min-width:0}:global(.admin-overview-command-deck) :global(article){min-width:0}:global(.admin-overview-command-deck) :global(.admin-queue-action){white-space:normal}}
 @media(max-width:700px){:global(.admin-command-link.admin-action-control){flex:0 0 auto}:global(.admin-overview-command-deck) :global(article){padding:12px}:global(.admin-overview-command-deck) :global(.admin-queue-action){width:100%;margin:2px 0 0;padding:0 8px}:global(.admin-overview-secondary) :global(.admin-panel-head){gap:8px}:global(.admin-overview-secondary) :global(.admin-panel-head > a.admin-action-control){margin:0}}
 @media(max-width:420px){:global(.admin-workspace) :global(.admin-workspace-content){padding-right:14px;padding-left:14px}:global(.admin-command-bar){gap:6px}:global(.admin-command-link.admin-action-control){padding:0 4px;font-size:10px}:global(.admin-context-link.admin-action-control){width:100%;justify-content:space-between}:global(.admin-overview-command-deck) :global(article){padding:12px 14px}:global(.admin-overview-secondary) :global(.admin-panel-head){align-items:flex-start;flex-direction:column}:global(.admin-overview-sellers) :global(.admin-row){gap:8px}:global(.admin-overview-sellers) :global(.admin-row) :global(.admin-action-control){width:100%;margin:0}}
+
+/* Responsive containment: records may carry unbounded identifiers and metadata, so the
+   surface owns overflow while each control keeps a touch-sized target. */
+:global(.admin-workspace-content){min-width:0}
+:global(.admin-command-bar){min-width:0}
+:global(.admin-command-context){min-width:0}
+:global(.admin-list){min-width:0;max-width:100%}
+:global(.admin-list) :global(article){min-width:0;max-width:100%}
+:global(.admin-list) :global(article) > :global(div){min-width:0;overflow-wrap:anywhere}
+:global(.admin-list) :global(code),:global(.admin-list) :global(small),:global(.admin-list) :global(time){overflow-wrap:anywhere}
+:global(.admin-workspace) :global(button),:global(.admin-workspace) :global(input),:global(.admin-workspace) :global(select){min-height:44px;box-sizing:border-box}
+:global(.admin-workspace) :global(textarea){min-height:88px;box-sizing:border-box}
+:global(.admin-empty){overflow-wrap:anywhere}
+
+@media(max-width:700px){
+  :global(.admin-command-bar){align-items:flex-start;flex-wrap:wrap;padding:6px 0}
+  :global(.admin-command-context){flex:1 1 220px}
+  :global(.admin-command-link.admin-action-control){flex:0 0 auto}
+  :global(.admin-workspace-nav){scroll-snap-type:inline mandatory;scroll-padding-inline:15px}
+  :global(.admin-workspace-nav) :global(.admin-nav-item){scroll-snap-align:start}
+  :global(.admin-panel-head){min-width:0}
+  :global(.admin-panel-head) > :global(div){min-width:0}
+}
+
+@media(max-width:420px){
+  :global(.admin-command-context){width:100%;flex-basis:100%}
+  :global(.admin-command-scope){display:none}
+  :global(.admin-command-link.admin-action-control){width:100%;justify-content:space-between}
+  :global(.admin-sidebar-return.admin-action-control){justify-content:space-between}
+}
+
+@media(max-width:390px){
+  :global(.admin-workspace) :global(.admin-workspace-content){padding-right:12px;padding-left:12px}
+  :global(.admin-workspace) :global(.admin-sidebar){padding-right:12px;padding-left:12px}
+  :global(.admin-workspace) :global(.admin-workspace-nav){margin-right:-12px;padding-right:12px}
+}

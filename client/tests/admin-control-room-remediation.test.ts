@@ -18,3 +18,16 @@ test("admin control room keeps real queues actionable, stateful, and usable on n
   assert.match(styles, /:global\(\.admin-workspace\) :global\(\[aria-busy="true"\]\)\{[^}]*opacity:/);
   assert.match(styles, /@media\(prefers-reduced-motion:reduce\)\{[\s\S]*transition-duration:\.01ms!important/);
 });
+
+test("admin control room contains its working surface and preserves usable recovery controls at 700, 420, and 390px", () => {
+  assert.match(dashboard, /className="admin-sidebar-session" aria-live="polite"/);
+  assert.match(dashboard, /className="admin-sidebar-logout-error" role="alert"/);
+  assert.match(styles, /:global\(\.admin-workspace-content\)\{[^}]*min-width:0/);
+  assert.match(styles, /:global\(\.admin-command-bar\)\{[^}]*min-width:0/);
+  assert.match(styles, /:global\(\.admin-list\)\{[^}]*min-width:0/);
+  assert.match(styles, /:global\(\.admin-list\) :global\(article\) > :global\(div\)\{[^}]*min-width:0/);
+  assert.match(styles, /:global\(\.admin-workspace\) :global\(button\),:global\(\.admin-workspace\) :global\(input\),:global\(\.admin-workspace\) :global\(select\)\{[^}]*min-height:44px/);
+  assert.match(styles, /@media\(max-width:700px\)\{[\s\S]*:global\(\.admin-command-bar\)\{[^}]*flex-wrap:wrap/);
+  assert.match(styles, /@media\(max-width:420px\)\{[\s\S]*:global\(\.admin-command-context\)\{[^}]*width:100%/);
+  assert.match(styles, /@media\(max-width:390px\)\{[\s\S]*:global\(\.admin-workspace\) :global\(\.admin-workspace-content\)\{[^}]*padding-right:12px/);
+});
