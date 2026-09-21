@@ -17,12 +17,7 @@ test("C09 public store keeps its real catalog in a bounded responsive customer f
 
 test("VISUAL-10 public store uses the Explore header and returned store collection hierarchy", () => {
   assert.match(storePage, /href="#store-products-heading">Skip to store products<\/a>/);
-  assert.match(storePage, /<header className="deals-header">/);
-  assert.match(storePage, /<nav aria-label="Marketplace">/);
-  assert.match(storePage, /<Link href="\/">Shop<\/Link>/);
-  assert.match(storePage, /<Link href="\/deals">Deals<\/Link>/);
-  assert.match(storePage, /<Link aria-current="page" href="\/stores">Stores<\/Link>/);
-  assert.match(storePage, /<Link href="\/account">Account<\/Link>/);
+  assert.match(storePage, /<ExploreHeader active="stores" \/>/);
   assert.match(storePage, /<p className="eyebrow">Store collection<\/p>/);
   assert.match(storePage, /\{store\.storeName\}/);
   assert.match(storePage, /\{store\.productCount\} \{store\.productCount === 1 \? "product" : "products"\}/);

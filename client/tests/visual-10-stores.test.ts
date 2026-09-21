@@ -7,12 +7,7 @@ const styles = readFileSync(new URL("../src/features/catalog/StoreDirectory.modu
 
 test("VISUAL-10 stores directory keeps an Explore navigation hierarchy at every width", () => {
   assert.match(directory, /<a className="storefront-skip-link" href="#stores-heading">Skip to stores<\/a>/);
-  assert.match(directory, /<header className="store-page-header deals-topbar">/);
-  assert.match(directory, /<nav aria-label="Marketplace">/);
-  assert.match(directory, /<Link href="\/">Shop<\/Link>/);
-  assert.match(directory, /<Link href="\/deals">Deals<\/Link>/);
-  assert.match(directory, /<Link aria-current="page" href="\/stores">Stores<\/Link>/);
-  assert.match(directory, /<Link href="\/account">Account<\/Link>/);
+  assert.match(directory, /<ExploreHeader active="stores" \/>/);
 });
 
 test("VISUAL-10 store cards are dense, link only to verified public stores, and use returned fields", () => {
@@ -27,7 +22,7 @@ test("VISUAL-10 store cards are dense, link only to verified public stores, and 
 });
 
 test("VISUAL-10 store directory exposes loading, empty, error, and retry feedback", () => {
-  assert.match(directory, /role="status" aria-live="polite">Loading stores…/);
+  assert.match(directory, /role="status" aria-live="polite"><p>Loading stores…<\/p>/);
   assert.match(directory, /role="alert"/);
   assert.match(directory, /Stores are temporarily unavailable\./);
   assert.match(directory, /Retry stores/);

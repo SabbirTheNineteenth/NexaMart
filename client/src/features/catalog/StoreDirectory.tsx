@@ -40,22 +40,11 @@ export function StoreDirectory() {
   return <main className="store-directory customer-experience orchid-explore" aria-labelledby="stores-heading">
     <a className="storefront-skip-link" href="#stores-heading">Skip to stores</a>
     <ExploreHeader active="stores" />
-    {/*
-    <header className="store-page-header deals-topbar">
-      <Link className="brand" href="/">NEXA<span>•</span>MART</Link>
-      <nav aria-label="Marketplace">
-        <Link href="/">Shop</Link>
-        <Link href="/deals">Deals</Link>
-        <Link aria-current="page" href="/stores">Stores</Link>
-        <Link href="/account">Account</Link>
-      </nav>
-    </header>
-    */}
-    <section className="shell" aria-busy={state === "loading"}>
+    <section className={`shell ${styles.surface}`} aria-busy={state === "loading"}>
       <p className="eyebrow">Marketplace sellers</p>
       <h1 id="stores-heading">Stores</h1>
       <p>Explore independent storefronts and their current catalog selections.</p>
-      {isLoading ? <p className="marketplace-load-state" role="status" aria-live="polite">Loading stores…</p> : null}
+      {isLoading ? <div className={`marketplace-load-state ${styles.stateFrame}`} role="status" aria-live="polite"><p>Loading stores…</p></div> : null}
       {state === "error" ? <div className={`marketplace-load-state ${styles.stateFrame}`} role="alert"><p>Stores are temporarily unavailable.</p><button className={styles.action} type="button" onClick={retry}>Retry stores</button></div> : null}
       {state === "loaded" && stores.length === 0 ? <div className={`marketplace-load-state ${styles.stateFrame}`} role="status" aria-live="polite"><p>No stores are available right now.</p><button className={styles.action} type="button" onClick={retry}>Check again</button></div> : null}
       {state === "loaded" && stores.length > 0 ? <>

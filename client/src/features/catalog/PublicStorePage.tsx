@@ -13,20 +13,6 @@ type PublicStorePayload = { store: PublicStore; products: Product[] };
 type PublicStoreState = "loading" | "loaded" | "error";
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
-/* function StoreHeader() {
-  return <header className="deals-header">
-    <div className="shell deals-topbar">
-      <Link className="brand" href="/">NEXA<span>•</span>MART</Link>
-      <nav aria-label="Marketplace">
-        <Link href="/">Shop</Link>
-        <Link href="/deals">Deals</Link>
-        <Link aria-current="page" href="/stores">Stores</Link>
-        <Link href="/account">Account</Link>
-      </nav>
-    </div>
-  </header>;
-} */
-
 function StoreProductCard({ product }: { product: Product }) {
   const image = productImageSource(product.image, product.id);
   const price = product.effectivePrice ?? product.price;
@@ -60,7 +46,7 @@ export function PublicStorePage({ slug }: { slug: string }) {
   useEffect(() => {
     const controller = new AbortController();
     getJSON<PublicStorePayload>(`/catalog/stores/${slug}`, controller.signal)
-      .then((nextPayload) => { setPayload(nextPayload); setState("loaded"); })
+      .then((nextPayload) => { if (controller.signal.aborted) return; setPayload(nextPayload); setState("loaded"); })
       .catch(() => { if (!controller.signal.aborted) setState("error"); });
     return () => controller.abort();
   }, [slug, storeReloadNonce]);
@@ -69,7 +55,7 @@ export function PublicStorePage({ slug }: { slug: string }) {
   const currentPayload = payload?.store.storeSlug === slug ? payload : null;
   if (state === "loading" || !currentPayload && state !== "error") return <main className="public-store-page customer-experience orchid-explore">
     <ExploreHeader active="stores" />
-    <section className="shell deals-content" aria-label="Store loading" aria-busy="true">
+    <section className={`shell deals-content ${styles.stateSurface}`} aria-label="Store loading" aria-busy="true">
       <div className={styles.stateFrame}>
       <p className="marketplace-load-state" role="status" aria-live="polite">Loading store…</p>
       </div>
@@ -77,7 +63,7 @@ export function PublicStorePage({ slug }: { slug: string }) {
   </main>;
   if (state === "error" || !currentPayload) return <main className="public-store-page customer-experience orchid-explore">
     <ExploreHeader active="stores" />
-    <section className="shell deals-content" aria-labelledby="store-unavailable-heading">
+    <section className={`shell deals-content ${styles.stateSurface}`} aria-labelledby="store-unavailable-heading">
       <div className={styles.stateFrame}><div className={`marketplace-load-state ${styles.errorState}`} role="alert">
         <p className="eyebrow">Storefront</p>
         <h1 id="store-unavailable-heading">Store unavailable</h1>
