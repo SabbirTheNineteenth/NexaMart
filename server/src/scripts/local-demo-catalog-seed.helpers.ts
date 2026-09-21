@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { accounts, brands, categories, products, promotions, sellerProfiles, subcategories } from "../db/schema/index.js";
 import type { LocalDemoCatalogSeedRepository } from "../db/seeds/runLocalDemoSeed.js";
@@ -40,6 +40,20 @@ export const localDemoCatalogSeedRepository: LocalDemoCatalogSeedRepository = {
     return product.id;
   },
   async upsertPromotion(value) {
-    await db.insert(promotions).values({ sellerId: value.sellerId, productId: value.productId, name: value.name, scope: "product", discountPercent: value.discountPercent, startsAt: value.startsAt, endsAt: value.endsAt }).onConflictDoUpdate({ target: [promotions.sellerId, promotions.startsAt], set: { productId: value.productId, name: value.name, scope: "product", discountPercent: value.discountPercent, endsAt: value.endsAt, updatedAt: new Date() } });
+    const [existing] = await db.select({ id: promotions.id }).from(promotions).where(and(
+      eq(promotions.sellerId, value.sellerId),
+      eq(promotions.productId, value.productId),
+      eq(promotions.scope, "product"),
+      sql`${promotions.startsAt} < ${value.endsAt}`,
+      sql`${promotions.endsAt} > ${value.startsAt}`,
+    )).limit(1);
+    const promotion = { sellerId: value.sellerId, productId: value.productId, name: value.name, scope: "product" as const, discountPercent: value.discountPercent, startsAt: value.startsAt, endsAt: value.endsAt };
+
+    if (existing) {
+      await db.update(promotions).set({ ...promotion, updatedAt: new Date() }).where(eq(promotions.id, existing.id));
+      return;
+    }
+
+    await db.insert(promotions).values(promotion);
   },
 };

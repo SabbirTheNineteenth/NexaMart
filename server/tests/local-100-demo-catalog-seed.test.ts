@@ -39,6 +39,19 @@ test("local seed guard accepts only exact localhost PostgreSQL hosts and does no
   }
 });
 
+test("local promotion persistence finds an overlapping product schedule before updating or inserting", async () => {
+  const source = await import("node:fs/promises").then((fs) => fs.readFile(new URL("../src/scripts/local-demo-catalog-seed.helpers.ts", import.meta.url), "utf8"));
+  const promotionUpsert = source.slice(source.indexOf("async upsertPromotion(value)"), source.indexOf("\n  },\n};", source.indexOf("async upsertPromotion(value)")));
+
+  assert.match(promotionUpsert, /eq\(promotions\.sellerId, value\.sellerId\)/);
+  assert.match(promotionUpsert, /eq\(promotions\.productId, value\.productId\)/);
+  assert.match(promotionUpsert, /promotions\.startsAt\} < \$\{value\.endsAt\}/);
+  assert.match(promotionUpsert, /promotions\.endsAt\} > \$\{value\.startsAt\}/);
+  assert.match(promotionUpsert, /if \(existing\)[\s\S]*db\.update\(promotions\)/);
+  assert.match(promotionUpsert, /await db\.insert\(promotions\)\.values\(promotion\)/);
+  assert.doesNotMatch(promotionUpsert, /onConflictDoUpdate/);
+});
+
 function fakeRepository(record: (call: string) => void): LocalDemoCatalogSeedRepository {
   return {
     async upsertSeller() { record("seller"); return "seller-id"; },
