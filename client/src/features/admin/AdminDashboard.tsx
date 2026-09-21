@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { type FormEvent, type MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getJSON, patchJSON } from "@/lib/api";
+import { getJSON, patchJSON, postJSON } from "@/lib/api";
 import { adminOverview } from "@/features/admin/admin-overview.utils";
 import { auditMetadataText, auditRecordsPath, type AuditRecordFilters } from "@/features/admin/audit-log.utils";
 import { adminSearchPath, normalizeAdminSearchInput } from "@/features/admin/admin-global-search";
@@ -38,6 +38,7 @@ type PublicationChange = { productId: string; isPublished: boolean; expectedRevi
 type ModerationChange = { productId: string; status: "approved" | "rejected" | "changes_requested"; reason: string; expectedRevision: string };
 type SellerChange = { sellerId: string; action: AdminSellerAction };
 type PayoutReviewChange = { payout: AdminFinancePayout; decision: "approve" | "reject" };
+type LogoutState = { state: "idle" } | { state: "pending" } | { state: "error"; message: string };
 type AdminConfirmation =
   | { kind: "seller"; change: SellerChange }
   | { kind: "publication"; change: PublicationChange }
@@ -92,6 +93,7 @@ function AdminNavIcon({ symbol }: { symbol: string }) {
 
 export function AdminDashboard() {
   const pathname = usePathname();
+  const router = useRouter();
   const requestedSection = pathname.split("/").filter(Boolean)[1];
   const activeSection: AdminSection = isAdminSection(requestedSection) ? requestedSection : "overview";
   const productOperation = pathname.split("/").filter(Boolean)[2];
@@ -142,6 +144,7 @@ export function AdminDashboard() {
   const [sellerFeedback, setSellerFeedback] = useState<Record<string, { kind: "success" | "error"; message: string }>>({});
   const [updatingSellerIds, setUpdatingSellerIds] = useState<Set<string>>(() => new Set());
   const [confirmation, setConfirmation] = useState<AdminConfirmation | null>(null);
+  const [logoutState, setLogoutState] = useState<LogoutState>({ state: "idle" });
   const productRequestPending = useRef(false);
   const productRequestController = useRef<AbortController | null>(null);
   const sellerRequestPending = useRef(false);
@@ -568,6 +571,16 @@ export function AdminDashboard() {
     workspaceContentRef.current?.focus();
   }
 
+  const logout = async () => {
+    setLogoutState({ state: "pending" });
+    try {
+      await postJSON<void>("/auth/logout", {});
+      router.replace("/");
+    } catch (reason) {
+      setLogoutState({ state: "error", message: reason instanceof Error ? reason.message : "Unable to sign out. Please try again." });
+    }
+  };
+
   return <main className="admin-workspace" data-admin-section={activeSection} data-admin-product-create={productCreateKind ?? undefined} data-admin-product-operation={productOperation ?? undefined}>
     <a className="admin-skip-link" href="#admin-workspace-content" onClick={focusWorkspace}>Skip to workspace content</a>
     <aside className="admin-sidebar" aria-label="Administration workspace">
@@ -583,7 +596,11 @@ export function AdminDashboard() {
           })}</div>}</div>;
         })}
       </nav>
-      <div className="admin-sidebar-profile"><span className="admin-sidebar-avatar" aria-hidden="true">A</span><div><strong>Admin workspace</strong><small>Protected administration workspace</small></div></div>
+      <div className="admin-sidebar-session">
+        <div className="admin-sidebar-profile"><span className="admin-sidebar-avatar" aria-hidden="true">A</span><div><strong>Admin workspace</strong><small>Protected administration workspace</small></div></div>
+        <button className="admin-sidebar-logout" type="button" onClick={() => void logout()} disabled={logoutState.state === "pending"}>{logoutState.state === "pending" ? "Signing out…" : "Sign out"}</button>
+        {logoutState.state === "error" && <div className="admin-sidebar-logout-error" role="alert"><span>{logoutState.message}</span><button className="admin-sidebar-logout-retry" type="button" onClick={() => void logout()}>Try signing out again</button></div>}
+      </div>
       <Link className="admin-sidebar-return" href="/">View storefront <span aria-hidden="true">↗</span></Link>
     </aside>
     <div className="admin-workspace-content" id="admin-workspace-content" ref={workspaceContentRef} tabIndex={-1}>
