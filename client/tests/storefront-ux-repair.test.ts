@@ -31,6 +31,24 @@ test("Storefront gives API-backed discovery products a readable rail, real actio
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.spotlightCardVisible[\s\S]*?animation: none;/);
 });
 
+test("Storefront gives the catalog hero one truthful, motion-safe featured-product composition", () => {
+  assert.match(storefront, /const featuredProduct = catalog\.products\[0\];/);
+  assert.match(storefront, /className="marketplace-hero reference-collection-hero" aria-labelledby="explore-heading"/);
+  assert.match(storefront, /styles\.heroMediaFrame/);
+  assert.match(storefront, /className="marketplace-hero-note reference-hero-context" aria-label="Current catalog context" aria-live="polite"/);
+  assert.match(storefront, /const featuredPresentation = featuredProduct \? buildProductPresentation\(featuredProduct\) : null;/);
+  assert.match(storefront, /href=\{`\/products\/\$\{featuredProduct\.slug\}`\}>View product<\/a>/);
+  assert.match(storefront, /featuredProduct\.inStock && <span className=\{styles\.heroAvailability\}>In stock<\/span>/);
+  assert.match(storefront, /Browse products <ArrowUpRight size=\{18\}\/>/);
+  assert.match(storefront, /Browse departments/);
+  assert.match(styles, /\.heroSurface\s*\{[\s\S]*?grid-template-columns: minmax\(12rem, 0\.78fr\) minmax\(18rem, 1\.32fr\) minmax\(13rem, 0\.6fr\);/);
+  assert.match(styles, /\.heroMediaFrame\s*\{[\s\S]*?aspect-ratio: 16 \/ 10;/);
+  assert.match(styles, /\.heroCopyEnter\s*\{[\s\S]*?animation: hero-copy-in 420ms/);
+  assert.match(styles, /\.heroMediaEnter\s*\{[\s\S]*?animation: hero-media-in 520ms/);
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.heroCopyEnter[\s\S]*?animation: none;/);
+  assert.doesNotMatch(storefront, /rating|delivery|discount|seller claim/i);
+});
+
 test("Storefront gives its sidebar, hero, cards, and brand rail local responsive safeguards", () => {
   assert.match(styles, /\.storefrontLayout[\s,]*:global\(\.storefront \.reference-explore-content\)\s*\{[\s\S]*?grid-template-columns: minmax\(12rem, 14rem\) minmax\(0, 1fr\);/);
   assert.match(styles, /\.heroHeading[\s,]*:global\(\.storefront #explore-heading\)\s*\{[\s\S]*?max-width: 13ch;/);

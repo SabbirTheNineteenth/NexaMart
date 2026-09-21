@@ -195,6 +195,7 @@ export function Storefront() {
   const { subcategories, applied } = useMemo(() => catalogDiscoveryFacets(taxonomy, { query, categoryName: category, subcategorySlug: subcategory, brandSlug: brand }), [taxonomy, query, category, subcategory, brand]);
   const hasActiveCatalogFilter = Boolean(query.trim() || category || subcategory || brand);
   const featuredProduct = catalog.products[0];
+  const featuredPresentation = featuredProduct ? buildProductPresentation(featuredProduct) : null;
   const departmentTiles = useMemo(() => taxonomy.categories.slice(0, 8).map((department, index) => ({
     department,
     product: catalog.products.find((product) => product.category === department.name) ?? catalog.products[index],
@@ -229,6 +230,11 @@ export function Storefront() {
   const scrollToCollection = () => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     document.getElementById("collection")?.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" });
+  };
+  const browseCatalog = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    scrollToCollection();
+    requestAnimationFrame(() => collectionHeadingRef.current?.focus());
   };
   const openCart = (opener: HTMLElement) => {
     cartOpenerRef.current = opener;
@@ -406,8 +412,9 @@ export function Storefront() {
         </div>
       </div>
       <section className="marketplace-hero reference-collection-hero" aria-labelledby="explore-heading">
-        <div className="marketplace-hero-copy"><p className="eyebrow">NexaMart catalog</p><h1 id="explore-heading">Browse <em>catalog products.</em></h1><p>Search products by department, brand, or keyword.</p><div className="hero-actions"><a className="primary-button" href="#collection">Browse products <ArrowUpRight size={18}/></a><a className="text-link" href="#departments">Browse departments</a></div></div>
-        <div className="marketplace-hero-media">{featuredProduct ? <ProductVisual key={featuredProduct.id} product={featuredProduct} className="marketplace-hero-image" priority/> : <div className="hero-placeholder" aria-hidden="true">NEXA</div>}</div><aside className="marketplace-hero-note reference-hero-context" aria-label="Current catalog context" aria-live="polite"><span>From the catalog</span><strong>{featuredProduct?.name ?? "Loading products"}</strong>{featuredProduct && <small><ServerPrice product={featuredProduct}/> · {featuredProduct.category}</small>}</aside>
+        <div className={`${styles.heroCopy} ${styles.heroCopyEnter}`}><p className="eyebrow">NexaMart catalog</p><h1 id="explore-heading">Browse <em>catalog products.</em></h1><p>Search products by department, brand, or keyword.</p><div className={styles.heroActions}><a className="primary-button" href="#collection" onClick={browseCatalog}>Browse products <ArrowUpRight size={18}/></a><a className="text-link" href="#departments">Browse departments</a></div></div>
+        <div className={`${styles.heroMediaFrame} ${styles.heroMediaEnter}`}><span className={styles.heroGlow} aria-hidden="true"/>{featuredProduct ? <ProductVisual key={featuredProduct.id} product={featuredProduct} className={styles.heroImage} priority/> : <div className={styles.heroEmptyMedia} role="status">No catalog product is available right now.</div>}</div>
+        <aside className="marketplace-hero-note reference-hero-context" aria-label="Current catalog context" aria-live="polite"><div className={styles.heroContextEnter}>{featuredProduct ? <><span>From the catalog</span><strong>{featuredProduct.name}</strong><p>{featuredPresentation?.brand ?? featuredProduct.category}</p><ServerPrice product={featuredProduct}/>{featuredProduct.inStock && <span className={styles.heroAvailability}>In stock</span>}<a href={`/products/${featuredProduct.slug}`}>View product</a></> : <><span>From the catalog</span><p>No featured product is available right now.</p></>}</div></aside>
       </section>
       <div className="reference-product-toolbar"><div><h2>Products</h2><p className="product-count" aria-live="polite">{productCountLabel}</p></div><div className="reference-product-toolbar-actions" role="group" aria-label="Catalog display controls" aria-controls="catalog-product-grid"><label className="catalog-sort">Sort<select aria-label="Sort catalog" value={sort} onChange={(event) => { setCatalogLoaded(false); setSort(event.target.value === "newest" ? "newest" : ""); }}><option value="">Catalog order</option><option value="newest">Newest arrivals</option></select></label><span className="reference-grid-view" role="img" aria-label="Catalog grid view"><LayoutGrid size={16} aria-hidden="true"/></span></div></div>
       <div className={styles.catalogResults} aria-live="polite" aria-busy={!catalogLoaded && !error}>
