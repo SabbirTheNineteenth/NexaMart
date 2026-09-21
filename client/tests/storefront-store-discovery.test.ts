@@ -39,7 +39,7 @@ test("public store pages load the verified slug contract and retain safe error r
   assert.match(storePage, /Loading store…/);
   assert.match(storePage, /Store unavailable/);
   assert.match(storePage, /Try again/);
-  assert.match(storePage, /<Link href=\{`\/products\/\$\{product\.slug\}`\}/);
+  assert.match(storePage, /<Link(?: className=\{styles\.productLink\})? href=\{`\/products\/\$\{product\.slug\}`\}/);
   assert.match(storePage, /storeReloadNonce/);
 });
 

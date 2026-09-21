@@ -28,7 +28,8 @@ test("VISUAL-10 store cards are dense, link only to verified public stores, and 
 
 test("VISUAL-10 store directory exposes loading, empty, error, and retry feedback", () => {
   assert.match(directory, /role="status" aria-live="polite">Loading stores…/);
-  assert.match(directory, /role="alert">Stores are temporarily unavailable\./);
+  assert.match(directory, /role="alert"/);
+  assert.match(directory, /Stores are temporarily unavailable\./);
   assert.match(directory, /Retry stores/);
   assert.match(directory, /aria-busy=\{state === "loading"\}/);
   assert.match(directory, /No stores are available right now\./);

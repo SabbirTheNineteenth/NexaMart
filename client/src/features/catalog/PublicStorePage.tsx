@@ -32,7 +32,7 @@ function StoreProductCard({ product }: { product: Product }) {
   const price = product.effectivePrice ?? product.price;
 
   return <article className={styles.productCard}>
-    <Link href={`/products/${product.slug}`}>
+    <Link className={styles.productLink} href={`/products/${product.slug}`}>
       {image
         ? <img src={image} alt={product.name} loading="lazy" />
         : <span className="store-product-fallback" role="img" aria-label={`${product.name} product image unavailable`}>NM</span>}
@@ -78,11 +78,11 @@ export function PublicStorePage({ slug }: { slug: string }) {
   if (state === "error" || !currentPayload) return <main className="public-store-page customer-experience orchid-explore">
     <ExploreHeader active="stores" />
     <section className="shell deals-content" aria-labelledby="store-unavailable-heading">
-      <div className={styles.stateFrame}><div className="marketplace-load-state" role="alert">
+      <div className={styles.stateFrame}><div className={`marketplace-load-state ${styles.errorState}`} role="alert">
         <p className="eyebrow">Storefront</p>
         <h1 id="store-unavailable-heading">Store unavailable</h1>
         <p>Unable to load this storefront. Try again.</p>
-        <button type="button" onClick={retry}>Retry store</button>
+        <div className={styles.stateActions}><button className={styles.action} type="button" onClick={retry}>Retry store</button><Link className={styles.backLink} href="/stores">Back to stores</Link></div>
       </div></div>
     </section>
   </main>;
@@ -92,6 +92,7 @@ export function PublicStorePage({ slug }: { slug: string }) {
     <ExploreHeader active="stores" />
     <section className={`shell public-store-hero ${styles.storeFrame}`} aria-labelledby="store-heading">
       <p className={styles.context}>01 / Store collection</p>
+      <Link className={styles.backLink} href="/stores">Back to stores</Link>
       <p className="eyebrow">Store collection</p>
       <h1 id="store-heading">{store.storeName}</h1>
       {store.description ? <p>{store.description}</p> : null}
