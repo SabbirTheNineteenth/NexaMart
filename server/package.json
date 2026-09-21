@@ -11,6 +11,7 @@
     "admin:create": "tsx src/scripts/create-admin.ts",
     "seller:provision": "tsx src/scripts/provision-seller.ts",
     "demo:seed": "tsx src/scripts/demo-seed.ts",
+    "demo:seed:local": "tsx src/scripts/local-demo-catalog-seed.ts",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.vercel.json",
     "lint": "eslint .",

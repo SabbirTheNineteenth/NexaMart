@@ -1,4 +1,6 @@
-export type LocalDemoSeedEnvironment = Pick<NodeJS.ProcessEnv, "DATABASE_URL" | "NEXAMART_DEMO_SEED">;
+import { DEMO_CATALOG_SEED_PLAN } from "./demo-catalog-plan.js";
+
+export type LocalDemoSeedEnvironment = { DATABASE_URL?: string; NEXAMART_DEMO_SEED?: string };
 
 const LOCAL_DATABASE_HOSTS = new Set(["localhost", "127.0.0.1"]);
 const LOCAL_DEMO_SEED_CONFIRMATION = "local-confirmed";
@@ -25,4 +27,88 @@ export function assertLocalDemoSeedGuard(environment: LocalDemoSeedEnvironment):
   if (!isLocalPostgresUrl(environment.DATABASE_URL)) {
     throw new Error("Refusing local demo seed: database target must be a valid local PostgreSQL URL.");
   }
+}
+
+export type LocalDemoCatalogSeedEnvironment = LocalDemoSeedEnvironment & { NODE_ENV?: string };
+type CanonicalRecord = { name: string; slug: string };
+type CanonicalSubcategory = CanonicalRecord & { categorySlug: string };
+type SeedProduct = {
+  sellerId: string;
+  categoryId: string;
+  subcategoryId: string;
+  brandId: string;
+  brand: string;
+  slug: string;
+  name: string;
+  description: string;
+  primaryImageUrl: string;
+  price: string;
+  originalPrice: string;
+  stock: number;
+  rating: string;
+  reviewCount: number;
+  colors: string[];
+  isPublished: true;
+};
+type SeedPromotion = { sellerId: string; productId: string; productSlug: string; name: string; discountPercent: string; startsAt: Date; endsAt: Date };
+
+export type LocalDemoCatalogSeedRepository = {
+  upsertSeller(): Promise<string>;
+  upsertCategories(values: CanonicalRecord[]): Promise<Map<string, string>>;
+  upsertSubcategories(values: CanonicalSubcategory[]): Promise<Map<string, string>>;
+  upsertBrands(values: CanonicalRecord[]): Promise<Map<string, string>>;
+  upsertProduct(value: SeedProduct): Promise<string>;
+  upsertPromotion(value: SeedPromotion): Promise<void>;
+};
+
+/** Performs no database work. Call before loading a local seed repository. */
+export function assertLocalDemoCatalogSeedExecutionGuard(environment: LocalDemoCatalogSeedEnvironment): void {
+  assertLocalDemoSeedGuard(environment);
+  if (environment.NODE_ENV === "production") throw new Error("Refusing local demo seed when NODE_ENV=production.");
+}
+
+const LOCAL_DEMO_PRODUCT_PREFIX = "local-demo-catalog";
+const unique = <T>(values: T[], key: (value: T) => string) => [...new Map(values.map((value) => [key(value), value])).values()];
+const slugify = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+/**
+ * Seeds only the development catalog. The caller must provide the repository so
+ * guard behavior remains independently testable and free of database side effects.
+ */
+export async function runLocalDemoCatalogSeed(repository: LocalDemoCatalogSeedRepository, environment: LocalDemoCatalogSeedEnvironment) {
+  assertLocalDemoCatalogSeedExecutionGuard(environment);
+
+  const categories = unique(DEMO_CATALOG_SEED_PLAN.map(({ category }) => ({ name: category, slug: slugify(category) })), (value) => value.slug);
+  const subcategories = unique(DEMO_CATALOG_SEED_PLAN.map(({ category, subcategory }) => ({ name: subcategory, slug: slugify(subcategory), categorySlug: slugify(category) })), (value) => `${value.categorySlug}/${value.slug}`);
+  const brands = unique(DEMO_CATALOG_SEED_PLAN.map(({ brand }) => ({ name: brand, slug: slugify(brand) })), (value) => value.slug);
+
+  const sellerId = await repository.upsertSeller();
+  const categoryIds = await repository.upsertCategories(categories);
+  const subcategoryIds = await repository.upsertSubcategories(subcategories);
+  const brandIds = await repository.upsertBrands(brands);
+  const productIds = new Map<string, string>();
+
+  for (const [index, plan] of DEMO_CATALOG_SEED_PLAN.entries()) {
+    const categorySlug = slugify(plan.category);
+    const subcategorySlug = slugify(plan.subcategory);
+    const brandSlug = slugify(plan.brand);
+    const categoryId = categoryIds.get(categorySlug);
+    const subcategoryId = subcategoryIds.get(`${categorySlug}/${subcategorySlug}`);
+    const brandId = brandIds.get(brandSlug);
+    if (!categoryId || !subcategoryId || !brandId) throw new Error("Refusing local demo seed: canonical taxonomy could not be resolved.");
+    const slug = `${LOCAL_DEMO_PRODUCT_PREFIX}-${plan.id}`;
+    const price = (29 + index * 3).toFixed(2);
+    productIds.set(slug, await repository.upsertProduct({
+      sellerId, categoryId, subcategoryId, brandId, brand: plan.brand, slug, name: plan.name,
+      description: `${plan.name} is a local development catalog item from ${plan.brand}.`, primaryImageUrl: plan.imageUrl,
+      price, originalPrice: (Number(price) + 12).toFixed(2), stock: 20 + (index % 30), rating: "4.50", reviewCount: 10 + index,
+      colors: ["Demo"], isPublished: true,
+    }));
+  }
+
+  const promotionSlug = `${LOCAL_DEMO_PRODUCT_PREFIX}-${DEMO_CATALOG_SEED_PLAN[0]!.id}`;
+  const promotionProductId = productIds.get(promotionSlug);
+  if (!promotionProductId) throw new Error("Refusing local demo seed: promotion product could not be resolved.");
+  await repository.upsertPromotion({ sellerId, productId: promotionProductId, productSlug: promotionSlug, name: "Local Demo Catalog Deal", discountPercent: "15.00", startsAt: new Date("2020-01-01T00:00:00.000Z"), endsAt: new Date("2100-01-01T00:00:00.000Z") });
+  return { categoryCount: categories.length, productCount: DEMO_CATALOG_SEED_PLAN.length, promotionCount: 1 };
 }
