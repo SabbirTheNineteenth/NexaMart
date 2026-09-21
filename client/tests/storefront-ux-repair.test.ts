@@ -21,3 +21,11 @@ test("Storefront gives its sidebar, hero, cards, and brand rail local responsive
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.brandChip[\s\S]*?animation: none/);
   assert.match(styles, /\.productCardFooter\s*\{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto;/);
 });
+
+test("Storefront keeps subcategory, brand discovery, and recently viewed controls in one normal-flow facet stack", () => {
+  assert.match(storefront, /const recentlyViewedPanel = recentlyViewed\.length > 0 \? <section className=\{`recently-viewed reference-recently-viewed \$\{styles\.sidebarRecentlyViewed\}`}/);
+  assert.match(storefront, /<div className=\{styles\.sidebarDiscovery\}>[\s\S]*?className="taxonomy-controls"[\s\S]*?aria-label="Discover brands"[\s\S]*?\{recentlyViewedPanel\}/);
+  assert.match(styles, /\.sidebarDiscovery\s*\{[\s\S]*?display: grid;[\s\S]*?position: static;[\s\S]*?min-height: max-content;/);
+  assert.match(styles, /\.sidebarRecentlyViewed\s*\{[\s\S]*?grid-area: auto;[\s\S]*?position: static;/);
+  assert.match(styles, /@media \(max-width: 700px\)\s*\{[\s\S]*?\.sidebarDiscovery[\s\S]*?min-width: 0;[\s\S]*?\.sidebarDiscovery :global\(\.brand-discovery\)[\s\S]*?max-width: 100%;/);
+});

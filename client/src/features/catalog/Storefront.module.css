@@ -25,6 +25,73 @@
   padding: 1rem;
 }
 
+.sidebarDiscovery {
+  display: grid;
+  position: static;
+  min-width: 0;
+  min-height: max-content;
+  gap: 1rem;
+  align-content: start;
+}
+
+.sidebarDiscovery :global(.taxonomy-controls) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.sidebarDiscovery :global(.brand-discovery) {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.sidebarDiscovery :global(.brand-discovery > span) {
+  width: auto;
+}
+
+.sidebarDiscovery :global(.brand-discovery button) {
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  text-align: left;
+}
+
+.sidebarRecentlyViewed {
+  display: grid;
+  grid-area: auto;
+  position: static;
+  z-index: auto;
+  min-width: 0;
+  min-height: max-content;
+  margin: 0;
+  padding-top: 1rem;
+  overflow: visible;
+  transform: none;
+  border-top: 1px solid var(--orchid-border, #4e3d5e);
+}
+
+.sidebarRecentlyViewed :global(.marketplace-section-head) {
+  display: grid;
+  gap: 0.65rem;
+  align-items: start;
+  margin-bottom: 0.65rem;
+}
+
+.sidebarRecentlyViewed :global(.text-link),
+.sidebarRecentlyViewed :global(.recently-viewed-remove) {
+  min-height: 44px;
+}
+
+.sidebarRecentlyViewed :global(.recently-viewed-rail) {
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
 .catalogHero,
 :global(.storefront .reference-collection-hero) {
   grid-area: hero;
@@ -630,6 +697,27 @@
     padding: 0.85rem;
   }
 
+  .sidebarDiscovery {
+    min-width: 0;
+    gap: 0.85rem;
+  }
+
+  .sidebarDiscovery :global(.brand-discovery) {
+    display: flex;
+    max-width: 100%;
+    flex-wrap: wrap;
+    overflow-x: hidden;
+  }
+
+  .sidebarDiscovery :global(.brand-discovery button) {
+    width: auto;
+    min-width: 44px;
+  }
+
+  .sidebarRecentlyViewed {
+    padding-top: 0.85rem;
+  }
+
   .catalogHero {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -704,6 +792,10 @@
     gap: 0.4rem;
     padding: 0 0.7rem 0.7rem;
   }
+
+  .sidebarRecentlyViewed :global(.marketplace-section-head) {
+    gap: 0.45rem;
+  }
 }
 
 @media (max-width: 390px) {
@@ -714,6 +806,10 @@
   .productCardFooter :global(.quick-add) {
     padding-inline: 0.45rem;
     font-size: 0.7rem;
+  }
+
+  .sidebarDiscovery :global(.brand-discovery button) {
+    width: 100%;
   }
 }
 

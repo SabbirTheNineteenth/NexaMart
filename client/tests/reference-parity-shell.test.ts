@@ -5,6 +5,7 @@ import test from "node:test";
 const home = readFileSync(new URL("../src/app/page.tsx", import.meta.url), "utf8");
 const storefront = readFileSync(new URL("../src/features/catalog/Storefront.tsx", import.meta.url), "utf8");
 const styles = readFileSync(new URL("../src/app/globals.css", import.meta.url), "utf8");
+const storefrontStyles = readFileSync(new URL("../src/features/catalog/Storefront.module.css", import.meta.url), "utf8");
 
 test("PARITY-R01 keeps the real Explore storefront at the root rather than merging role concepts", () => {
   assert.match(home, /<Storefront \/>/);
@@ -94,14 +95,14 @@ test("PARITY-C04 keeps the live grid toolbar truthful while catalog results are 
   assert.match(storefront, /<p className="product-count" aria-live="polite">\{productCountLabel\}<\/p>/);
 });
 
-test("PARITY-C05 places the browser-local recently viewed rail directly beneath the live product grid", () => {
+test("PARITY-C05 keeps the browser-local recently viewed rail inside the normal-flow facet stack", () => {
   const collection = storefront.indexOf('className="collection shell customer-collection reference-explore-content"');
-  const productGrid = storefront.indexOf('className="product-grid"', collection);
-  const recentlyViewed = storefront.indexOf('className="recently-viewed reference-recently-viewed"', collection);
-  const collectionEnd = storefront.indexOf('</section>', recentlyViewed);
-  assert.ok(collection >= 0 && productGrid > collection && recentlyViewed > productGrid && collectionEnd > recentlyViewed, "recently viewed must stay in the live collection after the catalog grid");
+  const facetRail = storefront.indexOf('className="catalog-tools taxonomy-discovery reference-facet-rail"', collection);
+  const facetStack = storefront.indexOf('className={styles.sidebarDiscovery}', facetRail);
+  const recentlyViewed = storefront.indexOf('{recentlyViewedPanel}', facetStack);
+  assert.ok(collection >= 0 && facetRail > collection && facetStack > facetRail && recentlyViewed > facetStack, "recently viewed must stay inside the live normal-flow facet stack");
   assert.match(storefront, /Saved in this browser\. It is not synced to an account\./);
-  assert.match(styles, /\.reference-explore-content>\.reference-recently-viewed\{grid-column:2;grid-row:5/);
-  assert.match(styles, /\.reference-explore-content>\.reference-recently-viewed\{order:4\}/);
+  assert.match(storefront, /reference-recently-viewed \$\{styles\.sidebarRecentlyViewed\}/);
+  assert.match(storefrontStyles, /\.sidebarRecentlyViewed\s*\{[\s\S]*?grid-area: auto;[\s\S]*?position: static;/);
   assert.match(styles, /\.reference-recently-viewed \.recently-viewed-note\{display:block/);
 });
