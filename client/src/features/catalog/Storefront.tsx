@@ -29,7 +29,9 @@ type WishlistSaveState = { state: "saving" } | { state: "success" } | { state: "
 type CartAddState = { state: "pending" } | { state: "success" } | { state: "error"; message: string };
 
 function ServerPrice({ product }: { product: Pick<Product, "price" | "effectivePrice"> }) {
-  return <span className="server-price"><strong>{money.format(product.effectivePrice ?? product.price)}</strong></span>;
+  const { effectivePrice, price } = product;
+  const currentPrice = effectivePrice ?? price;
+  return <span className="server-price"><strong>{money.format(currentPrice)}</strong></span>;
 }
 
 function ProductVisual({ product, className = "", priority = false }: ProductVisualProps) {
@@ -374,7 +376,7 @@ export function Storefront() {
 
     <section className="new-arrivals shell" aria-labelledby="new-arrivals-heading"><div className="marketplace-section-head"><div><p className="eyebrow">Just landed</p><h2 id="new-arrivals-heading">New arrivals</h2></div><a className="text-link" href="#collection">Browse all products <ArrowUpRight size={16}/></a></div>{newArrivalsState === "loading" ? <p className="marketplace-load-state" role="status">Loading new arrivals…</p> : newArrivalsState === "error" ? <p className="marketplace-load-state" role="alert">New arrivals are temporarily unavailable. <button type="button" onClick={() => setNewArrivalsReloadNonce((value) => value + 1)}>Retry new arrivals</button></p> : newArrivals.length === 0 ? <p className="marketplace-load-state" role="status">No new arrivals are available right now.</p> : <div className="marketplace-rail new-arrivals-rail">{newArrivals.slice(0, 8).map((product) => <article className="new-arrival-card" key={product.id}><a href={`/products/${product.slug}`}><ProductVisual product={product}/><h3>{product.name}</h3><ServerPrice product={product}/></a>{product.storeName && product.storeSlug ? <a className="store-attribution" href={`/stores/${product.storeSlug}`}>From {product.storeName}</a> : null}</article>)}</div>}</section>
 
-    {taxonomy.brands.length > 0 && <section className="brand-showcase"><div className="shell"><p className="eyebrow">Shop by brand</p><div className="marketplace-rail brand-strip" aria-label="Catalog brands">{taxonomy.brands.map((item) => <button key={item.id} type="button" className={brand === item.slug ? "active" : ""} aria-pressed={brand === item.slug} onClick={() => { setCatalogLoaded(false); setBrand(brand === item.slug ? "" : item.slug); scrollToCollection(); }}>{item.name}</button>)}</div></div></section>}
+    {taxonomy.brands.length > 0 && <section className="brand-showcase"><div className="shell"><p className="eyebrow">Shop by brand</p><div className="marketplace-rail brand-strip" aria-label="Catalog brands">{taxonomy.brands.map((item, index) => <button key={item.id} type="button" className={`${styles.brandChip} ${brand === item.slug ? "active" : ""}`} style={{ animationDelay: `${index * 45}ms` }} aria-pressed={brand === item.slug} onClick={() => { setCatalogLoaded(false); setBrand(brand === item.slug ? "" : item.slug); scrollToCollection(); }}>{item.name}</button>)}</div></div></section>}
 
     <section id="collection" className="collection shell customer-collection reference-explore-content">
       <div className="section-heading reference-collection-heading"><div><p className="eyebrow">Catalog</p><h2 id="collection-heading" ref={collectionHeadingRef} tabIndex={-1}>Browse catalog products.</h2></div><p>Filter products by department, subcategory, brand, or newest arrivals.</p></div>
@@ -411,13 +413,11 @@ export function Storefront() {
           <div className="product-image">
             <ProductVisual key={product.id} product={product} priority={index < 3} />
             <div className="product-topline"><span>{presentation.brand ?? presentation.category}</span></div>
-            <button className="wishlist-button" aria-label={`Save ${product.name} to saved pieces`} aria-busy={wishlistSave?.state === "saving"} disabled={wishlistSave?.state === "saving"} onClick={() => void saveWishlist(product.id)}><Heart size={17}/><span className="sr-only">{wishlistSave?.state === "saving" ? "Saving…" : `Save ${product.name} to saved pieces`}</span></button>
-            <button className="quick-add" disabled={!product.inStock || cartAdd?.state === "pending"} aria-busy={cartAdd?.state === "pending"} onClick={() => void addToCart(product)}>{cartAdd?.state === "pending" ? "Adding…" : product.inStock ? "Add to bag" : "Out of stock"} <Plus size={16}/></button>
           </div>
           <div className="product-copy">
             <div className="product-title"><div><p>{presentation.brand ? `${presentation.brand} · ${presentation.category}` : presentation.category}</p><h3><a href={`/products/${product.slug}`}>{product.name}</a></h3></div><ServerPrice product={product}/></div>
             {presentation.description && <p className="product-description">{presentation.description}</p>}
-            <div className="reference-product-details"><div className="reference-variant-summary" aria-label={variantCount ? `${variantCount} available variants` : "Standard product without variants"}><span>Variants</span>{variantCount ? <span className="reference-variant-dots" aria-hidden="true">{Array.from({ length: Math.min(variantCount, 4) }, (_, dotIndex) => <i className="reference-variant-dot" key={dotIndex}/>)}</span> : <span className="reference-variant-none">—</span>}</div><div className={`reference-availability is-${availabilityState}`}><span>Availability</span><strong>{availabilityLabel}</strong></div></div>
+            <div className="reference-product-details"><div className="reference-variant-summary" aria-label={variantCount ? `${variantCount} available variants` : "Standard product without variants"}><span>Variants</span>{variantCount ? <span className="reference-variant-dots" aria-hidden="true">{Array.from({ length: Math.min(variantCount, 4) }, (_, dotIndex) => <i className="reference-variant-dot" key={dotIndex}/>)}</span> : <span className="reference-variant-none">—</span>}</div>{product.inStock && <div className={`reference-availability is-${availabilityState}`}><span>Availability</span><strong>{availabilityLabel}</strong></div>}</div>
             {presentation.specification && <div className="product-meta"><span>{presentation.specification}</span></div>}
             {wishlistSave?.state === "saving" && <p className="wishlist-save-feedback" role="status">Saving…</p>}
             {wishlistSave?.state === "success" && <p className="wishlist-save-feedback success" role="status">Saved.</p>}
@@ -425,6 +425,10 @@ export function Storefront() {
             {cartAdd?.state === "success" && <p className="cart-add-feedback success" role="status">Added to bag.</p>}
             {cartAdd?.state === "error" && <p className="cart-add-feedback error" role="alert">{cartAdd.message}</p>}
           </div>
+          <footer className={styles.productCardFooter}>
+            <button className="wishlist-button" aria-label={`Save ${product.name} to saved pieces`} aria-busy={wishlistSave?.state === "saving"} disabled={wishlistSave?.state === "saving"} onClick={() => void saveWishlist(product.id)}><Heart size={17}/><span className="sr-only">{wishlistSave?.state === "saving" ? "Saving…" : `Save ${product.name} to saved pieces`}</span></button>
+            <button className="quick-add" disabled={!product.inStock || cartAdd?.state === "pending"} aria-busy={cartAdd?.state === "pending"} onClick={() => void addToCart(product)}>{cartAdd?.state === "pending" ? "Adding…" : product.inStock ? "Add to bag" : "Out of stock"} <Plus size={16}/></button>
+          </footer>
         </article>;
       })}</div>}
       </div>

@@ -2,6 +2,166 @@
   min-width: 0;
 }
 
+/* Storefront owns this dense catalog composition so inherited marketplace rows cannot overlap. */
+.storefrontLayout,
+:global(.storefront .reference-explore-content) {
+  display: grid;
+  grid-template-columns: minmax(12rem, 14rem) minmax(0, 1fr);
+  grid-template-areas:
+    "filters hero"
+    "filters toolbar"
+    "filters results"
+    "filters recent";
+  gap: 1rem;
+  align-items: start;
+}
+
+.filterSurface,
+:global(.storefront .reference-facet-rail) {
+  grid-area: filters;
+  align-self: start;
+  min-width: 0;
+  margin: 0;
+  padding: 1rem;
+}
+
+.catalogHero,
+:global(.storefront .reference-collection-hero) {
+  grid-area: hero;
+  min-width: 0;
+  margin: 0;
+  grid-template-columns: minmax(12rem, 0.8fr) minmax(15rem, 1.2fr) minmax(9rem, 0.44fr);
+  gap: clamp(0.8rem, 1.5vw, 1.25rem);
+  padding: clamp(1rem, 2vw, 1.4rem);
+}
+
+.heroCopy,
+:global(.storefront .reference-collection-hero .marketplace-hero-copy) {
+  min-width: 0;
+}
+
+.heroHeading,
+:global(.storefront #explore-heading) {
+  max-width: 13ch;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: clamp(1.9rem, 3.1vw, 3rem);
+  line-height: 0.98;
+}
+
+.heroCopy > p:not(.eyebrow),
+:global(.storefront .reference-collection-hero .marketplace-hero-copy > p:not(.eyebrow)) {
+  max-width: 34ch;
+  margin: 0.85rem 0 0;
+  line-height: 1.5;
+}
+
+.heroActions,
+:global(.storefront .reference-collection-hero .hero-actions) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+  margin-top: 1rem;
+}
+
+.heroActions :global(.primary-button),
+.heroActions :global(.text-link),
+:global(.storefront .reference-collection-hero .hero-actions .primary-button),
+:global(.storefront .reference-collection-hero .hero-actions .text-link) {
+  min-height: 44px;
+}
+
+.storefrontLayout :global(.reference-product-toolbar) {
+  grid-area: toolbar;
+  min-width: 0;
+  margin: 0;
+}
+
+:global(.storefront .reference-product-toolbar) {
+  grid-area: toolbar;
+  min-width: 0;
+  margin: 0;
+}
+
+.catalogResults {
+  grid-area: results;
+}
+
+.storefrontLayout :global(.reference-recently-viewed) {
+  grid-area: recent;
+  min-width: 0;
+}
+
+:global(.storefront .reference-recently-viewed) {
+  grid-area: recent;
+  min-width: 0;
+}
+
+.productCardFooter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.55rem;
+  align-items: center;
+  padding: 0 0.8rem 0.8rem;
+}
+
+.productCardFooter :global(.quick-add),
+.productCardFooter :global(.wishlist-button) {
+  position: static;
+  min-height: 44px;
+}
+
+.productCardFooter :global(.quick-add) {
+  width: 100%;
+  justify-content: center;
+}
+
+.productCardFooter :global(.wishlist-button) {
+  grid-column: 2;
+  grid-row: 1;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  border: 1px solid var(--orchid-border, #4e3d5e);
+  border-radius: 0.5rem;
+  background: var(--orchid-surface, #241630);
+}
+
+.catalogResults :global(.product-card) {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+}
+
+.catalogResults :global(.product-copy) {
+  flex: 1;
+}
+
+.catalogResults :global(.product-title h3) {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.brandChip {
+  animation: brand-chip-in 360ms ease-out both;
+}
+
+.brandChip:hover,
+.brandChip:focus-visible {
+  border-color: var(--orchid-orchid, #d3a5ff);
+  background: var(--orchid-surface, #241630);
+  color: var(--orchid-text, #f8f2ff);
+  transform: translateY(-1px);
+}
+
+@keyframes brand-chip-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* Keep wide product and taxonomy rails inside the Storefront viewport. */
 :global(.storefront) {
   overflow-x: clip;
@@ -406,5 +566,163 @@
     scroll-behavior: auto;
     animation: none !important;
     transition: none !important;
+  }
+}
+
+@media (min-width: 961px) {
+  .filterSurface {
+    position: sticky;
+    top: 1rem;
+  }
+
+  :global(.storefront .reference-facet-rail) {
+    position: sticky;
+    top: 1rem;
+  }
+
+  .catalogHero :global(.marketplace-hero-media) {
+    height: 12rem;
+    min-height: 12rem;
+  }
+
+  :global(.storefront .reference-collection-hero .marketplace-hero-media) {
+    height: 12rem;
+    min-height: 12rem;
+  }
+
+  .catalogResults :global(.product-grid) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .storefrontLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "hero"
+      "filters"
+      "toolbar"
+      "results"
+      "recent";
+    gap: 0.85rem;
+  }
+
+  :global(.storefront .reference-explore-content) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "hero"
+      "filters"
+      "toolbar"
+      "results"
+      "recent";
+    gap: 0.85rem;
+  }
+
+  .filterSurface {
+    position: static;
+    padding: 0.85rem;
+  }
+
+  :global(.storefront .reference-facet-rail) {
+    position: static;
+    padding: 0.85rem;
+  }
+
+  .catalogHero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  :global(.storefront .reference-collection-hero) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .catalogHero :global(.marketplace-hero-media) {
+    min-height: 11rem;
+  }
+
+  :global(.storefront .reference-collection-hero .marketplace-hero-media) {
+    min-height: 11rem;
+  }
+
+  .catalogHero :global(.reference-hero-context) {
+    min-width: 0;
+  }
+
+  :global(.storefront .reference-collection-hero .reference-hero-context) {
+    min-width: 0;
+  }
+
+  .heroHeading {
+    max-width: 15ch;
+  }
+
+  :global(.storefront #explore-heading) {
+    max-width: 15ch;
+  }
+
+  .storefrontLayout :global(.department-rail),
+  .storefrontLayout :global(.brand-discovery) {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+
+  :global(.storefront .department-rail),
+  :global(.storefront .brand-discovery) {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+}
+
+@media (max-width: 420px) {
+  .heroActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  :global(.storefront .reference-collection-hero .hero-actions) {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .heroActions :global(.primary-button),
+  .heroActions :global(.text-link) {
+    width: 100%;
+    justify-content: center;
+  }
+
+  :global(.storefront .reference-collection-hero .hero-actions .primary-button),
+  :global(.storefront .reference-collection-hero .hero-actions .text-link) {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .productCardFooter {
+    gap: 0.4rem;
+    padding: 0 0.7rem 0.7rem;
+  }
+}
+
+@media (max-width: 390px) {
+  .catalogResults :global(.product-copy) {
+    padding: 0.7rem;
+  }
+
+  .productCardFooter :global(.quick-add) {
+    padding-inline: 0.45rem;
+    font-size: 0.7rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brandChip,
+  .brandChip:hover,
+  .brandChip:focus-visible {
+    animation: none;
+    transform: none;
+    transition: none;
   }
 }
