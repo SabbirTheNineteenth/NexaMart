@@ -19,3 +19,14 @@ test("UI-04 admin workspace uses the compact Obsidian Orchid control-room system
   assert.match(styles, /@media\(max-width:900px\)\{[\s\S]*:global\(\.admin-workspace\)\{[\s\S]*grid-template-columns:1fr/);
   assert.match(styles, /@media\(prefers-reduced-motion:reduce\)/);
 });
+
+test("UI-05 overview distinguishes actionable queues from activity and keeps controls operable on narrow screens", () => {
+  assert.match(dashboard, /aria-label="Governance queues"/);
+  assert.match(dashboard, /<article><span>Admin Audit<\/span>[\s\S]*?recent records/);
+  assert.match(dashboard, /href="\/admin\/products">Open product oversight/);
+  assert.match(dashboard, /href="\/admin\/applications">View all/);
+  assert.match(styles, /:global\(\.admin-action-control\)\{[\s\S]*min-height:44px/);
+  assert.match(styles, /@media\(max-width:700px\)\{[\s\S]*:global\(\.admin-overview-command-deck\)\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(styles, /@media\(max-width:420px\)\{[\s\S]*:global\(\.admin-overview-command-deck\)\{[\s\S]*grid-template-columns:1fr/);
+  assert.match(styles, /:global\(\.admin-workspace\)\{[\s\S]*overflow-x:clip/);
+});
