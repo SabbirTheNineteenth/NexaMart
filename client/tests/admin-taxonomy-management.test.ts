@@ -50,9 +50,9 @@ test("a mutation that began before an archive-triggered taxonomy reload cannot o
 });
 
 test("a create response begun before a taxonomy reload cannot append stale taxonomy state", () => {
-  assert.match(taxonomy, /const mutationRevision = taxonomyRevision\.current;\n    const payload = \{ name: String\(data\.get\("name"\)/);
+  assert.match(taxonomy, /const mutationRevision = taxonomyRevision\.current;\r?\n    const payload = \{ name: String\(data\.get\("name"\)/);
   assert.match(taxonomy, /if \(mutationRevision === taxonomyRevision\.current\) \{ setTaxonomy\(\(current\) => \(\{ \.\.\.current, \[plural\]: sortNodes\(\[\.\.\.current\[plural\], node\]\) \}\)\); \}/);
-  assert.match(taxonomy, /form\.reset\(\);\n      setFeedback/);
+  assert.match(taxonomy, /form\.reset\(\);\r?\n      setFeedback/);
 });
 
 test("taxonomy loading and mutations are abort-safe, retryable, status-aware, and row-scoped", () => {
@@ -81,4 +81,15 @@ test("canonical taxonomy saves and proposal decisions require accessible confirm
   assert.match(taxonomy, /<ConfirmationDialog title=\{`Save changes to \$\{nodeUpdateConfirmation\.node\.name\}\?`\}[\s\S]*onCancel=\{\(\) => setNodeUpdateConfirmation\(null\)\}[\s\S]*onConfirm=\{confirmNodeUpdate\}/);
   assert.match(taxonomy, /<ConfirmationDialog title=\{`\$\{proposalReviewConfirmation\.decision === "approve" \? "Approve" : "Reject"\} \$\{proposalReviewConfirmation\.proposal\.name\}\?`\}[\s\S]*onCancel=\{\(\) => setProposalReviewConfirmation\(null\)\}[\s\S]*onConfirm=\{confirmProposalReview\}/);
   assert.match(taxonomy, /<ConfirmationDialog title=\{`Archive \$\{archiveConfirmation\.node\.name\}\?`\}[\s\S]*onConfirm=\{confirmArchive\}/);
+});
+
+test("taxonomy management groups active work, gives each action context, and reflows its own form controls", () => {
+  assert.match(taxonomy, /className="admin-taxonomy-workspace"/);
+  assert.match(taxonomy, /<section className="admin-taxonomy-create-group" aria-labelledby="taxonomy-create-group-heading">/);
+  assert.match(taxonomy, /<section className="admin-taxonomy-records" aria-label="Canonical taxonomy records">/);
+  assert.match(taxonomy, /<fieldset className="admin-taxonomy-fields">/);
+  assert.match(taxonomy, /className="admin-taxonomy-row-actions"/);
+  assert.match(taxonomy, /aria-live="polite"/);
+  assert.match(taxonomy, /className="admin-taxonomy-proposal-actions"/);
+  assert.match(taxonomy, /<style jsx global>\{`[\s\S]*min-height: 44px[\s\S]*@media \(max-width: 700px\)[\s\S]*`\}<\/style>/);
 });
