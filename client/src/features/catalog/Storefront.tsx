@@ -138,7 +138,10 @@ export function Storefront() {
       })
       .catch((reason: unknown) => {
         const failure = catalogLoadFailure(reason);
-        if (failure) setError(failure.error);
+        if (failure) {
+          setCatalogLoaded(true);
+          setError(failure.error);
+        }
       });
     return () => controller.abort();
   }, [query, category, subcategory, brand, sort, reloadNonce]);
