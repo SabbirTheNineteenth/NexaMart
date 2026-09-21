@@ -59,7 +59,7 @@ export function DealsDiscovery() {
     <section className={`marketplace-hero shell ${styles.hero}`} aria-labelledby="deals-heading">
       <div className={`marketplace-hero-copy ${styles.heroCopy}`}>
         <p className="eyebrow">Catalog selection</p>
-        <h1 id="deals-heading">Active deals</h1>
+        <h1 id="deals-heading" tabIndex={-1}>Active deals</h1>
         <p>Products currently returned by the catalog as active deals.</p>
         <div className={`hero-actions ${styles.heroActions}`}><a className="primary-button" href="#deals-collection">View active deals</a><Link className="text-link" href="/">Browse the catalog</Link></div>
       </div>

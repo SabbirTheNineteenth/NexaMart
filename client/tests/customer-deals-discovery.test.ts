@@ -16,8 +16,13 @@ test("public deals route renders the dedicated active-deals discovery experience
   assert.match(source(dealsPagePath), /return <DealsDiscovery\/>;/);
   const deals = source(dealsPath);
   assert.match(deals, /<main className="deals-discovery customer-experience orchid-explore">/);
-  assert.match(deals, /<h1 id="deals-heading">Active deals<\/h1>/);
+  assert.match(deals, /<h1 id="deals-heading" tabIndex=\{-1\}>Active deals<\/h1>/);
   assert.match(deals, /<ExploreHeader active="deals" \/>/);
+});
+
+test("the active-deals skip link targets a programmatically focusable heading", () => {
+  const deals = source(dealsPath);
+  assert.match(deals, /<h1 id="deals-heading" tabIndex=\{-1\}>Active deals<\/h1>/);
 });
 
 test("deals discovery requests and refreshes only server-confirmed active deals", () => {
