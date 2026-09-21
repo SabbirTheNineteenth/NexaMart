@@ -9,3 +9,46 @@
 .skipLink {
   isolation: isolate;
 }
+
+.hero { padding: clamp(20px, 3vw, 34px); }
+.heroCopy { max-width: 34rem; }
+.heroActions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+.heroActions :global(.primary-button),.retryButton,.catalogLink { min-height: 44px; }
+.heroMedia { min-height: 300px; }
+.heroImage { object-position: center; }
+.heroNote { max-width: min(82%, 24rem); }
+.sectionHead { align-items: center; margin-bottom: 12px; }
+.collectionSection { padding-top: clamp(32px, 5vw, 56px); }
+.collection { min-width: 0; }
+.stateFrame { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 74px; margin: 0; padding: 16px 18px; }
+.stateFrame p { margin: 0; }
+.retryButton,.catalogLink { flex: 0 0 auto; border: 1px solid var(--nx-border); border-radius: 7px; background: var(--nx-surface-control); color: var(--nx-text); padding: 10px 13px; font-size: 11px; font-weight: 800; }
+.catalogLink { display: inline-flex; align-items: center; }
+.retryButton:hover,.catalogLink:hover { border-color: var(--nx-orchid); color: var(--nx-orchid); }
+.results { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; overflow: visible; }
+.card { display: flex; min-width: 0; flex-direction: column; transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease; }
+.card:hover { border-color: var(--nx-orchid); transform: translateY(-2px); }
+.productLink { display: flex; min-height: 0; flex: 1; flex-direction: column; }
+.image { height: 180px; }
+.cardCopy { display: grid; flex: 1; align-content: start; gap: 6px; padding: 12px; }
+.cardCopy > p:first-child,.dealMeta,.confirmation { margin: 0; color: var(--nx-text-muted); font-family: "DM Mono", monospace; font-size: 9px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; }
+.cardCopy h3 { min-height: 0; margin: 0; font-size: 14px; line-height: 1.35; }
+.dealMeta { margin-top: auto; color: var(--nx-orchid); }
+.confirmation { border-top: 1px solid var(--nx-border); padding: 9px 12px; }
+
+@media (max-width: 700px) {
+  :global(.deals-discovery .marketplace-hero) { margin-top: 0; padding: clamp(20px, 3vw, 34px); }
+  .heroMedia { min-height: 250px; }
+  .stateFrame { align-items: flex-start; flex-direction: column; }
+  .results { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .image { height: 150px; }
+}
+
+@media (max-width: 420px) {
+  :global(.deals-discovery .customer-collection) { padding-top: 32px; }
+  .sectionHead { align-items: flex-start; flex-direction: column; }
+  .results { grid-template-columns: 1fr; }
+  .image { height: 190px; }
+}
+
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } }

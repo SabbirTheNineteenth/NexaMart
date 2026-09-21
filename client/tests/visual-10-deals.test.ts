@@ -19,10 +19,10 @@ test("VISUAL-10/07 restores the shared Explore hierarchy with only existing navi
 });
 
 test("VISUAL-10/07 keeps the deals canvas editorial, responsive, and fed only by active-deals records", () => {
-  assert.match(deals, /<section className="marketplace-hero shell" aria-labelledby="deals-heading">/);
-  assert.match(deals, /<div className="marketplace-hero-media">/);
-  assert.match(deals, /<section id="deals-collection" className="collection shell customer-collection"/);
-  assert.match(deals, /className="deals-results-frame marketplace-rail product-spotlight-rail"/);
+  assert.match(deals, /marketplace-hero shell \$\{styles\.hero\}/);
+  assert.match(deals, /marketplace-hero-media \$\{styles\.heroMedia\}/);
+  assert.match(deals, /collection shell customer-collection \$\{styles\.collectionSection\}/);
+  assert.match(deals, /deals-results-frame marketplace-rail product-spotlight-rail \$\{styles\.results\}/);
   assert.match(deals, /getJSON<\{ products: Product\[\] \}>\("\/catalog\/products\?deals=active", controller\.signal\)/);
   assert.doesNotMatch(deals, /(?:countdown|remaining time|Save \$|Was \$|payment|delivery)/i);
   assert.doesNotMatch(deals, /(?:basePrice|originalPrice|discountPercent|promotion\.name)/);
