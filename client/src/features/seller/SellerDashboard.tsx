@@ -36,6 +36,7 @@ type FulfillmentFeedback = { kind: "pending" | "success" | "error"; message: str
 type FulfillmentChange = { order: SellerOrder; item: SellerOrder["items"][number]; status: FulfillmentStatus };
 type StockFeedback = { kind: "pending" | "success" | "error"; message: string };
 type WorkspaceState = "loading" | "ready" | "error";
+type LogoutState = { state: "idle" } | { state: "pending" } | { state: "error"; message: string };
 type SellerSection = "overview" | "analytics" | "profile" | "catalog" | "inventory" | "taxonomy" | "promotions" | "fulfillment" | "finance" | "reviews" | "notifications";
 
 const sellerSections: { section: SellerSection; label: string; group: "Operate" | "Manage"; icon: LucideIcon }[] = [
@@ -82,6 +83,7 @@ export function SellerDashboard() {
   const [profileSuccess, setProfileSuccess] = useState("");
   const [promotionSuccess, setPromotionSuccess] = useState("");
   const [workspaceState, setWorkspaceState] = useState<WorkspaceState>("loading");
+  const [logoutState, setLogoutState] = useState<LogoutState>({ state: "idle" });
   const [createTarget, setCreateTarget] = useState<"product" | "promotion" | null>(null);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
@@ -238,6 +240,16 @@ export function SellerDashboard() {
     } finally { setReadingNotificationId(null); }
   };
 
+  const logout = async () => {
+    setLogoutState({ state: "pending" });
+    try {
+      await postJSON<void>("/auth/logout", {});
+      window.location.assign("/");
+    } catch (reason) {
+      setLogoutState({ state: "error", message: reason instanceof Error ? reason.message : "Unable to sign out. Please try again." });
+    }
+  };
+
   const saveStock = async (event: FormEvent<HTMLFormElement>, product: SellerProduct) => {
     event.preventDefault();
     const stockValue = String(new FormData(event.currentTarget).get("stock") ?? "");
@@ -326,7 +338,7 @@ export function SellerDashboard() {
       <Link className={styles.storefrontLink} href="/">View storefront <PackageSearch aria-hidden="true" size={14} strokeWidth={1.8} /></Link>
     </aside>
     <div className={styles.sellerContent} id="seller-workspace-content" tabIndex={-1}>
-    <header className={`seller-topbar seller-workspace-topbar ${styles.commandBar}`} aria-label="Seller workspace command"><div className={styles.operationsHeader}><div className={styles.workspaceContext}><span>Seller workspace</span><span className={styles.liveMarker}>Operate</span><span className={styles.sectionContext}>{sellerSections.find((item) => item.section === activeSection)?.label}</span></div><Link className={styles.topbarAction} href={`/seller/${commandTarget}`}>{activeSection === "catalog" ? "Manage inventory" : "Manage catalog"}</Link></div></header>
+    <header className={`seller-topbar seller-workspace-topbar ${styles.commandBar}`} aria-label="Seller workspace command"><div className={styles.operationsHeader}><div className={styles.workspaceContext}><span>Seller workspace</span><span className={styles.liveMarker}>Operate</span><span className={styles.sectionContext}>{sellerSections.find((item) => item.section === activeSection)?.label}</span></div><div className={styles.topbarActions}><Link className={styles.topbarAction} href={`/seller/${commandTarget}`}>{activeSection === "catalog" ? "Manage inventory" : "Manage catalog"}</Link><button className={styles.topbarAction} type="button" onClick={() => void logout()} disabled={logoutState.state === "pending"}>{logoutState.state === "pending" ? "Signing out…" : "Sign out"}</button>{logoutState.state === "error" && <div className={styles.logoutRecovery} role="alert"><p>{logoutState.message}</p><button className={styles.topbarAction} type="button" onClick={() => void logout()}>Try signing out again</button></div>}</div></div></header>
     <section className={styles.workspaceIntro} aria-labelledby="seller-workspace-heading"><p className="eyebrow">Seller command workspace</p><h1 id="seller-workspace-heading">{sellerSections.find((item) => item.section === activeSection)?.label}</h1><p>Owned records and actions for this part of your store.</p></section>
     <div className={styles.activeWorkspace}>
     {activeSection !== "analytics" && activeSection !== "reviews" && workspaceState === "loading" ? <p className="seller-state" role="status" aria-live="polite">Loading your seller workspace…</p> : activeSection !== "analytics" && activeSection !== "reviews" && workspaceState === "error" ? <section className="seller-empty" role="alert" aria-labelledby="seller-workspace-error-heading"><p className="eyebrow">Workspace unavailable</p><h2 id="seller-workspace-error-heading">Unable to load {sellerSections.find((item) => item.section === activeSection)?.label}</h2><p>Your seller data was not loaded. Try again to request the selected workspace.</p><strong>{error}</strong><button className="primary-button" type="button" onClick={loadWorkspace}>Retry workspace</button></section> : <>
