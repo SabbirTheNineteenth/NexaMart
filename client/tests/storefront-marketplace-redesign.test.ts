@@ -17,7 +17,7 @@ test("catalog discovery is driven by loaded catalog products and taxonomy", () =
   assert.match(storefront, /const departmentTiles = useMemo\(/);
   assert.match(storefront, /const featuredProducts = useMemo\(/);
   assert.match(storefront, /aria-label="Browse departments"/);
-  assert.match(storefront, /aria-label="Catalog brands"/);
+  assert.match(storefront, /aria-label="Explore brands"/);
   assert.match(storefront, /taxonomy\.brands\.map/);
   assert.match(storefront, /ProductVisual key=\{item\.product\.id\} product=\{item\.product\}/);
 });

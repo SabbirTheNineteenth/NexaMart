@@ -16,27 +16,28 @@ test("Storefront keeps catalog actions in a card footer and only renders returne
 test("Storefront gives its sidebar, hero, cards, and brand rail local responsive safeguards", () => {
   assert.match(styles, /\.storefrontLayout[\s,]*:global\(\.storefront \.reference-explore-content\)\s*\{[\s\S]*?grid-template-columns: minmax\(12rem, 14rem\) minmax\(0, 1fr\);/);
   assert.match(styles, /\.heroHeading[\s,]*:global\(\.storefront #explore-heading\)\s*\{[\s\S]*?max-width: 13ch;/);
-  assert.match(styles, /\.brandChip\s*\{[\s\S]*?animation: brand-chip-in 360ms/);
+  assert.match(styles, /\.brandTrack\s*\{[\s\S]*?animation: brand-marquee 26s linear infinite;/);
   assert.match(styles, /@media \(max-width: 700px\)\s*\{[\s\S]*?\.storefrontLayout\s*\{[\s\S]*?grid-template-columns: minmax\(0, 1fr\);/);
-  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.brandChip[\s\S]*?animation: none/);
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.brandTrack[\s\S]*?animation: none/);
   assert.match(styles, /\.productCardFooter\s*\{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto;/);
 });
 
-test("Storefront presents API-backed brands in a contained, motion-safe discovery module", () => {
-  assert.match(storefront, /const \[brandPickerVisible, setBrandPickerVisible\] = useState\(false\);/);
-  assert.match(storefront, /new IntersectionObserver\(/);
-  assert.match(storefront, /ref=\{brandShowcaseRef\}/);
+test("Storefront presents API-backed brands in an accessible, seamless marquee", () => {
   assert.match(storefront, /aria-labelledby="brand-discovery-heading"/);
   assert.match(storefront, /<p className="eyebrow">Shop by brand<\/p><h2 id="brand-discovery-heading">Explore brands in the catalog<\/h2><p>Choose a brand to refine the current catalog\.<\/p>/);
-  assert.match(storefront, /role="group" aria-label="Catalog brands"/);
+  assert.match(storefront, /role="group" aria-label="Explore brands"/);
   assert.match(storefront, /aria-pressed=\{brand === item\.slug\}/);
   assert.match(storefront, /setBrand\(brand === item\.slug \? "" : item\.slug\); scrollToCollection\(\);/);
+  assert.match(storefront, /className=\{styles\.brandDuplicateSequence\} aria-hidden="true"/);
+  assert.match(storefront, /<span key=\{`duplicate-\$\{item\.id\}`\} className=\{`\$\{styles\.brandDuplicate\}/);
   assert.match(styles, /\.brandShowcase\s*\{[\s\S]*?overflow: hidden;[\s\S]*?background:/);
-  assert.match(styles, /\.brandPicker\s*\{[\s\S]*?grid-template-columns: repeat\(auto-fit, minmax\(8\.5rem, 1fr\)\);/);
+  assert.match(styles, /\.brandMarquee\s*\{[\s\S]*?overflow: hidden;[\s\S]*?mask-image:/);
+  assert.match(styles, /\.brandTrack\s*\{[\s\S]*?animation: brand-marquee 26s linear infinite;/);
+  assert.match(styles, /@keyframes brand-marquee[\s\S]*?transform: translateX\(-50%\);/);
   assert.match(styles, /\.brandChip\s*\{[\s\S]*?min-height: 44px;/);
-  assert.match(styles, /\.brandChipVisible\s*\{[\s\S]*?animation: brand-chip-in 360ms/);
-  assert.match(styles, /@media \(max-width: 700px\)\s*\{[\s\S]*?\.brandShowcaseInner[\s\S]*?grid-template-columns: minmax\(0, 1fr\);/);
-  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.brandChipVisible[\s\S]*?animation: none;/);
+  assert.match(styles, /\.brandMarquee:hover \.brandTrack,[\s\S]*?animation-play-state: paused;/);
+  assert.match(styles, /@media \(max-width: 700px\)\s*\{[\s\S]*?\.brandDuplicateSequence[\s\S]*?display: none;/);
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.brandTrack[\s\S]*?animation: none;[\s\S]*?\.brandDuplicateSequence[\s\S]*?display: none;/);
 });
 
 test("Storefront removes Recently viewed and preserves an ordered, normal-flow filter stack", () => {

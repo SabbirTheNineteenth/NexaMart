@@ -66,7 +66,6 @@ export function Storefront() {
   const [sort, setSort] = useState<"newest" | "">(initialFilters.sort ?? "");
   const [availability, setAvailability] = useState<AvailabilityFacet>("all");
   const [productType, setProductType] = useState<ProductTypeFacet>("all");
-  const [brandPickerVisible, setBrandPickerVisible] = useState(false);
   const [taxonomy, setTaxonomy] = useState<CatalogTaxonomy>({ categories: [], subcategories: [], brands: [] });
   const [taxonomyState, setTaxonomyState] = useState<"loading" | "loaded" | "error">("loading");
   const [taxonomyReloadNonce, setTaxonomyReloadNonce] = useState(0);
@@ -88,7 +87,6 @@ export function Storefront() {
   const cartOpenerRef = useRef<HTMLElement | null>(null);
   const mobileNavToggleRef = useRef<HTMLButtonElement>(null);
   const collectionHeadingRef = useRef<HTMLHeadingElement>(null);
-  const brandShowcaseRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const checkoutKeyRef = useRef<string | null>(null);
   const wishlistSavingIds = useRef(new Set<string>());
@@ -123,23 +121,6 @@ export function Storefront() {
       });
     return () => taxonomyController.abort();
   }, [taxonomyReloadNonce]);
-
-  useEffect(() => {
-    const brandShowcase = brandShowcaseRef.current;
-    if (!brandShowcase || brandPickerVisible) return;
-    if (typeof IntersectionObserver === "undefined") {
-      setBrandPickerVisible(true);
-      return;
-    }
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setBrandPickerVisible(true);
-        observer.disconnect();
-      }
-    }, { threshold: 0.15 });
-    observer.observe(brandShowcase);
-    return () => observer.disconnect();
-  }, [brandPickerVisible, taxonomy.brands.length]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -388,7 +369,7 @@ export function Storefront() {
 
     <section className="new-arrivals shell" aria-labelledby="new-arrivals-heading"><div className="marketplace-section-head"><div><p className="eyebrow">Just landed</p><h2 id="new-arrivals-heading">New arrivals</h2></div><a className="text-link" href="#collection">Browse all products <ArrowUpRight size={16}/></a></div>{newArrivalsState === "loading" ? <p className="marketplace-load-state" role="status">Loading new arrivals…</p> : newArrivalsState === "error" ? <p className="marketplace-load-state" role="alert">New arrivals are temporarily unavailable. <button type="button" onClick={() => setNewArrivalsReloadNonce((value) => value + 1)}>Retry new arrivals</button></p> : newArrivals.length === 0 ? <p className="marketplace-load-state" role="status">No new arrivals are available right now.</p> : <div className="marketplace-rail new-arrivals-rail">{newArrivals.slice(0, 8).map((product) => <article className="new-arrival-card" key={product.id}><a href={`/products/${product.slug}`}><ProductVisual product={product}/><h3>{product.name}</h3><ServerPrice product={product}/></a>{product.storeName && product.storeSlug ? <a className="store-attribution" href={`/stores/${product.storeSlug}`}>From {product.storeName}</a> : null}</article>)}</div>}</section>
 
-    {taxonomy.brands.length > 0 && <section ref={brandShowcaseRef} className={`brand-showcase ${styles.brandShowcase}`} aria-labelledby="brand-discovery-heading"><div className={`shell ${styles.brandShowcaseInner}`}><div className={styles.brandIntro}><p className="eyebrow">Shop by brand</p><h2 id="brand-discovery-heading">Explore brands in the catalog</h2><p>Choose a brand to refine the current catalog.</p></div><div className={styles.brandPicker} role="group" aria-label="Catalog brands">{taxonomy.brands.map((item, index) => <button key={item.id} type="button" className={`${styles.brandChip} ${brandPickerVisible ? styles.brandChipVisible : ""} ${brand === item.slug ? "active" : ""}`} style={{ animationDelay: `${index * 45}ms` }} aria-pressed={brand === item.slug} onClick={() => { setCatalogLoaded(false); setBrand(brand === item.slug ? "" : item.slug); scrollToCollection(); }}>{item.name}</button>)}</div></div></section>}
+    {taxonomy.brands.length > 0 && <section className={`brand-showcase ${styles.brandShowcase}`} aria-labelledby="brand-discovery-heading"><div className={`shell ${styles.brandShowcaseInner}`}><div className={styles.brandIntro}><p className="eyebrow">Shop by brand</p><h2 id="brand-discovery-heading">Explore brands in the catalog</h2><p>Choose a brand to refine the current catalog.</p></div><div className={styles.brandMarquee} role="group" aria-label="Explore brands"><div className={styles.brandTrack}><div className={styles.brandSequence}>{taxonomy.brands.map((item) => <button key={item.id} type="button" className={`${styles.brandChip} ${brand === item.slug ? "active" : ""}`} aria-pressed={brand === item.slug} onClick={() => { setCatalogLoaded(false); setBrand(brand === item.slug ? "" : item.slug); scrollToCollection(); }}>{item.name}</button>)}</div><div className={styles.brandDuplicateSequence} aria-hidden="true">{taxonomy.brands.map((item) => <span key={`duplicate-${item.id}`} className={`${styles.brandDuplicate} ${brand === item.slug ? styles.brandDuplicateActive : ""}`}>{item.name}</span>)}</div></div></div></div></section>}
 
     <section id="collection" className="collection shell customer-collection reference-explore-content">
       <div className="section-heading reference-collection-heading"><div><p className="eyebrow">Catalog</p><h2 id="collection-heading" ref={collectionHeadingRef} tabIndex={-1}>Browse catalog products.</h2></div><p>Filter products by department, subcategory, brand, or newest arrivals.</p></div>

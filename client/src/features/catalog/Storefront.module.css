@@ -321,15 +321,37 @@
   line-height: 1.5;
 }
 
-.brandPicker {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
-  gap: 0.55rem;
+.brandMarquee {
   min-width: 0;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
 }
 
-.brandChip {
-  min-width: 0;
+.brandTrack,
+.brandSequence,
+.brandDuplicateSequence {
+  display: flex;
+  align-items: center;
+}
+
+.brandTrack {
+  width: max-content;
+  animation: brand-marquee 26s linear infinite;
+  will-change: transform;
+}
+
+.brandSequence,
+.brandDuplicateSequence {
+  flex: none;
+  gap: 0.55rem;
+  padding-right: 0.55rem;
+}
+
+.brandChip,
+.brandDuplicate {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
   min-height: 44px;
   border: 1px solid var(--orchid-border, #4e3d5e);
   border-radius: 0.55rem;
@@ -338,11 +360,11 @@
   color: var(--orchid-text, #f8f2ff);
   font-weight: 700;
   text-align: left;
-  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  white-space: nowrap;
 }
 
-.brandChipVisible {
-  animation: brand-chip-in 360ms ease-out both;
+.brandChip {
+  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
 .brandChip:hover,
@@ -361,9 +383,20 @@
   color: #fff;
 }
 
-@keyframes brand-chip-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+.brandDuplicateActive {
+  border-color: var(--orchid-orchid, #d3a5ff);
+  background: var(--orchid-violet, #9360ef);
+  color: #fff;
+}
+
+.brandMarquee:hover .brandTrack,
+.brandMarquee:focus-within .brandTrack {
+  animation-play-state: paused;
+}
+
+@keyframes brand-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 /* Keep wide product and taxonomy rails inside the Storefront viewport. */
@@ -815,8 +848,25 @@
     gap: 1rem;
   }
 
-  .brandPicker {
+  .brandMarquee {
+    overflow: visible;
+    mask-image: none;
+  }
+
+  .brandTrack {
+    display: grid;
+    width: 100%;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    animation: none;
+    transform: none;
+  }
+
+  .brandSequence {
+    display: contents;
+  }
+
+  .brandDuplicateSequence {
+    display: none;
   }
 
   .storefrontLayout {
@@ -954,7 +1004,7 @@
 }
 
 @media (max-width: 390px) {
-  .brandPicker {
+  .brandTrack {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -974,11 +1024,30 @@
 
 @media (prefers-reduced-motion: reduce) {
   .brandChip,
-  .brandChipVisible,
   .brandChip:hover,
   .brandChip:focus-visible {
     animation: none;
     transform: none;
     transition: none;
+  }
+
+  .brandMarquee {
+    overflow-x: auto;
+    mask-image: none;
+  }
+
+  .brandTrack {
+    display: flex;
+    width: max-content;
+    animation: none;
+    transform: none;
+  }
+
+  .brandSequence {
+    display: flex;
+  }
+
+  .brandDuplicateSequence {
+    display: none;
   }
 }
