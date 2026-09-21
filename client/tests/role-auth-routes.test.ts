@@ -78,11 +78,15 @@ test("role auth preserves loading, error, success, focus, and reduced-motion sta
   const styles = css();
 
   assert.match(source, /aria-busy=\{saving\}/);
+  assert.match(source, /\{saving && <p className="role-auth-pending" role="status" aria-live="polite">Submitting your details…<\/p>\}/);
   assert.match(source, /role="alert"/);
   assert.match(source, /role="status"/);
   assert.match(source, /disabled=\{saving\}/);
   assert.match(styles, /\.shell :global\(\.role-auth-panel input:focus-visible\),\.shell :global\(\.role-auth-panel textarea:focus-visible\)\{[^}]*outline:/);
   assert.match(styles, /@media\(prefers-reduced-motion:reduce\)\{[\s\S]*?\.shell \*,\.shell \*::before,\.shell \*::after\{animation:none!important;transition:none!important/);
+  assert.match(styles, /\.shell :global\(\.role-auth-panel \.primary-button\)\{min-height:44px/);
+  assert.match(styles, /@media\(max-width:700px\)/);
+  assert.match(styles, /@media\(max-width:420px\)/);
 });
 
 test("seller registration remains a customer account plus a real seller application", () => {
