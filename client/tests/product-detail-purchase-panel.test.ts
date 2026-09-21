@@ -31,12 +31,12 @@ test("C06 keeps truthful cart and saved-piece feedback in the bounded purchase h
 test("C06 presents returned availability and category facts as a compact panel ledger", () => {
   assert.match(factStyles, /\.facts\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\);border:1px solid var\(--nx-border\);background:var\(--nx-surface-control\)\}/);
   assert.match(factStyles, /\.facts div\{min-width:0;border:0;padding:9px 10px\}/);
-  assert.match(factStyles, /@media\(max-width:760px\)\{\.facts\{grid-template-columns:1fr\}/);
+  assert.match(factStyles, /@media\(max-width:420px\)[\s\S]*\.facts\{grid-template-columns:1fr\}/);
 });
 
 test("C06 keeps real variant selection and stock rows in a compact contained detail panel", () => {
-  assert.match(factStyles, /\.variantPanel\{width:100%;margin:18px 0 0;border:1px solid var\(--nx-border\);background:var\(--nx-surface-control\);padding:12px\}/);
+  assert.match(factStyles, /\.variantPanel\{width:100%;margin:14px 0 0;border:1px solid var\(--nx-border\);background:var\(--nx-surface-control\);padding:12px\}/);
   assert.match(factStyles, /\.variantPanel ul\{border:1px solid var\(--nx-border\);background:var\(--nx-surface-panel\)\}/);
   assert.match(factStyles, /\.variantPanel li\{min-width:0;padding:10px\}/);
-  assert.match(factStyles, /@media\(max-width:760px\)\{\.variantPanel\{padding:10px\}/);
+  assert.match(factStyles, /@media\(max-width:700px\)[\s\S]*\.variantPanel\{padding:10px\}/);
 });

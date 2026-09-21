@@ -34,7 +34,7 @@ test("VISUAL-7/03 keeps the focused detail in the real Explore header and purcha
   assert.match(source, /headerWishlistPath\(authenticated\)/);
   assert.match(source, /href="\/\?bag=1"/);
   assert.match(source, /<section className="product-purchase-panel" aria-label="Purchase options">/);
-  assert.match(source, /<aside className="product-detail-copy product-detail-summary" aria-label="Product summary">/);
+  assert.match(source, /<aside className=\{`product-detail-copy product-detail-summary \$\{styles\.summary\}`\} aria-label="Product summary">/);
 });
 
 test("C06 carries the compact Explore hierarchy into the product detail header", () => {

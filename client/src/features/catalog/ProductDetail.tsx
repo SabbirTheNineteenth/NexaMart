@@ -136,8 +136,8 @@ export function ProductDetail({ slug }: { slug: string }) {
 
   const currentProduct = product?.slug === slug ? product : null;
   const activeError = errorSlug === slug ? error : "";
-  if (activeError) return <main className="product-detail-shell orchid-explore"><DetailHeader authenticated={cart.authenticated} totalItems={cart.totalItems} /><section className="product-detail-state" aria-label="Product loading error"><div className="message" role="alert"><p>{activeError}</p><button type="button" disabled={detailRetryPending} aria-busy={detailRetryPending} onClick={() => { setDetailRetryPending(true); setDetailReloadNonce((value) => value + 1); }}>{detailRetryPending ? "Retrying product\u2026" : "Try again"}</button></div></section></main>;
-  if (!currentProduct) return <main className="product-detail-shell orchid-explore"><DetailHeader authenticated={cart.authenticated} totalItems={cart.totalItems} /><section className="product-detail-state" aria-label="Product loading"><p className="seller-state" role="status">Loading product\u2026</p></section></main>;
+  if (activeError) return <main className="product-detail-shell orchid-explore"><DetailHeader authenticated={cart.authenticated} totalItems={cart.totalItems} /><section className={`product-detail-state ${styles.state} ${styles.errorState}`} aria-label="Product loading error"><div className="message" role="alert"><p>{activeError}</p><button className={styles.retryButton} type="button" disabled={detailRetryPending} aria-busy={detailRetryPending} onClick={() => { setDetailRetryPending(true); setDetailReloadNonce((value) => value + 1); }}>{detailRetryPending ? "Retrying product\u2026" : "Try again"}</button></div></section></main>;
+  if (!currentProduct) return <main className="product-detail-shell orchid-explore"><DetailHeader authenticated={cart.authenticated} totalItems={cart.totalItems} /><section className={`product-detail-state ${styles.state} ${styles.loadingState}`} aria-label="Product loading"><p className="seller-state" role="status">Loading product\u2026</p></section></main>;
   product = currentProduct;
 
   const galleryImages = product.galleryImages.length ? product.galleryImages : [{ imageUrl: product.image, altText: product.name, sortOrder: 0 }];
@@ -150,18 +150,21 @@ export function ProductDetail({ slug }: { slug: string }) {
 
   return <main className="product-detail-shell orchid-explore" aria-labelledby="product-detail-heading">
     <DetailHeader authenticated={cart.authenticated} totalItems={cart.totalItems} />
-    <section className="product-detail">
-      <div className="product-detail-media">
-        <div className="product-gallery" aria-label="Product images">
-          {!currentImageSource || galleryImageFailed ? <div className="product-gallery-main product-visual-fallback" role="img" aria-label={`${product.name} product image unavailable`}><span aria-hidden="true">NM</span></div> : <img className="product-gallery-main" src={currentImageSource} alt={currentImage?.altText ?? product.name} onError={() => setGalleryImageFailed(true)} />}
-          {galleryImages.length > 1 && <div className="product-gallery-thumbnails">{galleryImages.map((image, index) => <button key={`${image.imageUrl}-${image.sortOrder}`} type="button" className={selectedImage === index ? "is-selected" : ""} aria-label={`View image ${index + 1}: ${image.altText ?? product.name}`} aria-pressed={selectedImage === index} onClick={() => { setGalleryImageFailed(false); setSelectedImage(index); }}><img src={productImageSource(image.imageUrl, product.id)} alt="" /></button>)}</div>}
-        </div>
+    <section className={`product-detail ${styles.layout}`}>
+      <div className={`product-detail-media ${styles.media}`}>
+        <figure className={styles.mediaFrame}>
+          <div className="product-gallery" aria-label="Product images">
+            {!currentImageSource || galleryImageFailed ? <div className={`product-gallery-main product-visual-fallback ${styles.mainImage} ${styles.mediaFallback}`} role="img" aria-label={`${product.name} product image unavailable`}><span aria-hidden="true">NM</span></div> : <img className={`product-gallery-main ${styles.mainImage}`} src={currentImageSource} alt={currentImage?.altText ?? product.name} onError={() => setGalleryImageFailed(true)} />}
+            <figcaption className={styles.mediaCaption}>Image {selectedImage + 1} of {galleryImages.length}</figcaption>
+          </div>
+          {galleryImages.length > 1 && <div className={`product-gallery-thumbnails ${styles.thumbnailList}`} aria-label="Choose a product image">{galleryImages.map((image, index) => <button key={`${image.imageUrl}-${image.sortOrder}`} type="button" className={selectedImage === index ? "is-selected" : ""} aria-label={`View image ${index + 1}: ${image.altText ?? product.name}`} aria-pressed={selectedImage === index} onClick={() => { setGalleryImageFailed(false); setSelectedImage(index); }}><img src={productImageSource(image.imageUrl, product.id)} alt="" /></button>)}</div>}
+        </figure>
       </div>
-      <aside className="product-detail-copy product-detail-summary" aria-label="Product summary">
+      <aside className={`product-detail-copy product-detail-summary ${styles.summary}`} aria-label="Product summary">
         <p className="eyebrow">{product.brand ?? product.category}</p>
         <h1 id="product-detail-heading">{product.name}</h1>
         <p>{product.description}</p>
-        <dl className={`product-detail-facts ${styles.facts}`}><div><dt>Availability</dt><dd>{purchasable ? "In stock" : "Currently unavailable"}</dd></div><div><dt>Category</dt><dd>{product.category}</dd></div></dl>
+        <dl className={`product-detail-facts ${styles.facts}`}><div><dt>Availability</dt><dd className={styles.availability} data-available={purchasable}>{purchasable ? "In stock" : "Currently unavailable"}</dd></div><div><dt>Category</dt><dd>{product.category}</dd></div></dl>
         {product.variants.length > 0 && <section className={`product-variants ${styles.variantPanel}`} aria-labelledby="variant-availability-heading">
           <h2 id="variant-availability-heading">Available variants</h2>
           <p>Select a variant to use its own current price and stock when adding it to your bag.</p>
@@ -169,6 +172,8 @@ export function ProductDetail({ slug }: { slug: string }) {
           {selectedVariant && <p className="product-selected-configuration" role="status">Selected configuration: <strong>{selectedVariant.sku}</strong> \u00c2\u00b7 {money.format(displayedPrice)} \u00c2\u00b7 {selectedVariant.stock > 0 ? `${selectedVariant.stock} in stock` : "Out of stock"}</p>}
           <ul>{product.variants.map((variant) => <li key={variant.sku}><div><strong>{variant.sku}</strong><span>{Object.entries(variant.options).map(([name, value]) => `${name}: ${value}`).join(" \u00c2\u00b7 ") || "Standard"}</span></div><div><strong>{money.format(variant.price)}</strong><span>{variant.stock > 0 ? `${variant.stock} in stock` : "Out of stock"}</span></div></li>)}</ul>
         </section>}
+        {!purchasable && <p className={styles.unavailableNote} role="status">This item is currently unavailable.</p>}
+        <div className={styles.purchasePanel}>
         <section className="product-purchase-panel" aria-label="Purchase options"><div className="product-detail-price"><strong>{money.format(displayedPrice)}</strong></div><div className="product-detail-actions"><button className="primary-button" disabled={!product.inStock || cartAdd?.state === "pending"} aria-busy={cartAdd?.state === "pending"} onClick={() => void addToCart()}><ShoppingBag size={17} /> {cartAdd?.state === "pending" ? "Adding\u2026" : product.inStock ? "Add to bag" : "Out of stock"}</button><button className="icon-button" aria-label={wishlistSave?.state === "saving" ? `Saving ${product.name} to saved pieces` : `Save ${product.name} to saved pieces`} aria-busy={wishlistSave?.state === "saving"} disabled={wishlistSave?.state === "saving"} onClick={() => void saveWishlist()}>{wishlistSave?.state === "saving" ? <LoaderCircle className="wishlist-save-indicator" aria-hidden="true" size={18} /> : <Heart size={18} aria-hidden="true" />}<span className="sr-only">{wishlistSave?.state === "saving" ? "Saving…" : `Save ${product.name} to saved pieces`}</span></button></div>
         {(cartAdd || wishlistSave) && <div className="product-purchase-feedback">
           {cartAdd?.state === "success" && <p className="cart-add-feedback success" role="status">Added to bag. <Link href="/?bag=1">View bag and checkout</Link></p>}
@@ -176,7 +181,7 @@ export function ProductDetail({ slug }: { slug: string }) {
           {wishlistSave?.state === "saving" && <p className="wishlist-save-feedback" role="status">Saving…</p>}
           {wishlistSave?.state === "success" && <p className="wishlist-save-feedback success" role="status">Saved.</p>}
           {wishlistSave?.state === "error" && <p className="wishlist-save-feedback error" role="alert">{wishlistSave.message}</p>}
-        </div>}</section>
+        </div>}</section></div>
       </aside>
     </section>
   </main>;
