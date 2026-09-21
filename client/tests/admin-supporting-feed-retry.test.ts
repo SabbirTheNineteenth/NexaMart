@@ -6,13 +6,11 @@ const dashboard = readFileSync(new URL("../src/features/admin/AdminDashboard.tsx
 
 const supportingFeed = (name: "Products" | "Sellers" | "Finance" | "Analytics") => {
   const start = dashboard.indexOf(`const load${name} = useCallback`);
-  const end = ["\n\n  const load", "\n\n  useEffect", "\n\n  const overview"]
-    .map((marker) => dashboard.indexOf(marker, start + 1))
-    .filter((index) => index !== -1)
-    .sort((left, right) => left - right)[0] ?? -1;
+  const callbackEnd = "\n  }, []);";
+  const end = dashboard.indexOf(callbackEnd, start);
   assert.notEqual(start, -1, `load${name} is defined`);
-  assert.notEqual(end, -1, `load${name} ends before initial loading`);
-  return dashboard.slice(start, end);
+  assert.notEqual(end, -1, `load${name} has its useCallback terminator`);
+  return dashboard.slice(start, end + callbackEnd.length);
 };
 
 test("admin product retry reloads only products, clears only its error, and prevents duplicate pending requests", () => {

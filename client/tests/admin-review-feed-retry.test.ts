@@ -6,10 +6,11 @@ const dashboard = readFileSync(new URL("../src/features/admin/AdminDashboard.tsx
 
 const reviewFeed = () => {
   const start = dashboard.indexOf("const loadReviews = useCallback");
-  const end = dashboard.indexOf("\n\n  useEffect", start);
+  const callbackEnd = "\n  }, []);";
+  const end = dashboard.indexOf(callbackEnd, start);
   assert.notEqual(start, -1, "loadReviews is defined");
-  assert.notEqual(end, -1, "loadReviews ends before its effect");
-  return dashboard.slice(start, end);
+  assert.notEqual(end, -1, "loadReviews has its useCallback terminator");
+  return dashboard.slice(start, end + callbackEnd.length);
 };
 
 test("admin review retry reloads only reviews, clears only the feed error, and prevents duplicate pending requests", () => {
