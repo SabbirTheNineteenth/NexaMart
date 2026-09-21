@@ -48,44 +48,54 @@ export function AccountWorkspace() {
   const [reviews, setReviews] = useState<ReviewState>({ state: "loading" });
   const [reviewSubmissions, setReviewSubmissions] = useState<Record<string, ReviewSubmissionState | undefined>>({});
   const [reviewSuccess, setReviewSuccess] = useState("");
-  const reviewLoadInFlight = useRef(false);
+  const reviewLoadInFlight = useRef<number | null>(null);
+  const accountRequestRef = useRef(0);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [addressCreateSuccess, setAddressCreateSuccess] = useState("");
   const [logoutState, setLogoutState] = useState<LogoutState>({ state: "idle" });
 
-  const loadOrders = async () => {
+  const isCurrentRequest = (requestId: number) => accountRequestRef.current === requestId;
+
+  const loadOrders = async (requestId = accountRequestRef.current, signal?: AbortSignal) => {
     setOrdersState({ state: "loading" });
     try {
-      const { orders } = await getJSON<{ orders: CustomerOrder[] }>("/checkout/orders");
+      const { orders } = await getJSON<{ orders: CustomerOrder[] }>("/checkout/orders", signal);
+      if (!isCurrentRequest(requestId)) return;
       setOrdersState({ state: "loaded", items: orders });
     } catch (reason) {
+      if (!isCurrentRequest(requestId)) return;
       setOrdersState({ state: "error", message: reason instanceof Error ? reason.message : "Unable to load orders." });
     }
   };
-  const loadAddresses = async () => {
+  const loadAddresses = async (requestId = accountRequestRef.current, signal?: AbortSignal) => {
     setAddressesState({ state: "loading" });
     try {
-      const { addresses } = await getJSON<{ addresses: ShippingAddress[] }>("/addresses/");
+      const { addresses } = await getJSON<{ addresses: ShippingAddress[] }>("/addresses/", signal);
+      if (!isCurrentRequest(requestId)) return;
       setAddressesState({ state: "loaded", items: addresses });
     } catch (reason) {
+      if (!isCurrentRequest(requestId)) return;
       setAddressesState({ state: "error", message: reason instanceof Error ? reason.message : "Unable to load shipping addresses." });
     }
   };
   useEffect(() => {
     let active = true;
+    const controller = new AbortController();
+    const requestId = accountRequestRef.current + 1;
+    accountRequestRef.current = requestId;
     const initialize = async () => {
       setAccountResolution({ state: "loading" });
       try {
-        const { account: current } = await getJSON<{ account: Account }>("/auth/me");
-        if (!active) return;
+        const { account: current } = await getJSON<{ account: Account }>("/auth/me", controller.signal);
+        if (!active || !isCurrentRequest(requestId)) return;
         setAccount(current);
         setAccountResolution({ state: "authenticated" });
-        void loadOrders();
-        void loadAddresses();
+        void loadOrders(requestId, controller.signal);
+        void loadAddresses(requestId, controller.signal);
       } catch (reason) {
-        if (!active) return;
+        if (!active || !isCurrentRequest(requestId)) return;
         setAccount(null);
         if (reason instanceof ApiError && reason.status === 401) {
           setAccountResolution({ state: "signed-out" });
@@ -95,42 +105,50 @@ export function AccountWorkspace() {
       }
     };
     void initialize();
-    return () => { active = false; };
+    return () => {
+      active = false;
+      controller.abort();
+      if (isCurrentRequest(requestId)) accountRequestRef.current += 1;
+    };
   }, [accountRefreshNonce]);
 
-  const loadWishlist = async () => {
+  const loadWishlist = async (requestId = accountRequestRef.current) => {
     setWishlistState({ state: "loading" });
     try {
       const { items } = await getJSON<{ items: WishlistItem[] }>("/wishlist/items");
+      if (!isCurrentRequest(requestId)) return;
       setWishlist(items);
       setWishlistState({ state: "loaded" });
     } catch (reason) {
+      if (!isCurrentRequest(requestId)) return;
       setWishlistState({ state: "error", message: reason instanceof Error ? reason.message : "Unable to load saved pieces" });
     }
   };
 
   useEffect(() => {
     if (!account || account.role !== "customer") return;
-    void loadWishlist();
+    void loadWishlist(accountRequestRef.current);
   }, [account]);
 
-  const loadEligibleReviews = useCallback(async () => {
-    if (reviewLoadInFlight.current) return;
-    reviewLoadInFlight.current = true;
+  const loadEligibleReviews = useCallback(async (requestId = accountRequestRef.current) => {
+    if (reviewLoadInFlight.current === requestId) return;
+    reviewLoadInFlight.current = requestId;
     setReviews({ state: "loading" });
     try {
       const { items } = await getJSON<{ items: CustomerReviewEligibility[] }>("/reviews/eligible");
+      if (accountRequestRef.current !== requestId) return;
       setReviews({ state: "loaded", items });
     } catch {
+      if (accountRequestRef.current !== requestId) return;
       setReviews({ state: "error" });
     } finally {
-      reviewLoadInFlight.current = false;
+      if (reviewLoadInFlight.current === requestId) reviewLoadInFlight.current = null;
     }
   }, []);
 
   useEffect(() => {
     if (!account || account.role !== "customer") return;
-    void loadEligibleReviews();
+    void loadEligibleReviews(accountRequestRef.current);
   }, [account, loadEligibleReviews]);
 
   const loadTracking = async (order: CustomerOrder) => {
@@ -161,6 +179,7 @@ export function AccountWorkspace() {
     setLogoutState({ state: "pending" });
     try {
       await postJSON<void>("/auth/logout", {});
+      accountRequestRef.current += 1;
       setAccount(null);
       setAccountResolution({ state: "signed-out" });
       setOrdersState({ state: "loading" });
@@ -260,6 +279,8 @@ export function AccountWorkspace() {
 
   return <main className={`account-shell customer-account-workspace ${styles.shell}`}>
     <header className="seller-topbar customer-account-topbar"><Link className="marketplace-brand" href="/"><BrandLogo monogram className="marketplace-brand-mark" priority /><span>NexaMart</span></Link><div><button className="account-switch" type="button" onClick={() => void logout()} disabled={logoutState.state === "pending"}>{logoutState.state === "pending" ? "Signing out…" : "Sign out"}</button>{logoutState.state === "error" && <div role="alert"><p className="seller-error">{logoutState.message}</p><button className="account-switch" type="button" onClick={() => void logout()}>Try signing out again</button></div>}</div></header>
+    <a className={styles.skipLink} href="#account-content">Skip to account content</a>
+    <div id="account-content" className={styles.content} tabIndex={-1}>
     <section className="account-hero"><p className="eyebrow">Your NexaMart account</p><h1>Hi, {account.name}.</h1><p>{account.email} · {account.role}</p></section>
     <nav className="orchid-navigation account-section-navigation" aria-label="Account sections"><a href="#orders">Orders</a>{account.role === "customer" && <a href="#reviews">Reviews</a>}<a href="#addresses">Addresses</a>{account.role === "customer" && <a href="#wishlist">Saved pieces</a>}</nav>
     <section className="trust account-data-summary" aria-label="Account overview"><span><strong>{ordersState.state === "loaded" ? ordersState.items.length : "—"}</strong> orders</span><span><strong>{addressesState.state === "loaded" ? addressesState.items.length : "—"}</strong> addresses</span>{account.role === "customer" && <span><strong>{wishlistState.state === "loaded" ? wishlist.length : "—"}</strong> saved pieces</span>}</section>
@@ -279,7 +300,7 @@ export function AccountWorkspace() {
           </section>}
         </div>
       </article>;
-    }) : <p className="seller-state">Your order history is clear. The collection is waiting.</p>}</section>
+    }) : <p className="seller-state">No orders have been placed from this account yet. Your order history is clear. The collection is waiting.</p>}</section>
     {account.role === "customer" && <section id="reviews" className="customer-reviews" aria-labelledby="customer-reviews-heading"><p className="eyebrow">Delivered purchases</p><h2 id="customer-reviews-heading">Review delivered purchases</h2><p className="customer-reviews-note">Share feedback only for items delivered to you.</p>{reviewSuccess && <p className="customer-review-success" role="status">{reviewSuccess}</p>}{reviews.state === "loading" ? <p className="seller-state" aria-live="polite">Loading delivered purchases…</p> : reviews.state === "error" ? <div role="alert"><p className="seller-error">Unable to load delivered purchases.</p><button className="account-switch" type="button" aria-label="Retry loading delivered purchases" onClick={() => void loadEligibleReviews()}>Retry loading delivered purchases</button></div> : reviews.items.length ? <div className="customer-review-list">{reviews.items.map((item) => {
       const submission = reviewSubmissions[item.orderItem.id];
       return <article className="customer-review" key={item.orderItem.id}><div className="customer-review-product"><div><strong>{item.product.name}</strong><small>Order {item.order.reference}</small></div></div>{submission?.state === "success" ? <p className="customer-review-success" role="status">Review submitted.</p> : <form onSubmit={(event) => void submitReview(event, item)}><label>Rating<select name="rating" defaultValue="5" required><option value="5">5 — Excellent</option><option value="4">4 — Good</option><option value="3">3 — Average</option><option value="2">2 — Fair</option><option value="1">1 — Poor</option></select></label><label>Title<input name="title" required minLength={2} maxLength={120} /></label><label>Review<textarea name="body" required minLength={2} maxLength={2000} rows={4} /></label>{submission?.state === "error" && <p className="seller-error" role="alert">{submission.message || "Unable to submit review"}</p>}<button className="primary-button" disabled={submission?.state === "saving"}>{submission?.state === "saving" ? "Submitting review…" : "Submit review"}</button></form>}</article>;
@@ -313,12 +334,13 @@ export function AccountWorkspace() {
             {edit?.state === "error" && <p className="seller-error" role="alert">{edit.message}</p>}
           </form>
         </article>;
-      })}</div> : <p className="seller-state">Add a shipping address before placing an order.</p>}
+      })}</div> : <p className="seller-state">No shipping addresses have been saved to this account yet. Add a shipping address before placing an order.</p>}
       <form onSubmit={addAddress}><label>Recipient<input required name="recipientName" minLength={2} /></label><label>Phone<input required name="phone" minLength={5} inputMode="tel" /></label><label>Address<input required name="line1" minLength={2} autoComplete="street-address" /></label><label>City<input required name="city" minLength={2} autoComplete="address-level2" /></label><label>Country code<input required name="country" defaultValue="BD" minLength={2} maxLength={2} autoComplete="country" /></label>{error && <p className="seller-error" role="alert">{error}</p>}{addressCreateSuccess && <p className="seller-profile-success" role="status">{addressCreateSuccess}</p>}<button className="primary-button" disabled={saving}>{saving ? "Saving…" : "Save shipping address"}</button></form>
     </section>
-    {account.role === "customer" && <section id="wishlist" className="account-wishlist" aria-labelledby="customer-wishlist-heading"><p className="eyebrow">Saved pieces</p><h2 id="customer-wishlist-heading">Your shortlist.</h2>{wishlistState.state === "loading" ? <p className="seller-state" aria-live="polite">Loading saved pieces…</p> : wishlistState.state === "error" ? <div role="alert"><p className="seller-error">{wishlistState.message || "Unable to load saved pieces"}</p><button className="account-switch" onClick={() => void loadWishlist()}>Try again</button></div> : wishlist.length ? <div className="wishlist-list">{wishlist.map((item) => {
+    {account.role === "customer" && <section id="wishlist" className="account-wishlist" aria-labelledby="customer-wishlist-heading"><p className="eyebrow">Saved pieces</p><h2 id="customer-wishlist-heading">Your shortlist.</h2>{wishlistState.state === "loading" ? <p className="seller-state" aria-live="polite">Loading saved pieces…</p> : wishlistState.state === "error" ? <div role="alert"><p className="seller-error">{wishlistState.message || "Unable to load saved pieces"}</p><button className="account-switch" type="button" aria-label="Retry loading saved pieces" onClick={() => void loadWishlist()}>Try again</button></div> : wishlist.length ? <div className="wishlist-list">{wishlist.map((item) => {
       const removal = wishlistRemovals[item.id];
           return <article key={item.id}><WishlistMedia item={item} /><div><strong>{item.name}</strong><small>${item.price.toFixed(2)}</small></div><div className="wishlist-action"><button className="wishlist-remove" aria-label={`Remove ${item.name} from saved pieces`} onClick={() => void removeWishlistItem(item)} disabled={removal?.state === "removing"}>{removal?.state === "removing" ? "Removing…" : "Remove"}</button>{removal?.state === "error" && <p className="seller-error" role="alert">{removal.message || "Unable to remove saved piece"}</p>}</div></article>;
-    })}</div> : <p className="seller-state">Save pieces from the collection to revisit them here.</p>}</section>}
+    })}</div> : <p className="seller-state">No saved pieces are available for this account yet. Save pieces from the collection to revisit them here.</p>}</section>}
+    </div>
   </main>;
 }

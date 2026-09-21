@@ -3,4 +3,7 @@
 .statePanel h1{max-width:13ch;margin:0;font-size:clamp(32px,5vw,58px);letter-spacing:-.06em;line-height:1.02}
 .statePanel p{max-width:52ch;margin:0;color:var(--nx-text-muted);line-height:1.65}
 .statePanel :global(.primary-button){width:max-content;margin-top:6px}
-@media(max-width:760px){.shell{width:min(100% - 24px,1240px);padding-bottom:32px}.statePanel{margin:28px 0;padding:24px 18px}.statePanel :global(.primary-button){width:100%}}
+.skipLink{position:absolute;z-index:10;top:-64px;left:16px;padding:10px 14px;background:var(--nx-text);color:var(--nx-surface-base);font-size:12px;font-weight:800}
+.skipLink:focus{top:16px}
+.content:focus{outline:3px solid var(--nx-focus,var(--nx-primary));outline-offset:8px}
+@media(max-width:760px){.shell{width:min(100% - 24px,1240px);padding-bottom:32px}.statePanel{margin:28px 0;padding:24px 18px}.statePanel :global(.primary-button){width:100%}.content :global(.account-section-navigation){overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}.content :global(.account-section-navigation a){white-space:nowrap}.content :global(.account-orders article),.content :global(.account-addresses article){align-items:flex-start;gap:12px;flex-wrap:wrap}.content :global(.account-address-editor form),.content :global(.account-address-removal-confirmation){width:100%}.content :global(.account-data-summary){grid-template-columns:1fr}.content :global(.account-data-summary span+span){border-top:1px solid var(--nx-border);border-left:0}}
