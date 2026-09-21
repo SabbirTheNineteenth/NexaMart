@@ -1,0 +1,48 @@
+.catalogResults {
+  min-width: 0;
+}
+
+.catalogResults :global(.product-grid) {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 11.5rem), 1fr));
+  gap: clamp(0.65rem, 1.4vw, 1rem);
+}
+
+.catalogResults :global(.product-card) {
+  min-width: 0;
+}
+
+.catalogResults :global(.product-card:focus-within) {
+  outline: 2px solid var(--orchid-violet, #8b5cf6);
+  outline-offset: 3px;
+}
+
+.catalogResults :global(a:focus-visible),
+.catalogResults :global(button:focus-visible),
+.catalogResults :global(select:focus-visible),
+.catalogResults :global(input:focus-visible) {
+  outline: 3px solid var(--orchid-violet, #8b5cf6);
+  outline-offset: 3px;
+}
+
+.catalogResults :global(.marketplace-load-state),
+.catalogResults :global(.catalog-empty),
+.catalogResults :global(.message) {
+  max-width: 44rem;
+  margin: 1rem auto;
+}
+
+.catalogResults :global(.message h3),
+.catalogResults :global(.catalog-empty h3) {
+  margin-block: 0 0.35rem;
+}
+
+@media (max-width: 34rem) {
+  .catalogResults :global(.product-grid) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .catalogResults :global(.product-copy) {
+    padding-inline: 0.7rem;
+  }
+}
