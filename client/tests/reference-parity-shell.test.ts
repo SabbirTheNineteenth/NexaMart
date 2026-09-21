@@ -95,14 +95,12 @@ test("PARITY-C04 keeps the live grid toolbar truthful while catalog results are 
   assert.match(storefront, /<p className="product-count" aria-live="polite">\{productCountLabel\}<\/p>/);
 });
 
-test("PARITY-C05 keeps the browser-local recently viewed rail inside the normal-flow facet stack", () => {
+test("PARITY-C05 keeps the live filter stack free of the removed recent-viewed surface", () => {
   const collection = storefront.indexOf('className="collection shell customer-collection reference-explore-content"');
   const facetRail = storefront.indexOf('className="catalog-tools taxonomy-discovery reference-facet-rail"', collection);
   const facetStack = storefront.indexOf('className={styles.sidebarDiscovery}', facetRail);
-  const recentlyViewed = storefront.indexOf('{recentlyViewedPanel}', facetStack);
-  assert.ok(collection >= 0 && facetRail > collection && facetStack > facetRail && recentlyViewed > facetStack, "recently viewed must stay inside the live normal-flow facet stack");
-  assert.match(storefront, /Saved in this browser\. It is not synced to an account\./);
-  assert.match(storefront, /reference-recently-viewed \$\{styles\.sidebarRecentlyViewed\}/);
-  assert.match(storefrontStyles, /\.sidebarRecentlyViewed\s*\{[\s\S]*?grid-area: auto;[\s\S]*?position: static;/);
-  assert.match(styles, /\.reference-recently-viewed \.recently-viewed-note\{display:block/);
+  assert.ok(collection >= 0 && facetRail > collection && facetStack > facetRail, "filter controls must stay inside the live normal-flow facet stack");
+  assert.match(storefront, /<h2 id="filter-products-heading">Filter products<\/h2>/);
+  assert.doesNotMatch(storefront, /recentlyViewedPanel|Recently viewed|recently-viewed/);
+  assert.doesNotMatch(storefrontStyles, /sidebarRecentlyViewed|reference-recently-viewed/);
 });

@@ -16,11 +16,11 @@ test("UI-02 gives the customer catalog an Obsidian Orchid explore surface withou
   }
 });
 
-test("UI-02 retains truthful interactive discovery and browser-local history contracts", () => {
+test("UI-02 retains truthful interactive discovery while browser-local history stays on product detail", () => {
   assert.match(storefront, /aria-label="Search the marketplace"/);
   assert.match(storefront, /aria-label="Sort catalog"/);
   assert.match(storefront, /<option value="newest">Newest arrivals<\/option>/);
-  assert.match(storefront, /Saved in this browser\. It is not synced to an account\./);
+  assert.doesNotMatch(storefront, /Recently viewed|Saved in this browser|recently-viewed/);
   assert.match(detail, /recordRecentlyViewedProduct\(detail\.product\)/);
   assert.match(detail, /Available variants/);
   assert.match(detail, /Add to bag/);

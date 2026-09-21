@@ -28,20 +28,17 @@ test("recently viewed products are browser-local, de-duplicated, bounded, and re
   assert.deepEqual(removeRecentlyViewedProduct([lamp, chair], "lamp"), [chair]);
 });
 
-test("storefront synchronizes filters with URL, exposes the sole supported sort, and offers accessible local-history controls", () => {
+test("storefront synchronizes filters with URL and leaves browser-local history tracking to product detail", () => {
   assert.match(storefront, /usePathname, useRouter, useSearchParams/);
   assert.match(storefront, /router\.replace\(/);
   assert.match(storefront, /aria-label="Sort catalog"/);
   assert.match(storefront, /<option value="newest">Newest arrivals<\/option>/);
-  assert.match(storefront, /Recently viewed/);
-  assert.match(storefront, /Saved in this browser/);
-  assert.match(storefront, /aria-label=\{`Remove \$\{product\.name\} from recently viewed`\}/);
-  assert.match(storefront, /Clear recently viewed/);
+  assert.doesNotMatch(storefront, /Recently viewed|Saved in this browser|recently-viewed/);
   assert.match(storefront, /setBrand\(""\); setSort\(""\);/);
   assert.match(detail, /recordRecentlyViewedProduct\(detail\.product\)/);
 });
 
-test("C01 renders browser-local history as the compact reference rail", () => {
-  assert.match(storefront, /reference-recently-viewed/);
-  assert.match(storefront, /recently-viewed-thumb/);
+test("C01 omits browser-local history from the storefront while retaining detail tracking", () => {
+  assert.doesNotMatch(storefront, /reference-recently-viewed|recently-viewed-thumb/);
+  assert.match(detail, /recordRecentlyViewedProduct\(detail\.product\)/);
 });

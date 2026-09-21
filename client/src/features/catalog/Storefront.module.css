@@ -10,8 +10,7 @@
   grid-template-areas:
     "filters hero"
     "filters toolbar"
-    "filters results"
-    "filters recent";
+    "filters results";
   gap: 1rem;
   align-items: start;
 }
@@ -157,70 +156,6 @@
   text-align: left;
 }
 
-.sidebarRecentlyViewed {
-  display: grid;
-  grid-area: auto;
-  position: static;
-  z-index: auto;
-  min-width: 0;
-  min-height: max-content;
-  margin: 0;
-  gap: 0.65rem;
-  padding: 0.9rem;
-  overflow: hidden;
-  transform: none;
-  border: 1px solid rgb(197 183 206 / 22%);
-  border-radius: 0.55rem;
-  background: rgb(46 29 61 / 42%);
-}
-
-.sidebarRecentlyViewed :global(.marketplace-section-head) {
-  display: grid;
-  gap: 0.65rem;
-  align-items: start;
-  margin-bottom: 0.65rem;
-}
-
-.sidebarRecentlyViewed :global(.eyebrow) {
-  margin: 0 0 0.2rem;
-}
-
-.sidebarRecentlyViewed :global(h2) {
-  font-size: 0.95rem;
-}
-
-.sidebarRecentlyViewed :global(.text-link),
-.sidebarRecentlyViewed :global(.recently-viewed-remove) {
-  min-height: 44px;
-}
-
-.sidebarRecentlyViewed :global(.text-link) {
-  width: max-content;
-  padding: 0.35rem 0;
-  color: var(--orchid-muted, #c5b7ce);
-  font-size: 0.75rem;
-}
-
-.sidebarRecentlyViewed :global(.recently-viewed-rail) {
-  display: grid;
-  gap: 0.5rem;
-  max-width: 100%;
-  min-width: 0;
-  overflow: visible;
-}
-
-.sidebarRecentlyViewed :global(.new-arrival-card) {
-  width: 100%;
-  min-width: 0;
-  border-radius: 0.4rem;
-}
-
-.sidebarRecentlyViewed :global(.recently-viewed-remove) {
-  width: max-content;
-  margin: 0;
-  padding: 0.25rem 0;
-}
-
 .catalogHero,
 :global(.storefront .reference-collection-hero) {
   grid-area: hero;
@@ -282,16 +217,6 @@
 
 .catalogResults {
   grid-area: results;
-}
-
-.storefrontLayout :global(.reference-recently-viewed) {
-  grid-area: recent;
-  min-width: 0;
-}
-
-:global(.storefront .reference-recently-viewed) {
-  grid-area: recent;
-  min-width: 0;
 }
 
 .productCardFooter {
@@ -814,8 +739,7 @@
       "hero"
       "filters"
       "toolbar"
-      "results"
-      "recent";
+      "results";
     gap: 0.85rem;
   }
 
@@ -826,8 +750,7 @@
       "hero"
       "filters"
       "toolbar"
-      "results"
-      "recent";
+      "results";
     gap: 0.85rem;
   }
 
@@ -864,14 +787,6 @@
   .sidebarDiscovery :global(.brand-discovery button) {
     width: auto;
     min-width: 44px;
-  }
-
-  .sidebarRecentlyViewed {
-    padding-top: 0.85rem;
-  }
-
-  .sidebarRecentlyViewed :global(.new-arrival-card) {
-    grid-template-columns: 44px minmax(0, 1fr);
   }
 
   .catalogHero {
@@ -949,13 +864,6 @@
     padding: 0 0.7rem 0.7rem;
   }
 
-  .sidebarRecentlyViewed :global(.marketplace-section-head) {
-    gap: 0.45rem;
-  }
-
-  .sidebarRecentlyViewed {
-    padding: 0.75rem;
-  }
 }
 
 @media (max-width: 390px) {

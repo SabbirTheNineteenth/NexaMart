@@ -13,7 +13,6 @@ import { catalogLoadFailure, catalogLoadSuccess } from "@/features/catalog/catal
 import { buildCatalogDiscoveryPath, catalogDiscoveryFacets, catalogFiltersFromSearchParams, catalogFiltersToSearchParams, type CatalogTaxonomy } from "@/features/catalog/catalog-discovery";
 import { headerWishlistPath } from "@/features/catalog/header-wishlist";
 import { buildProductPresentation, productImageSource } from "@/features/catalog/product-presentation";
-import { readRecentlyViewedProducts, removeRecentlyViewedProduct, writeRecentlyViewedProducts, type RecentlyViewedProduct } from "@/features/catalog/recently-viewed";
 import { wishlistSaveError } from "@/features/catalog/wishlist-save";
 import { referenceFacetProducts, type AvailabilityFacet, type ProductTypeFacet } from "@/features/catalog/reference-facets";
 import { useCart } from "@/hooks/useCart";
@@ -67,7 +66,6 @@ export function Storefront() {
   const [sort, setSort] = useState<"newest" | "">(initialFilters.sort ?? "");
   const [availability, setAvailability] = useState<AvailabilityFacet>("all");
   const [productType, setProductType] = useState<ProductTypeFacet>("all");
-  const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedProduct[]>([]);
   const [taxonomy, setTaxonomy] = useState<CatalogTaxonomy>({ categories: [], subcategories: [], brands: [] });
   const [taxonomyState, setTaxonomyState] = useState<"loading" | "loaded" | "error">("loading");
   const [taxonomyReloadNonce, setTaxonomyReloadNonce] = useState(0);
@@ -109,8 +107,6 @@ export function Storefront() {
     const currentUrl = searchParams?.toString() ? `${pathname}?${searchParams}` : pathname;
     if (nextUrl !== currentUrl) router.replace(nextUrl, { scroll: false });
   }, [brand, category, pathname, query, router, searchParams, sort, subcategory]);
-
-  useEffect(() => { setRecentlyViewed(readRecentlyViewedProducts()); }, []);
 
   useEffect(() => {
     const taxonomyController = new AbortController();
@@ -196,13 +192,6 @@ export function Storefront() {
   const checkoutAvailable = cart.authenticated && addressLoadState === "loaded" && savedAddresses.length > 0 && Boolean(selectedShippingAddressId);
   const { subcategories, applied } = useMemo(() => catalogDiscoveryFacets(taxonomy, { query, categoryName: category, subcategorySlug: subcategory, brandSlug: brand }), [taxonomy, query, category, subcategory, brand]);
   const hasActiveCatalogFilter = Boolean(query.trim() || category || subcategory || brand);
-  const removeRecentlyViewed = (productId: string) => setRecentlyViewed((items) => {
-    const next = removeRecentlyViewedProduct(items, productId);
-    writeRecentlyViewedProducts(next);
-    return next;
-  });
-  const clearRecentlyViewed = () => { writeRecentlyViewedProducts([]); setRecentlyViewed([]); };
-  const recentlyViewedPanel = recentlyViewed.length > 0 ? <section className={`recently-viewed reference-recently-viewed ${styles.sidebarRecentlyViewed}`} aria-labelledby="recently-viewed-heading"><div className="marketplace-section-head"><div><p className="eyebrow">Your browsing</p><h2 id="recently-viewed-heading">Recently viewed</h2><p className="recently-viewed-note">Saved in this browser. It is not synced to an account.</p></div><button type="button" className="text-link" onClick={clearRecentlyViewed}>Clear recently viewed</button></div><div className="marketplace-rail recently-viewed-rail">{recentlyViewed.map((product) => <article className="new-arrival-card" key={product.id}><a href={`/products/${product.slug}`}><ProductVisual product={product} className="recently-viewed-thumb"/><h3>{product.name}</h3><strong>{money.format(product.effectivePrice ?? product.price)}</strong></a><button type="button" className="recently-viewed-remove" aria-label={`Remove ${product.name} from recently viewed`} onClick={() => removeRecentlyViewed(product.id)}>Remove</button></article>)}</div></section> : null;
   const featuredProduct = catalog.products[0];
   const departmentTiles = useMemo(() => taxonomy.categories.slice(0, 8).map((department, index) => ({
     department,
@@ -361,7 +350,7 @@ export function Storefront() {
     <header id="top" className="marketplace-header" onKeyDown={handleMobileNavKeyDown}>
       <div className="shell marketplace-topbar">
         <a className="marketplace-brand" href="#top" aria-label="NexaMart marketplace"><BrandLogo monogram className="marketplace-brand-mark" priority /><span>NexaMart</span></a>
-        <nav className="reference-explore-tabs" aria-label="Explore sections"><a href="#collection">Shop</a><a href="#collection">Categories</a><a href="#new-arrivals-heading">New Arrivals</a><a href="#recently-viewed-heading">For You</a></nav>
+        <nav className="reference-explore-tabs" aria-label="Explore sections"><a href="#collection">Shop</a><a href="#collection">Categories</a><a href="#new-arrivals-heading">New Arrivals</a><a href="#collection">For You</a></nav>
         <label className="marketplace-search"><Search size={17}/><span className="sr-only">Search the marketplace</span><input id="product-search" aria-label="Search the marketplace" value={query} onChange={(event) => { setCatalogLoaded(false); setQuery(event.target.value); }} placeholder="Search products, brands, and departments" /></label>
         <div className="marketplace-actions"><Link className="marketplace-action-icon" href={headerWishlistPath(cart.authenticated)} aria-label="Open saved pieces"><Heart size={17}/></Link>
           <a className="marketplace-action-icon" href="/account" aria-label="Open account"><UserRound size={17}/></a>
@@ -392,7 +381,6 @@ export function Storefront() {
             <fieldset className={`reference-facet-group ${styles.sidebarSection}`}><legend>Availability</legend>{(["all", "in-stock", "low-stock", "out-of-stock"] as const).map((value) => <label key={value}><input type="radio" name="availability" checked={availability === value} onChange={() => setAvailability(value)} />{value === "all" ? "All" : value.replace("-", " ")}</label>)}</fieldset>
             <fieldset className={styles.sidebarSection}><legend>Category</legend><div className="department-rail" role="group" aria-label="Browse departments"><button className={!category ? "active" : ""} aria-pressed={!category} onClick={() => { setCatalogLoaded(false); setCategory(""); setSubcategory(""); }}>All departments</button>{taxonomy.categories.map((item) => <button key={item.id} className={category === item.name ? "active" : ""} aria-pressed={category === item.name} onClick={() => { setCatalogLoaded(false); setCategory(item.name); setSubcategory(""); }}>{item.name}</button>)}</div></fieldset>
             <fieldset className={`reference-facet-group ${styles.sidebarSection}`}><legend>Product type</legend>{(["all", "standard", "variant-based"] as const).map((value) => <label key={value}><input type="radio" name="product-type" checked={productType === value} onChange={() => setProductType(value)} />{value === "all" ? "All" : value.replace("-", " ")}</label>)}</fieldset>
-            {recentlyViewedPanel}
             <div className={`taxonomy-controls ${styles.sidebarSection}`}><label>Subcategory<select aria-label="Subcategory" value={subcategory} disabled={!category} onChange={(event) => { setCatalogLoaded(false); setSubcategory(event.target.value); }}><option value="">All subcategories</option>{subcategories.map((item) => <option key={item.id} value={item.slug}>{item.name}</option>)}</select></label><div className="brand-discovery" role="group" aria-label="Discover brands"><span>Explore brands</span>{taxonomy.brands.map((item) => <button key={item.id} className={brand === item.slug ? "active" : ""} aria-pressed={brand === item.slug} onClick={() => { setCatalogLoaded(false); setBrand(brand === item.slug ? "" : item.slug); }}>{item.name}</button>)}</div></div>
           </>}
           {hasActiveCatalogFilter && <div className="applied-facets" aria-label="Applied filters"><span>Applied filters</span>{query.trim() && <button type="button" onClick={() => { setCatalogLoaded(false); setQuery(""); }}>Search: {query.trim()}</button>}{applied.map((item) => <span key={item}>{item}</span>)}<button type="button" onClick={() => { setCatalogLoaded(false); setQuery(""); setCategory(""); setSubcategory(""); setBrand(""); setSort(""); }}>Clear all filters</button></div>}

@@ -15,7 +15,7 @@ test("VISUAL-CX-01 keeps Explore's dark browse hierarchy data-bound and landmark
   assert.match(storefront, /aria-label="Browse departments"/);
   assert.match(storefront, /aria-label="Discover brands"/);
   assert.match(storefront, /catalogLoaded && !visibleProducts\.length/);
-  assert.match(storefront, /Saved in this browser\. It is not synced to an account\./);
+  assert.doesNotMatch(storefront, /Recently viewed|Saved in this browser|recently-viewed/);
 });
 
 test("VISUAL-CX-01 preserves the selected product's focused Explore context", () => {
