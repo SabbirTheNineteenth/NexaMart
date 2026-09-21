@@ -15,3 +15,15 @@ test("account workspace gives each real account area a responsive panel and mean
   assert.match(styles, /@media\(max-width:420px\)/);
   assert.match(styles, /prefers-reduced-motion:reduce/);
 });
+
+test("account workspace preserves truthful feed states in an accessible, compact panel system", () => {
+  assert.match(workspace, /className=\{styles\.workspaceHero\}/);
+  assert.match(workspace, /aria-live="polite"/);
+  assert.match(workspace, /role="alert"/);
+  assert.match(workspace, /ordersState\.state === "loaded" \? ordersState\.items\.length/);
+  assert.match(styles, /\.workspaceHero\{/);
+  assert.match(styles, /min-height:44px/);
+  assert.match(styles, /:focus-visible/);
+  assert.match(styles, /@media\(max-width:760px\)/);
+  assert.match(styles, /@media\(prefers-reduced-motion:reduce\)/);
+});
