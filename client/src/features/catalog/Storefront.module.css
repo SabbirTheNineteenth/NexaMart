@@ -34,12 +34,110 @@
   align-content: start;
 }
 
+.sidebarHeader {
+  display: grid;
+  gap: 0.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--orchid-border, #4e3d5e);
+}
+
+.sidebarHeader :global(.eyebrow) {
+  margin: 0;
+}
+
+.sidebarHeader h2,
+.sidebarHeader p {
+  margin: 0;
+}
+
+.sidebarHeader h2 {
+  color: var(--orchid-text, #f8f2ff);
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.sidebarSection {
+  display: grid;
+  min-width: 0;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0.9rem 0 0;
+  border: 0;
+  border-top: 1px solid rgb(197 183 206 / 22%);
+}
+
+.sidebarDiscovery > :first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.sidebarDiscovery :global(.reference-facet-group) {
+  gap: 0.35rem;
+}
+
+.sidebarDiscovery :global(.reference-facet-group legend),
+.sidebarSection > legend,
+.sidebarDiscovery :global(.taxonomy-controls label) {
+  padding: 0;
+  color: var(--orchid-muted, #c5b7ce);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sidebarDiscovery :global(.reference-facet-group label) {
+  min-height: 44px;
+  align-items: center;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.45rem;
+  color: var(--orchid-text, #f8f2ff);
+}
+
+.sidebarDiscovery :global(.reference-facet-group label:hover) {
+  background: rgb(147 96 239 / 12%);
+}
+
+.sidebarDiscovery :global(.reference-facet-group label:has(input:checked)) {
+  background: rgb(147 96 239 / 18%);
+  color: var(--orchid-text, #f8f2ff);
+}
+
+.sidebarDiscovery :global(.reference-facet-group input) {
+  width: 1rem;
+  height: 1rem;
+}
+
 .sidebarDiscovery :global(.taxonomy-controls) {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
   align-items: stretch;
   min-width: 0;
+}
+
+.sidebarDiscovery :global(.taxonomy-controls select) {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 0.35rem;
+  padding: 0.55rem 2.25rem 0.55rem 0.7rem;
+  border-radius: 0.45rem;
+  background-position: right 0.7rem center;
+}
+
+.sidebarDiscovery :global(.department-rail) {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 100%;
+  overflow: visible;
+}
+
+.sidebarDiscovery :global(.department-rail button) {
+  min-height: 44px;
+  margin: 0;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.45rem;
+  text-align: left;
 }
 
 .sidebarDiscovery :global(.brand-discovery) {
@@ -67,10 +165,13 @@
   min-width: 0;
   min-height: max-content;
   margin: 0;
-  padding-top: 1rem;
-  overflow: visible;
+  gap: 0.65rem;
+  padding: 0.9rem;
+  overflow: hidden;
   transform: none;
-  border-top: 1px solid var(--orchid-border, #4e3d5e);
+  border: 1px solid rgb(197 183 206 / 22%);
+  border-radius: 0.55rem;
+  background: rgb(46 29 61 / 42%);
 }
 
 .sidebarRecentlyViewed :global(.marketplace-section-head) {
@@ -80,16 +181,44 @@
   margin-bottom: 0.65rem;
 }
 
+.sidebarRecentlyViewed :global(.eyebrow) {
+  margin: 0 0 0.2rem;
+}
+
+.sidebarRecentlyViewed :global(h2) {
+  font-size: 0.95rem;
+}
+
 .sidebarRecentlyViewed :global(.text-link),
 .sidebarRecentlyViewed :global(.recently-viewed-remove) {
   min-height: 44px;
 }
 
+.sidebarRecentlyViewed :global(.text-link) {
+  width: max-content;
+  padding: 0.35rem 0;
+  color: var(--orchid-muted, #c5b7ce);
+  font-size: 0.75rem;
+}
+
 .sidebarRecentlyViewed :global(.recently-viewed-rail) {
+  display: grid;
+  gap: 0.5rem;
   max-width: 100%;
   min-width: 0;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
+  overflow: visible;
+}
+
+.sidebarRecentlyViewed :global(.new-arrival-card) {
+  width: 100%;
+  min-width: 0;
+  border-radius: 0.4rem;
+}
+
+.sidebarRecentlyViewed :global(.recently-viewed-remove) {
+  width: max-content;
+  margin: 0;
+  padding: 0.25rem 0;
 }
 
 .catalogHero,
@@ -303,6 +432,21 @@
 .collectionSearch button:hover {
   border-color: var(--orchid-orchid, #d3a5ff);
   background: var(--orchid-plum, #1a1025);
+}
+
+.sidebarDiscovery .collectionSearch {
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.sidebarDiscovery .collectionSearch label {
+  width: 100%;
+}
+
+.sidebarDiscovery .collectionSearch button {
+  align-self: start;
+  min-height: 44px;
 }
 
 .catalogResults :global(.product-grid) {
@@ -702,6 +846,14 @@
     gap: 0.85rem;
   }
 
+  .sidebarHeader {
+    padding-bottom: 0.75rem;
+  }
+
+  .sidebarSection {
+    padding-top: 0.8rem;
+  }
+
   .sidebarDiscovery :global(.brand-discovery) {
     display: flex;
     max-width: 100%;
@@ -716,6 +868,10 @@
 
   .sidebarRecentlyViewed {
     padding-top: 0.85rem;
+  }
+
+  .sidebarRecentlyViewed :global(.new-arrival-card) {
+    grid-template-columns: 44px minmax(0, 1fr);
   }
 
   .catalogHero {
@@ -795,6 +951,10 @@
 
   .sidebarRecentlyViewed :global(.marketplace-section-head) {
     gap: 0.45rem;
+  }
+
+  .sidebarRecentlyViewed {
+    padding: 0.75rem;
   }
 }
 

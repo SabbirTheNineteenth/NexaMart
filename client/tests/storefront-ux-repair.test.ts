@@ -24,8 +24,21 @@ test("Storefront gives its sidebar, hero, cards, and brand rail local responsive
 
 test("Storefront keeps subcategory, brand discovery, and recently viewed controls in one normal-flow facet stack", () => {
   assert.match(storefront, /const recentlyViewedPanel = recentlyViewed\.length > 0 \? <section className=\{`recently-viewed reference-recently-viewed \$\{styles\.sidebarRecentlyViewed\}`}/);
-  assert.match(storefront, /<div className=\{styles\.sidebarDiscovery\}>[\s\S]*?className="taxonomy-controls"[\s\S]*?aria-label="Discover brands"[\s\S]*?\{recentlyViewedPanel\}/);
+  assert.match(storefront, /<div className=\{styles\.sidebarDiscovery\}>[\s\S]*?\{recentlyViewedPanel\}[\s\S]*?taxonomy-controls[\s\S]*?aria-label="Discover brands"/);
   assert.match(styles, /\.sidebarDiscovery\s*\{[\s\S]*?display: grid;[\s\S]*?position: static;[\s\S]*?min-height: max-content;/);
   assert.match(styles, /\.sidebarRecentlyViewed\s*\{[\s\S]*?grid-area: auto;[\s\S]*?position: static;/);
   assert.match(styles, /@media \(max-width: 700px\)\s*\{[\s\S]*?\.sidebarDiscovery[\s\S]*?min-width: 0;[\s\S]*?\.sidebarDiscovery :global\(\.brand-discovery\)[\s\S]*?max-width: 100%;/);
+});
+
+test("Storefront presents an ordered, labelled, touch-friendly filter sidebar", () => {
+  assert.match(storefront, /<h2 id="filter-products-heading">Filter products<\/h2>/);
+  const sidebar = storefront.match(/<div className=\{styles\.sidebarDiscovery\}>[\s\S]*?\{recentlyViewedPanel\}[\s\S]*?taxonomy-controls[\s\S]*?<\/div>\s*<\/div>/)?.[0] ?? "";
+  assert.ok(sidebar.indexOf('<legend>Availability</legend>') < sidebar.indexOf('aria-label="Browse departments"'));
+  assert.ok(sidebar.indexOf('aria-label="Browse departments"') < sidebar.indexOf('<legend>Product type</legend>'));
+  assert.ok(sidebar.indexOf('<legend>Product type</legend>') < sidebar.indexOf('{recentlyViewedPanel}'));
+  assert.ok(sidebar.indexOf('{recentlyViewedPanel}') < sidebar.indexOf('aria-label="Subcategory"'));
+  assert.match(storefront, /role="region" aria-label="Product search and filters"/);
+  assert.match(styles, /\.sidebarSection\s*\{[\s\S]*?border-top: 1px solid/);
+  assert.match(styles, /\.sidebarDiscovery :global\(\.reference-facet-group label\)[\s\S]*?min-height: 44px;/);
+  assert.match(styles, /\.sidebarDiscovery :global\(\.taxonomy-controls select\)[\s\S]*?min-height: 44px;/);
 });
