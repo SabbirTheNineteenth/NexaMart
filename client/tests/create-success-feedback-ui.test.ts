@@ -19,7 +19,7 @@ test("async create forms announce their own successful reconciliation politely w
 
   assert.match(taxonomy, /const \[feedback, setFeedback\] = useState<Record<string, Feedback>>\(\{\}\);/);
   assert.match(taxonomy, /form\.reset\(\);\s*setFeedback\(\(current\) => \(\{ \.\.\.current, \[id\]: \{ kind: "success"/);
-  assert.match(taxonomy, /<p role=\{itemFeedback\.kind === "error" \? "alert" : "status"\}>\{itemFeedback\.message\}<\/p>/);
+  assert.match(taxonomy, /<p aria-live="polite" role=\{itemFeedback\.kind === "error" \? "alert" : "status"\}>\{itemFeedback\.message\}<\/p>/);
 
   assert.match(workspace, /const \[addressCreateSuccess, setAddressCreateSuccess\] = useState\(""\);/);
   assert.match(workspace, /event\.currentTarget\.reset\(\); await loadAddresses\(\);\s*setAddressCreateSuccess\("Shipping address saved\."\);/);
