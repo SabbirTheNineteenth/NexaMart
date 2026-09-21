@@ -30,3 +30,13 @@
 @media(max-width:420px){:global(.admin-overview-command-deck){grid-template-columns:1fr}:global(.admin-overview-command-deck) :global(article + article){border-top:1px solid var(--admin-line);border-left:0}}
 @media(max-width:420px){:global(.admin-overview-audit-table-wrap){margin:0 -1px}:global(.admin-overview-audit-table){min-width:540px}:global(.admin-overview-audit-table) :global(th),:global(.admin-overview-audit-table) :global(td){padding:8px 10px}}
 :global(.admin-sidebar-session) :global(.admin-sidebar-profile){margin-top:0}
+
+/* Queue actions remain easy to scan and meet a practical touch target without adding decorative controls. */
+:global(.admin-queue-action){display:inline-flex;align-items:center;min-height:44px;padding:0 8px;margin:-4px -8px 0;border-radius:7px;box-sizing:border-box;transition:background .16s ease,color .16s ease,transform .16s ease}
+:global(.admin-queue-action:hover){background:rgba(197,140,255,.12);text-decoration:none!important;transform:translateX(2px)}
+:global(.admin-queue-action:focus-visible){background:rgba(197,140,255,.16)}
+:global(.admin-overview-audit-table-wrap){overscroll-behavior-inline:contain;scrollbar-gutter:stable both-edges}
+:global(.admin-overview-audit-table-wrap:focus-visible){outline:3px solid var(--admin-orchid);outline-offset:-3px}
+:global(.admin-workspace) :global([aria-busy="true"]){opacity:.82}
+:global(.admin-workspace) :global(button:disabled){cursor:wait}
+@media(max-width:700px){:global(.admin-overview-secondary){grid-template-columns:1fr!important}:global(.admin-overview-audit-table-wrap){max-width:100%}:global(.admin-overview-audit-table){min-width:580px}}
