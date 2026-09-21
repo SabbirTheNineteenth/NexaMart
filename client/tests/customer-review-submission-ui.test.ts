@@ -19,11 +19,12 @@ test("customer account loads customer-only eligible purchases into a named revie
 });
 
 test("customer can retry only eligible-review loading after an error without duplicate requests", () => {
-  assert.match(workspace, /const reviewLoadInFlight = useRef\(false\);/);
-  assert.match(workspace, /const loadEligibleReviews = useCallback\(async \(\) => \{/);
-  assert.match(workspace, /if \(reviewLoadInFlight\.current\) return;/);
-  assert.match(workspace, /reviewLoadInFlight\.current = true;/);
-  assert.match(workspace, /finally \{\s*reviewLoadInFlight\.current = false;\s*\}/);
+  assert.match(workspace, /const reviewLoadInFlight = useRef<number \| null>\(null\);/);
+  assert.match(workspace, /const loadEligibleReviews = useCallback\(async \(requestId = accountRequestRef\.current\) => \{/);
+  assert.match(workspace, /if \(reviewLoadInFlight\.current === requestId\) return;/);
+  assert.match(workspace, /reviewLoadInFlight\.current = requestId;/);
+  assert.match(workspace, /if \(accountRequestRef\.current !== requestId\) return;/);
+  assert.match(workspace, /finally \{\s*if \(reviewLoadInFlight\.current === requestId\) reviewLoadInFlight\.current = null;\s*\}/);
   assert.match(workspace, /aria-label="Retry loading delivered purchases"/);
   assert.match(workspace, /onClick=\{\(\) => void loadEligibleReviews\(\)\}/);
   assert.match(workspace, /Retry loading delivered purchases/);

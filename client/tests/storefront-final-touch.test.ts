@@ -23,5 +23,5 @@ test("storefront-local styling keeps the product grid dense, responsive, and foc
   assert.match(styles, /grid-template-columns: repeat\(auto-fill, minmax\(min\(100%, 11\.5rem\), 1fr\)\);/);
   assert.match(styles, /@media \(max-width: 34rem\)/);
   assert.match(styles, /:global\(\.product-card:focus-within\)/);
-  assert.match(styles, /:global\(a:focus-visible\),\s*:global\(button:focus-visible\),\s*:global\(select:focus-visible\),\s*:global\(input:focus-visible\)/);
+  assert.match(styles, /\.catalogResults :global\(a:focus-visible\),\s*\.catalogResults :global\(button:focus-visible\),\s*\.catalogResults :global\(select:focus-visible\),\s*\.catalogResults :global\(input:focus-visible\)/);
 });

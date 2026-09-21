@@ -35,7 +35,7 @@ test("admin product oversight exposes only accessible publication controls", () 
   const productPanelEnd = dashboard.indexOf('className="admin-panel admin-finance"', productPanelStart);
   const productPanel = dashboard.slice(productPanelStart, productPanelEnd);
 
-  assert.match(dashboard, /import \{ getJSON, patchJSON \} from "@\/lib\/api"/);
+  assert.match(dashboard, /import \{ getJSON, patchJSON, postJSON \} from "@\/lib\/api"/);
   assert.match(dashboard, /patchJSON<\{ product: AdminProduct \}>\(`\/admin\/products\/\$\{change\.productId\}\/publication`, \{ isPublished: change\.isPublished, expectedRevision: change\.expectedRevision \}\)/);
   assert.match(productPanel, /aria-label=\{`\$\{isPublished \? "Unpublish" : "Publish"\} \$\{product\.name\}`\}/);
   assert.match(productPanel, /\{isUpdating \? "Saving…" : isPublished \? "Unpublish" : "Publish"\}/);

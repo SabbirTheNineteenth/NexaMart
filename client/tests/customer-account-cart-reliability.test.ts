@@ -8,8 +8,9 @@ const cart = readFileSync(new URL("../src/hooks/useCart.ts", import.meta.url), "
 test("account keeps an authenticated customer mounted while order and address sections independently recover", () => {
   assert.match(accountWorkspace, /type OrdersState = \{ state: "loading" \} \| \{ state: "loaded"; items: CustomerOrder\[\] \} \| \{ state: "error"; message: string \}/);
   assert.match(accountWorkspace, /type AddressesState = \{ state: "loading" \} \| \{ state: "loaded"; items: ShippingAddress\[\] \} \| \{ state: "error"; message: string \}/);
-  assert.match(accountWorkspace, /await getJSON<\{ account: Account \}>\("\/auth\/me"\)/);
-  assert.match(accountWorkspace, /setAccount\(current\);[\s\S]*void loadOrders\(\);[\s\S]*void loadAddresses\(\);/);
+  assert.match(accountWorkspace, /const requestId = accountRequestRef\.current \+ 1;[\s\S]*accountRequestRef\.current = requestId;/);
+  assert.match(accountWorkspace, /await getJSON<\{ account: Account \}>\("\/auth\/me", controller\.signal\)/);
+  assert.match(accountWorkspace, /setAccount\(current\);[\s\S]*void loadOrders\(requestId, controller\.signal\);[\s\S]*void loadAddresses\(requestId, controller\.signal\);/);
   assert.match(accountWorkspace, /ordersState\.state === "loading"[\s\S]*ordersState\.state === "error"[\s\S]*Retry loading orders[\s\S]*ordersState\.items\.length/);
   assert.match(accountWorkspace, /addressesState\.state === "loading"[\s\S]*addressesState\.state === "error"[\s\S]*Retry loading addresses[\s\S]*addressesState\.items\.length/);
 });

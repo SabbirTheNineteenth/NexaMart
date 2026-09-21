@@ -15,7 +15,7 @@ test("mobile marketplace navigation keeps categories, Account, and an announced 
   assert.match(storefront, /aria-label="Browse all departments"/);
   assert.match(storefront, /href="#catalog-information"/); assert.match(storefront, />Catalog information<\/a>/);
   assert.match(storefront, /href="\/account"/); assert.match(storefront, />Account<\/a>/);
-  assert.match(storefront, /if \(event\.key === "Escape"\) \{\n      closeMobileNav\(\);/);
+  assert.match(storefront, /if \(event\.key === "Escape"\) \{\r?\n      closeMobileNav\(\);/);
   assert.match(storefront, /mobileNavToggleRef\.current\?\.focus\(\)/);
   assert.match(styles, /\.marketplace-category-nav\{display:none/);
   assert.match(styles, /\.marketplace-category-nav\.is-open\{display:block/);
@@ -23,8 +23,8 @@ test("mobile marketplace navigation keeps categories, Account, and an announced 
 
 test("Escape from the marketplace navigation toggle or a category link closes the menu and restores toggle focus", () => {
   assert.match(storefront, /<header id="top" className="marketplace-header" onKeyDown=\{handleMobileNavKeyDown\}>/);
-  assert.match(storefront, /if \(event\.key === "Escape"\) \{\n      closeMobileNav\(\);\n    \}/);
-  assert.match(storefront, /const closeMobileNav = \(\) => \{\n    setMobileNavOpen\(false\);\n    requestAnimationFrame\(\(\) => mobileNavToggleRef\.current\?\.focus\(\)\);\n  \};/);
+  assert.match(storefront, /if \(event\.key === "Escape"\) \{\r?\n      closeMobileNav\(\);\r?\n    \}/);
+  assert.match(storefront, /const closeMobileNav = \(\) => \{\r?\n    setMobileNavOpen\(false\);\r?\n    requestAnimationFrame\(\(\) => mobileNavToggleRef\.current\?\.focus\(\)\);\r?\n  \};/);
 });
 
 test("product detail links successful bag adds to the existing checkout drawer route", () => {
