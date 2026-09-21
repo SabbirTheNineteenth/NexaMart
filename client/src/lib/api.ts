@@ -19,7 +19,8 @@ function errorMessageForStatus(status: number): string {
 async function request<T>(path: string, init: RequestInit = {}, signal?: AbortSignal): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`/api${path}`, { credentials: "include", signal, headers: { Accept: "application/json", ...init.headers }, ...init });
+    const apiPath = path.startsWith("/api/") ? path : `/api${path}`;
+    response = await fetch(apiPath, { credentials: "include", signal, headers: { Accept: "application/json", ...init.headers }, ...init });
   } catch (reason) {
     if (signal?.aborted || (reason instanceof DOMException && reason.name === "AbortError")) throw reason;
     throw new ApiError("Unable to reach the service. Please check your connection and try again.", 0);
