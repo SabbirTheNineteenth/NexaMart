@@ -66,6 +66,7 @@ export function Storefront() {
   const [sort, setSort] = useState<"newest" | "">(initialFilters.sort ?? "");
   const [availability, setAvailability] = useState<AvailabilityFacet>("all");
   const [productType, setProductType] = useState<ProductTypeFacet>("all");
+  const [spotlightRailVisible, setSpotlightRailVisible] = useState(false);
   const [taxonomy, setTaxonomy] = useState<CatalogTaxonomy>({ categories: [], subcategories: [], brands: [] });
   const [taxonomyState, setTaxonomyState] = useState<"loading" | "loaded" | "error">("loading");
   const [taxonomyReloadNonce, setTaxonomyReloadNonce] = useState(0);
@@ -87,6 +88,7 @@ export function Storefront() {
   const cartOpenerRef = useRef<HTMLElement | null>(null);
   const mobileNavToggleRef = useRef<HTMLButtonElement>(null);
   const collectionHeadingRef = useRef<HTMLHeadingElement>(null);
+  const spotlightRailRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const checkoutKeyRef = useRef<string | null>(null);
   const wishlistSavingIds = useRef(new Set<string>());
@@ -200,6 +202,23 @@ export function Storefront() {
   const visibleProducts = useMemo(() => referenceFacetProducts(catalog.products, availability, productType), [availability, catalog.products, productType]);
   const productCountLabel = catalogLoaded ? `${visibleProducts.length} ${visibleProducts.length === 1 ? "product" : "products"}` : "Loading products";
   const featuredProducts = useMemo(() => catalog.products.filter((product) => product.inStock).slice(0, 6), [catalog.products]);
+
+  useEffect(() => {
+    const spotlightRail = spotlightRailRef.current;
+    if (!spotlightRail || spotlightRailVisible || featuredProducts.length === 0) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setSpotlightRailVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setSpotlightRailVisible(true);
+        observer.disconnect();
+      }
+    }, { threshold: 0.1 });
+    observer.observe(spotlightRail);
+    return () => observer.disconnect();
+  }, [featuredProducts.length, spotlightRailVisible]);
   const selectDepartment = (departmentName: string) => {
     setCatalogLoaded(false);
     setCategory(departmentName);
@@ -365,7 +384,7 @@ export function Storefront() {
 
     <section id="departments" className="department-showcase shell"><div className="marketplace-section-head"><div><p className="eyebrow">Departments</p><h2>Browse departments</h2></div><a className="text-link" href="#collection">See every product <ArrowUpRight size={16}/></a></div><div className="department-tile-rail" aria-label="Browse departments">{departmentTiles.map((item) => <button key={item.department.id} type="button" className="department-tile" onClick={() => selectDepartment(item.department.name)}><ProductVisual key={item.product.id} product={item.product}/><span>{item.department.name}</span><small>Browse department <ArrowUpRight size={14}/></small></button>)}{taxonomyState === "loading" ? <p className="taxonomy-state" role="status">Loading departments…</p> : taxonomyState === "error" ? <p className="taxonomy-state" role="alert">Unable to load departments. <button type="button" onClick={() => setTaxonomyReloadNonce((value) => value + 1)}>Retry departments</button></p> : taxonomy.categories.length === 0 ? <p className="taxonomy-state" role="status">No departments are available right now.</p> : null}</div></section>
 
-    {featuredProducts.length > 0 && <section className="deal-showcase shell" aria-label="Available catalog products"><div className="marketplace-section-head"><div><p className="eyebrow">Browse products</p><h2>Available products</h2></div><a className="text-link" href="#collection">See the catalog <ArrowUpRight size={16}/></a></div><div className="marketplace-rail product-spotlight-rail">{featuredProducts.map((product) => <article className="spotlight-card" key={product.id}><a href={`/products/${product.slug}`}><ProductVisual key={product.id} product={product}/><div><span>{product.category}</span><h3>{product.name}</h3><ServerPrice product={product}/></div></a><button type="button" onClick={() => void addToCart(product)} disabled={cartAdds[product.id]?.state === "pending"} aria-label={`Add ${product.name} to bag`}>{cartAdds[product.id]?.state === "pending" ? "Adding…" : "Add to bag"}</button></article>)}</div></section>}
+    {featuredProducts.length > 0 && <section className="deal-showcase shell" aria-label="Available catalog products"><div className="marketplace-section-head"><div><p className="eyebrow">Browse products</p><h2>Available products</h2></div><a className="text-link" href="#collection">See the catalog <ArrowUpRight size={16}/></a></div><div ref={spotlightRailRef} className={styles.spotlightRail} tabIndex={0} aria-label="Available catalog products. Scroll horizontally for more products.">{featuredProducts.map((product, index) => { const presentation = buildProductPresentation(product); const cartAdd = cartAdds[product.id]; return <article className={`${styles.spotlightCard} ${spotlightRailVisible ? styles.spotlightCardVisible : ""}`} style={{ animationDelay: `${index * 45}ms` }} key={product.id}><a className={styles.spotlightProductLink} href={`/products/${product.slug}`}><ProductVisual key={product.id} product={product} className={styles.spotlightMedia}/><div className={styles.spotlightContent}><p className={styles.spotlightEyebrow}>{presentation.brand ?? product.category}</p><h3>{product.name}</h3><ServerPrice product={product}/>{product.inStock && <p className={styles.spotlightAvailability}>In stock</p>}</div></a><div className={styles.spotlightActions}><a className={styles.spotlightViewLink} href={`/products/${product.slug}`}>View product</a><button className={styles.spotlightAddButton} type="button" onClick={() => void addToCart(product)} disabled={!product.inStock || cartAdd?.state === "pending"} aria-busy={cartAdd?.state === "pending"}>{cartAdd?.state === "pending" ? "Adding…" : product.inStock ? "Add to bag" : "Out of stock"}</button></div></article>; })}</div></section>}
 
     <section className="new-arrivals shell" aria-labelledby="new-arrivals-heading"><div className="marketplace-section-head"><div><p className="eyebrow">Just landed</p><h2 id="new-arrivals-heading">New arrivals</h2></div><a className="text-link" href="#collection">Browse all products <ArrowUpRight size={16}/></a></div>{newArrivalsState === "loading" ? <p className="marketplace-load-state" role="status">Loading new arrivals…</p> : newArrivalsState === "error" ? <p className="marketplace-load-state" role="alert">New arrivals are temporarily unavailable. <button type="button" onClick={() => setNewArrivalsReloadNonce((value) => value + 1)}>Retry new arrivals</button></p> : newArrivals.length === 0 ? <p className="marketplace-load-state" role="status">No new arrivals are available right now.</p> : <div className="marketplace-rail new-arrivals-rail">{newArrivals.slice(0, 8).map((product) => <article className="new-arrival-card" key={product.id}><a href={`/products/${product.slug}`}><ProductVisual product={product}/><h3>{product.name}</h3><ServerPrice product={product}/></a>{product.storeName && product.storeSlug ? <a className="store-attribution" href={`/stores/${product.storeSlug}`}>From {product.storeName}</a> : null}</article>)}</div>}</section>
 

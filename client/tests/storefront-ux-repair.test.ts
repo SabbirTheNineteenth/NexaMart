@@ -13,6 +13,24 @@ test("Storefront keeps catalog actions in a card footer and only renders returne
   assert.doesNotMatch(productImage, /className="quick-add"/);
 });
 
+test("Storefront gives API-backed discovery products a readable rail, real actions, and reduced-motion safeguards", () => {
+  assert.match(storefront, /const \[spotlightRailVisible, setSpotlightRailVisible\] = useState\(false\);/);
+  assert.match(storefront, /const spotlightRailRef = useRef<HTMLDivElement>\(null\);/);
+  assert.match(storefront, /ref=\{spotlightRailRef\}/);
+  assert.match(storefront, /className=\{styles\.spotlightRail\}[^>]*tabIndex=\{0\}/);
+  assert.match(storefront, /const presentation = buildProductPresentation\(product\);/);
+  assert.match(storefront, /presentation\.brand \?\? product\.category/);
+  assert.match(storefront, /product\.inStock && <p className=\{styles\.spotlightAvailability\}>In stock<\/p>/);
+  assert.match(storefront, /href=\{`\/products\/\$\{product\.slug\}`\}>View product<\/a>/);
+  assert.match(storefront, /disabled=\{!product\.inStock \|\| cartAdd\?\.state === "pending"\}/);
+  assert.match(storefront, /product\.inStock \? "Add to bag" : "Out of stock"/);
+  assert.match(styles, /\.spotlightRail\s*\{[\s\S]*?scroll-snap-type: x mandatory;[\s\S]*?scrollbar-width: none;/);
+  assert.match(styles, /\.spotlightCard\s*\{[\s\S]*?flex: 0 0 clamp\(14\.5rem, 20vw, 17\.5rem\);/);
+  assert.match(styles, /\.spotlightAddButton\s*\{[\s\S]*?min-height: 44px;[\s\S]*?background: var\(--orchid-violet/);
+  assert.match(styles, /\.spotlightCardVisible\s*\{[\s\S]*?animation: spotlight-card-in 280ms/);
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.spotlightCardVisible[\s\S]*?animation: none;/);
+});
+
 test("Storefront gives its sidebar, hero, cards, and brand rail local responsive safeguards", () => {
   assert.match(styles, /\.storefrontLayout[\s,]*:global\(\.storefront \.reference-explore-content\)\s*\{[\s\S]*?grid-template-columns: minmax\(12rem, 14rem\) minmax\(0, 1fr\);/);
   assert.match(styles, /\.heroHeading[\s,]*:global\(\.storefront #explore-heading\)\s*\{[\s\S]*?max-width: 13ch;/);
