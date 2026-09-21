@@ -11,11 +11,11 @@ const workspace = readFileSync(new URL("../src/features/account/AccountWorkspace
 test("async create forms announce their own successful reconciliation politely without moving focus", () => {
   assert.match(productForm, /const \[success, setSuccess\] = useState\(""\);/);
   assert.match(productForm, /onCreated\(\{ \.\.\.product, isPublished: false \}\);\s*event\.currentTarget\.reset\(\);\s*setSuccess\("Product draft created\."\);/);
-  assert.match(productForm, /<p className="seller-profile-success" role="status">\{success\}<\/p>/);
+  assert.match(productForm, /<p className="seller-profile-success" role="status">\s*\{success\}\s*<\/p>/);
 
   assert.match(promotionForm, /const \[success, setSuccess\] = useState\(""\);/);
   assert.match(promotionForm, /onCreated\(promotion\);\s*event\.currentTarget\.reset\(\);\s*setSuccess\("Product flash offer created\."\);/);
-  assert.match(promotionForm, /<p className="seller-profile-success" role="status">\{success\}<\/p>/);
+  assert.match(promotionForm, /<p className="seller-profile-success" role="status">\s*\{success\}\s*<\/p>/);
 
   assert.match(taxonomy, /const \[feedback, setFeedback\] = useState<Record<string, Feedback>>\(\{\}\);/);
   assert.match(taxonomy, /form\.reset\(\);\s*setFeedback\(\(current\) => \(\{ \.\.\.current, \[id\]: \{ kind: "success"/);
@@ -43,7 +43,7 @@ test("create retries and errors clear stale confirmations before a new result", 
   for (const source of [productForm, promotionForm, assets, workspace]) {
     assert.match(source, /set(?:Success|CreateSuccess|AddressCreateSuccess|VariantSuccess|ImageSuccess)\(""\)/);
   }
-  assert.match(productForm, /setError\(""\); setSuccess\(""\); setSaving\(true\);/);
+  assert.match(productForm, /setError\(""\);\s*setSuccess\(""\);\s*setSaving\(true\);/);
   assert.match(promotionForm, /setError\(""\);\s*setSuccess\(""\);/);
   assert.match(assets, /setSavingVariant\(true\);\s*setError\(""\);\s*setVariantSuccess\(""\);/);
   assert.match(assets, /setSavingImage\(true\);\s*setError\(""\);\s*setImageSuccess\(""\);/);

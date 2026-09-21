@@ -40,10 +40,10 @@ test("seller promotion configuration validation rejects invalid fields and inval
 
 test("seller promotion rows expose an accessible editor that PATCHes configuration only", () => {
   assert.match(dashboard, /<SellerPromotionEditor promotion=\{promotion\} onSaved=\{\(updatedPromotion\)/);
-  assert.match(editor, /<details className="seller-promotion-editor">/);
+  assert.match(editor, /<details\s+className=\{`seller-promotion-editor \$\{styles\.surface\}`\}>/);
   assert.match(editor, /<summary>Edit promotion configuration<\/summary>/);
   assert.match(editor, /aria-label=\{`Edit configuration for \$\{promotion\.name\}`\}/);
-  assert.match(editor, /patchJSON<\{ promotion: SellerPromotion \}>\(`\/seller\/promotions\/\$\{promotion\.id\}`, update\)/);
+  assert.match(editor, /patchJSON<\{ promotion: SellerPromotion \}>\(\s*`\/seller\/promotions\/\$\{promotion\.id\}`,\s*update,/);
   assert.match(editor, /reason instanceof ApiError && reason\.status === 404/);
   assert.match(editor, /Promotion was not found or is no longer available\./);
   assert.match(editor, /role="status"/);
@@ -59,14 +59,14 @@ test("seller promotion rows delete locally only after a successful DELETE respon
   assert.match(editor, /const \[deleteConfirmationOpen, setDeleteConfirmationOpen\] = useState\(false\)/);
   assert.match(editor, /aria-label=\{`Delete \$\{promotion\.name\} promotion`\}/);
   assert.match(editor, /onClick=\{\(\) => setDeleteConfirmationOpen\(true\)\}/);
-  assert.match(editor, /role="alertdialog" aria-modal="true" aria-labelledby="promotion-delete-confirmation-title"/);
+  assert.match(editor, /role="alertdialog"\s+aria-modal="true"\s+aria-labelledby="promotion-delete-confirmation-title"/);
   assert.match(editor, /Cancel deletion/);
   assert.match(editor, /Confirm deletion/);
   assert.match(editor, /disabled=\{saving \|\| deleting\}/);
   assert.match(editor, /deleting \? "Deleting promotion…" : "Delete promotion"/);
   assert.match(editor, /await deleteJSON<void>\(`\/seller\/promotions\/\$\{promotion\.id\}`\)/);
   assert.match(editor, /onRemoved\(promotion\.id\)/);
-  assert.match(editor, /reason instanceof ApiError && reason\.status === 404 \? "Promotion was not found or is no longer available\."/);
+  assert.match(editor, /reason instanceof ApiError && reason\.status === 404\s*\? "Promotion was not found or is no longer available\."/);
   assert.match(editor, /role="alert"/);
   assert.doesNotMatch(editor, /deleteJSON.*\/(?:cart|checkout|pricing|payment|delivery)/i);
 });

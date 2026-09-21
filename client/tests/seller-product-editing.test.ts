@@ -31,10 +31,10 @@ test("seller product detail validation rejects invalid values and empty updates"
 
 test("seller product rows expose an accessible edit form that PATCHes only permitted fields", () => {
   assert.match(dashboard, /<SellerProductEditor product=\{product\} onSaved=/);
-  assert.match(editor, /<details className="seller-product-editor">/);
+  assert.match(editor, /<details\s+className=\{`seller-product-editor \$\{styles\.surface\}`\}>/);
   assert.match(editor, /<summary>Edit product details<\/summary>/);
   assert.match(editor, /aria-label=\{`Edit details for \$\{product\.name\}`\}/);
-  assert.match(editor, /patchJSON<\{ product: SellerProductDetail \}>\(`\/seller\/products\/\$\{product\.id\}`, update\)/);
+  assert.match(editor, /patchJSON<\{ product: SellerProductDetail \}>\(\s*`\/seller\/products\/\$\{product\.id\}`,\s*update,/);
   assert.doesNotMatch(editor, /\b(?:stock|isPublished|sellerId|status)\s*:/);
   assert.match(editor, /reason instanceof ApiError && reason\.status === 404/);
   assert.match(editor, /Product was not found or is no longer available\./);

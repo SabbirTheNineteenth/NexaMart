@@ -1,0 +1,73 @@
+.surface fieldset {
+  min-width: 0;
+}
+
+.surface :global(.seller-form-group) {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+}
+
+.surface :global(.seller-form-group legend) {
+  padding: 0;
+  color: var(--seller-muted, var(--muted));
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.surface :global(.seller-form-group-help) {
+  margin: 0;
+  color: var(--seller-muted, var(--muted));
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.surface :global(.seller-form-actions) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.surface :is(input, textarea, select, button):focus-visible {
+  outline: 2px solid var(--orchid-orchid, var(--blue));
+  outline-offset: 2px;
+}
+
+.surface button {
+  min-height: 44px;
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+
+.surface button:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+.surface form[aria-busy="true"] {
+  opacity: 0.82;
+}
+
+@media (max-width: 700px) {
+  .surface :global(.seller-form-grid) {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .surface :global(.seller-form-actions) {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .surface :global(.primary-button) {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .surface button {
+    transition: none;
+  }
+}

@@ -3,6 +3,7 @@
 import type { FormEvent, KeyboardEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ApiError, deleteJSON, getJSON, patchJSON, postJSON } from "@/lib/api";
+import styles from "./SellerEditorForms.module.css";
 import type { SellerProduct, SellerTaxonomyKind, SellerTaxonomyOptions, SellerTaxonomyProposal } from "@/types/seller";
 
 type LoadState = "loading" | "ready" | "error";
@@ -139,7 +140,7 @@ export function SellerTaxonomyManagement({ products, onClassified }: { products:
     </form>;
   };
 
-  return <section className="seller-taxonomy" aria-labelledby="seller-taxonomy-heading">
+  return <section className={`seller-taxonomy ${styles.surface}`} aria-labelledby="seller-taxonomy-heading">
     <div><p className="eyebrow">Approved catalog vocabulary</p><h2 id="seller-taxonomy-heading">Classify products and propose missing terms</h2><p className="seller-form-note">Only approved terms can classify a product. Classification returns the product to draft for moderation.</p></div>
     {taxonomyState === "loading" ? <p className="seller-state" role="status" aria-live="polite">Loading approved taxonomy options…</p> : taxonomyState === "error" ? <div className="seller-empty" role="alert"><strong>Unable to load approved taxonomy options.</strong><p>{taxonomyError}</p><button type="button" onClick={loadTaxonomy} aria-label="Retry approved taxonomy options">Retry options</button></div> : <>
       <form className="seller-taxonomy-classification" aria-label="Classify an owned product" onSubmit={(event) => void classifyProduct(event)}>
