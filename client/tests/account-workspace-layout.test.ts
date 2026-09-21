@@ -27,3 +27,17 @@ test("account workspace preserves truthful feed states in an accessible, compact
   assert.match(styles, /@media\(max-width:760px\)/);
   assert.match(styles, /@media\(prefers-reduced-motion:reduce\)/);
 });
+
+test("account authentication states have clear, responsive actions without inventing account details", () => {
+  assert.match(workspace, /styles\.authState/);
+  assert.match(workspace, /styles\.authStateActions/);
+  assert.match(workspace, /aria-busy="true"/);
+  assert.match(workspace, /Retry loading your account/);
+  assert.match(workspace, /Continue browsing/);
+  assert.match(workspace, /Sign in to access orders, saved pieces, and shipping addresses for this session\./);
+  assert.doesNotMatch(workspace, /Welcome back,?\s+(?:Alex|Jamie|Customer)/i);
+  assert.match(styles, /\.authState\{/);
+  assert.match(styles, /\.authStateActions\{/);
+  assert.match(styles, /@media\(max-width:700px\)/);
+  assert.match(styles, /@media\(max-width:390px\)/);
+});
