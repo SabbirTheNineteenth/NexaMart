@@ -2,6 +2,59 @@
   min-width: 0;
 }
 
+.collectionSearch {
+  display: flex;
+  gap: 0.45rem;
+  align-items: stretch;
+  margin: 0.65rem 0 0.85rem;
+}
+
+.collectionSearch label {
+  display: flex;
+  min-width: 0;
+  min-height: 44px;
+  flex: 1;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid var(--orchid-border, #4e3d5e);
+  border-radius: 8px;
+  padding: 0 0.7rem;
+  background: var(--orchid-surface, #241630);
+  color: var(--orchid-muted, #c5b7ce);
+}
+
+.collectionSearch input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--orchid-text, #f8f2ff);
+}
+
+.collectionSearch button,
+:global(.storefront .catalog-tools button),
+.catalogResults :global(.quick-add),
+.catalogResults :global(.wishlist-button) {
+  min-height: 44px;
+}
+
+.collectionSearch button {
+  flex: 0 0 auto;
+  border: 1px solid var(--orchid-border, #4e3d5e);
+  border-radius: 8px;
+  padding: 0 0.75rem;
+  background: transparent;
+  color: var(--orchid-text, #f8f2ff);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.collectionSearch button:hover {
+  border-color: var(--orchid-orchid, #d3a5ff);
+  background: var(--orchid-plum, #1a1025);
+}
+
 .catalogResults :global(.product-grid) {
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 11.5rem), 1fr));
   gap: clamp(0.65rem, 1.4vw, 1rem);
@@ -9,6 +62,30 @@
 
 .catalogResults :global(.product-card) {
   min-width: 0;
+  overflow: hidden;
+  transition: border-color 180ms ease, transform 180ms ease;
+}
+
+.catalogResults :global(.product-card:hover) {
+  border-color: var(--orchid-violet, #9360ef);
+  transform: translateY(-2px);
+}
+
+.catalogResults :global(.product-copy) {
+  display: grid;
+  align-content: start;
+  gap: 0.45rem;
+  padding: 0.8rem;
+}
+
+.catalogResults :global(.product-title h3) {
+  margin-block: 0.2rem 0;
+  line-height: 1.3;
+}
+
+.catalogResults :global(.product-title h3 a) {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
 }
 
 .catalogResults :global(.product-card:focus-within) {
@@ -31,12 +108,33 @@
   margin: 1rem auto;
 }
 
+.catalogResults[aria-busy="true"] :global(.marketplace-load-state),
+.catalogResults :global(.catalog-empty),
+.catalogResults :global(.message),
+.catalogResults :global(.cart-add-feedback),
+.catalogResults :global(.wishlist-save-feedback) {
+  animation: storefront-state-in 180ms ease-out both;
+}
+
+@keyframes storefront-state-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .catalogResults :global(.message h3),
 .catalogResults :global(.catalog-empty h3) {
   margin-block: 0 0.35rem;
 }
 
 @media (max-width: 34rem) {
+  .collectionSearch {
+    margin-top: 0.55rem;
+  }
+
+  .collectionSearch button {
+    padding-inline: 0.6rem;
+  }
+
   .catalogResults :global(.product-grid) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.65rem;
@@ -44,5 +142,19 @@
 
   .catalogResults :global(.product-copy) {
     padding-inline: 0.7rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalogResults :global(.product-card),
+  .catalogResults :global(.product-card:hover),
+  .catalogResults[aria-busy="true"] :global(.marketplace-load-state),
+  .catalogResults :global(.catalog-empty),
+  .catalogResults :global(.message),
+  .catalogResults :global(.cart-add-feedback),
+  .catalogResults :global(.wishlist-save-feedback) {
+    animation: none;
+    transform: none;
+    transition: none;
   }
 }
