@@ -266,16 +266,99 @@
   -webkit-line-clamp: 2;
 }
 
+.brandShowcase {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin-block: clamp(1rem, 2vw, 1.5rem);
+  padding: 0;
+  border: 1px solid var(--orchid-border, #4e3d5e);
+  border-radius: 0.9rem;
+  background: var(--orchid-plum, #1a1025);
+  box-shadow: inset 0 1px rgb(255 255 255 / 5%), 0 0.75rem 2rem rgb(0 0 0 / 16%);
+}
+
+.brandShowcase::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border: 1px solid rgb(211 165 255 / 8%);
+  border-radius: inherit;
+  box-shadow: inset 0 0 4rem rgb(147 96 239 / 10%);
+  content: "";
+  pointer-events: none;
+}
+
+.brandShowcaseInner {
+  display: grid;
+  grid-template-columns: minmax(14rem, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(1rem, 3vw, 2.5rem);
+  align-items: center;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.brandIntro {
+  min-width: 0;
+}
+
+.brandIntro :global(.eyebrow),
+.brandIntro h2,
+.brandIntro p {
+  margin: 0;
+}
+
+.brandIntro h2 {
+  margin-top: 0.3rem;
+  color: var(--orchid-text, #f8f2ff);
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  line-height: 1.1;
+}
+
+.brandIntro > p:last-child {
+  max-width: 34ch;
+  margin-top: 0.55rem;
+  color: var(--orchid-muted, #c5b7ce);
+  line-height: 1.5;
+}
+
+.brandPicker {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.55rem;
+  min-width: 0;
+}
+
 .brandChip {
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--orchid-border, #4e3d5e);
+  border-radius: 0.55rem;
+  padding: 0.65rem 0.8rem;
+  background: rgb(36 22 48 / 78%);
+  color: var(--orchid-text, #f8f2ff);
+  font-weight: 700;
+  text-align: left;
+  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.brandChipVisible {
   animation: brand-chip-in 360ms ease-out both;
 }
 
 .brandChip:hover,
 .brandChip:focus-visible {
   border-color: var(--orchid-orchid, #d3a5ff);
-  background: var(--orchid-surface, #241630);
+  background: rgb(147 96 239 / 18%);
+  box-shadow: 0 0 0 3px rgb(211 165 255 / 12%);
   color: var(--orchid-text, #f8f2ff);
   transform: translateY(-1px);
+}
+
+.brandChip:global(.active) {
+  border-color: var(--orchid-orchid, #d3a5ff);
+  background: var(--orchid-violet, #9360ef);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 12%);
+  color: #fff;
 }
 
 @keyframes brand-chip-in {
@@ -295,11 +378,6 @@
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scrollbar-gutter: stable;
-}
-
-/* The catalog information panel follows the brand rail without a dead zone. */
-:global(.storefront .brand-showcase) {
-  padding-block: clamp(1.5rem, 4vw, 2.5rem);
 }
 
 :global(.storefront .statement) {
@@ -732,6 +810,15 @@
 }
 
 @media (max-width: 700px) {
+  .brandShowcaseInner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .brandPicker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .storefrontLayout {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -867,6 +954,10 @@
 }
 
 @media (max-width: 390px) {
+  .brandPicker {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .catalogResults :global(.product-copy) {
     padding: 0.7rem;
   }
@@ -883,6 +974,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .brandChip,
+  .brandChipVisible,
   .brandChip:hover,
   .brandChip:focus-visible {
     animation: none;

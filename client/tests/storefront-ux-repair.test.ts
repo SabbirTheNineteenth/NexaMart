@@ -22,6 +22,23 @@ test("Storefront gives its sidebar, hero, cards, and brand rail local responsive
   assert.match(styles, /\.productCardFooter\s*\{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto;/);
 });
 
+test("Storefront presents API-backed brands in a contained, motion-safe discovery module", () => {
+  assert.match(storefront, /const \[brandPickerVisible, setBrandPickerVisible\] = useState\(false\);/);
+  assert.match(storefront, /new IntersectionObserver\(/);
+  assert.match(storefront, /ref=\{brandShowcaseRef\}/);
+  assert.match(storefront, /aria-labelledby="brand-discovery-heading"/);
+  assert.match(storefront, /<p className="eyebrow">Shop by brand<\/p><h2 id="brand-discovery-heading">Explore brands in the catalog<\/h2><p>Choose a brand to refine the current catalog\.<\/p>/);
+  assert.match(storefront, /role="group" aria-label="Catalog brands"/);
+  assert.match(storefront, /aria-pressed=\{brand === item\.slug\}/);
+  assert.match(storefront, /setBrand\(brand === item\.slug \? "" : item\.slug\); scrollToCollection\(\);/);
+  assert.match(styles, /\.brandShowcase\s*\{[\s\S]*?overflow: hidden;[\s\S]*?background:/);
+  assert.match(styles, /\.brandPicker\s*\{[\s\S]*?grid-template-columns: repeat\(auto-fit, minmax\(8\.5rem, 1fr\)\);/);
+  assert.match(styles, /\.brandChip\s*\{[\s\S]*?min-height: 44px;/);
+  assert.match(styles, /\.brandChipVisible\s*\{[\s\S]*?animation: brand-chip-in 360ms/);
+  assert.match(styles, /@media \(max-width: 700px\)\s*\{[\s\S]*?\.brandShowcaseInner[\s\S]*?grid-template-columns: minmax\(0, 1fr\);/);
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.brandChipVisible[\s\S]*?animation: none;/);
+});
+
 test("Storefront removes Recently viewed and preserves an ordered, normal-flow filter stack", () => {
   assert.match(storefront, /<h2 id="filter-products-heading">Filter products<\/h2>/);
   const sidebar = storefront.match(/<div className=\{styles\.sidebarDiscovery\}>[\s\S]*?taxonomy-controls[\s\S]*?aria-label="Discover brands"[\s\S]*?<\/div>\s*<\/div>/)?.[0] ?? "";
