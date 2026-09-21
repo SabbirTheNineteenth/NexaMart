@@ -30,3 +30,16 @@ test("seller dashboard keeps compact controls and tables usable on narrow screen
   assert.match(stylesheet, /\.inventoryTableWrap\{[\s\S]*?overscroll-behavior-x:contain/);
   assert.match(stylesheet, /@media\(max-width:640px\)\{[\s\S]*?\.topbarActions\{min-width:0/);
 });
+
+test("seller dashboard contains its compact command bar and keeps dashboard controls touchable", () => {
+  assert.match(stylesheet, /@media\(max-width:420px\)\{[\s\S]*?\.operationsHeader\{[^}]*flex-direction:column/);
+  assert.match(stylesheet, /@media\(max-width:420px\)\{[\s\S]*?\.topbarActions\{width:100%/);
+  assert.match(stylesheet, /\.catalogFilters button,\.inventoryFilters button\{[\s\S]*?min-height:44px/);
+  assert.match(stylesheet, /\.workspace :global\(\.seller-fulfillment-actions button\)[\s\S]*?min-height:44px/);
+});
+
+test("seller dashboard announces a failed workspace load without pretending data was available", () => {
+  assert.match(dashboard, /workspaceState === "error"[\s\S]*?role="alert" aria-labelledby="seller-workspace-error-heading"/);
+  assert.match(dashboard, /Your seller data was not loaded\./);
+  assert.match(dashboard, /logoutState\.state === "error"[\s\S]*?role="alert"/);
+});
