@@ -13,6 +13,12 @@ import styles from "./DealsDiscovery.module.css";
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 type DealsState = "loading" | "loaded" | "error";
 
+type CatalogDealsResponse = { products?: unknown };
+
+export function activeDealsFromCatalogResponse(response: CatalogDealsResponse): Product[] {
+  return Array.isArray(response.products) ? response.products as Product[] : [];
+}
+
 function DealImage({ product, className = "deals-image" }: { product: Pick<Product, "id" | "image" | "name">; className?: string }) {
   const image = productImageSource(product.image, product.id);
   if (!image) return <div className={`${className} deals-image-fallback`} role="img" aria-label={`${product.name} product image unavailable`}>NEXA</div>;
@@ -33,8 +39,9 @@ export function DealsDiscovery() {
     const controller = new AbortController();
     let refreshTimer: number | undefined;
     getJSON<{ products: Product[] }>("/catalog/products?deals=active", controller.signal)
-      .then(({ products: activeDeals }) => {
+      .then((response) => {
         if (controller.signal.aborted) return;
+        const activeDeals = activeDealsFromCatalogResponse(response);
         setProducts(activeDeals);
         setState("loaded");
         const refreshAfterMs = millisecondsUntilNextDealRefresh(activeDeals);
