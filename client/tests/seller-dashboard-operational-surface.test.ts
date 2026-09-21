@@ -17,3 +17,16 @@ test("seller dashboard makes action, focus, and feedback states explicit without
   assert.match(stylesheet, /\.workspace :global\(\.seller-profile-success\)[\s\S]*?\.workspace :global\(\.seller-error\)/);
   assert.match(stylesheet, /@media\(prefers-reduced-motion:reduce\)\{\.workspace \*\{animation:none!important;transition:none!important;scroll-behavior:auto!important\}\}/);
 });
+
+test("seller dashboard gives loading, empty, and failed work clear bounded surfaces", () => {
+  assert.match(dashboard, /className=\{styles\.workspaceState\}/);
+  assert.match(dashboard, /aria-busy=\{notificationsLoading\}/);
+  assert.match(dashboard, /No inventory needs attention right now\./);
+  assert.match(stylesheet, /\.workspaceState\{[\s\S]*?border:1px solid var\(--orchid-border\)/);
+});
+
+test("seller dashboard keeps compact controls and tables usable on narrow screens", () => {
+  assert.match(stylesheet, /\.commandBar\{[\s\S]*?overflow:clip/);
+  assert.match(stylesheet, /\.inventoryTableWrap\{[\s\S]*?overscroll-behavior-x:contain/);
+  assert.match(stylesheet, /@media\(max-width:640px\)\{[\s\S]*?\.topbarActions\{min-width:0/);
+});
