@@ -224,6 +224,7 @@
   grid-column: 2;
   grid-row: 1;
   grid-template-columns: minmax(12rem, 0.78fr) minmax(18rem, 1.32fr) minmax(13rem, 0.6fr);
+  grid-template-areas: "copy media context";
   min-height: 0;
   width: auto;
 }
@@ -246,6 +247,7 @@
 }
 
 .heroCopy {
+  grid-area: copy;
   display: grid;
   align-content: center;
   min-width: 0;
@@ -298,6 +300,7 @@
 }
 
 .heroMediaFrame {
+  grid-area: media;
   position: relative;
   isolation: isolate;
   min-width: 0;
@@ -1276,6 +1279,230 @@
     scroll-behavior: auto;
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* Cohesive Obsidian Orchid marketplace frame: scoped to Storefront only. */
+:global(.storefront) {
+  background:
+    radial-gradient(circle at 50% 0%, rgb(147 96 239 / 10%), transparent 32rem),
+    var(--orchid-obsidian, #100b18);
+}
+
+:global(.storefront .marketplace-header) {
+  border-bottom: 1px solid rgb(197 183 206 / 18%);
+  box-shadow: 0 0.6rem 1.5rem rgb(0 0 0 / 14%);
+}
+
+:global(.storefront .marketplace-topbar) {
+  min-height: 64px;
+  grid-template-columns: auto auto minmax(16rem, 1fr) auto;
+  gap: clamp(0.75rem, 1.7vw, 1.5rem);
+}
+
+:global(.storefront .marketplace-brand) {
+  font-size: 1rem;
+}
+
+:global(.storefront .reference-explore-tabs) {
+  gap: clamp(0.7rem, 1.4vw, 1.25rem);
+}
+
+:global(.storefront .reference-explore-tabs a) {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+:global(.storefront .marketplace-search) {
+  min-width: 0;
+  height: 42px;
+  border-radius: 0.7rem;
+  background: rgb(46 29 61 / 72%);
+}
+
+:global(.storefront .marketplace-search:focus-within) {
+  border-color: var(--orchid-orchid, #d3a5ff);
+  box-shadow: 0 0 0 3px rgb(211 165 255 / 16%);
+}
+
+:global(.storefront .marketplace-actions) {
+  gap: 0.35rem;
+}
+
+:global(.storefront .marketplace-action-icon),
+:global(.storefront .marketplace-bag) {
+  min-height: 44px;
+}
+
+:global(.storefront .marketplace-action-icon) {
+  width: 44px;
+  height: 44px;
+}
+
+:global(.storefront .marketplace-bag) {
+  padding-inline: 0.9rem;
+  box-shadow: 0 0.45rem 0.9rem rgb(0 0 0 / 18%);
+}
+
+:global(.storefront .department-showcase),
+:global(.storefront .deal-showcase) {
+  width: min(100% - 2rem, 1240px);
+  max-width: min(100%, 1240px);
+  padding-top: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+:global(.storefront .new-arrivals),
+:global(.storefront .brand-showcase),
+:global(.storefront .statement),
+:global(.storefront .footer) {
+  width: min(100% - 2rem, 1240px);
+  max-width: min(100%, 1240px);
+}
+
+:global(.storefront .marketplace-section-head) {
+  margin-bottom: 1rem;
+}
+
+:global(.storefront .marketplace-section-head h2),
+:global(.storefront .reference-collection-heading h2) {
+  letter-spacing: -0.045em;
+}
+
+:global(.storefront .reference-explore-content) {
+  width: min(100% - 2rem, 1240px);
+  max-width: min(100%, 1240px);
+  padding-top: clamp(1.8rem, 4vw, 3.2rem);
+}
+
+:global(.storefront .reference-facet-rail) {
+  border-radius: 0.85rem;
+  background: linear-gradient(180deg, rgb(36 22 48 / 96%), rgb(26 16 37 / 96%));
+  box-shadow: 0 0.75rem 1.6rem rgb(0 0 0 / 14%);
+}
+
+:global(.storefront .reference-product-toolbar) {
+  min-height: 48px;
+  padding-bottom: 0.75rem;
+}
+
+:global(.storefront .reference-explore-content .product-grid) {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.4vw, 1rem);
+}
+
+:global(.storefront .reference-explore-content .product-card) {
+  border-radius: 0.75rem;
+  background: linear-gradient(180deg, rgb(46 29 61 / 92%), var(--orchid-surface, #241630));
+  box-shadow: 0 0.65rem 1.25rem rgb(0 0 0 / 12%);
+}
+
+:global(.storefront .reference-explore-content .product-image) {
+  aspect-ratio: 1 / 0.84;
+}
+
+:global(.storefront .reference-explore-content .product-card:hover) {
+  border-color: var(--orchid-orchid, #d3a5ff);
+  box-shadow: 0 0.9rem 1.8rem rgb(0 0 0 / 22%);
+}
+
+:global(.storefront .reference-explore-content .quick-add) {
+  min-height: 44px;
+  border-color: var(--orchid-violet, #9360ef);
+  background: var(--orchid-violet, #9360ef);
+  color: #fff;
+}
+
+:global(.storefront .reference-explore-content .quick-add:hover:not(:disabled)) {
+  background: #7045ce;
+}
+
+:global(.storefront .reference-explore-content .quick-add:disabled) {
+  background: rgb(197 183 206 / 20%);
+  color: var(--orchid-muted, #c5b7ce);
+}
+
+@media (min-width: 701px) {
+  :global(.storefront .reference-explore-content) {
+    grid-template-areas:
+      "hero hero"
+      "filters toolbar"
+      "filters results";
+  }
+
+  :global(.storefront .reference-explore-content > .reference-collection-hero) {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    grid-template-columns: minmax(14rem, 0.72fr) minmax(24rem, 1.5fr) minmax(13rem, 0.55fr);
+    grid-template-areas: "copy media context";
+  }
+
+  :global(.storefront.reference-explore-layout .reference-explore-content > .marketplace-hero.reference-collection-hero) {
+    min-height: 0;
+    height: auto;
+    align-items: center;
+    padding: clamp(1rem, 2vw, 1.6rem);
+  }
+
+  :global(.storefront.reference-explore-layout .reference-explore-content > .reference-collection-hero .reference-hero-context) {
+    position: static;
+    align-self: stretch;
+  }
+}
+
+:global(.storefront .new-arrivals-rail) {
+  gap: 0.9rem;
+  padding-bottom: 0.6rem;
+  scroll-snap-type: x mandatory;
+}
+
+:global(.storefront .new-arrival-card) {
+  scroll-snap-align: start;
+  border-radius: 0.7rem;
+}
+
+:global(.storefront .statement) {
+  border-radius: 1rem;
+  background: linear-gradient(125deg, var(--orchid-plum, #1a1025), rgb(46 29 61 / 82%));
+}
+
+@media (max-width: 700px) {
+  :global(.storefront .marketplace-topbar) {
+    min-height: 60px;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  :global(.storefront .marketplace-search) {
+    height: 44px;
+  }
+
+  :global(.storefront .department-showcase),
+  :global(.storefront .deal-showcase),
+  :global(.storefront .new-arrivals),
+  :global(.storefront .brand-showcase),
+  :global(.storefront .statement),
+  :global(.storefront .footer),
+  :global(.storefront .reference-explore-content) {
+    width: min(100% - 1.5rem, 1240px);
+  }
+
+  :global(.storefront .reference-explore-content .product-grid) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  :global(.storefront .marketplace-action-icon) {
+    width: 44px;
+  }
+
+  :global(.storefront .marketplace-bag) {
+    min-width: 44px;
+    padding-inline: 0.65rem;
+  }
+
+  :global(.storefront .reference-explore-content .product-grid) {
+    gap: 0.65rem;
   }
 }
 

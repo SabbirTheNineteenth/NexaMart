@@ -49,6 +49,20 @@ test("Storefront gives the catalog hero one truthful, motion-safe featured-produ
   assert.doesNotMatch(storefront, /rating|delivery|discount|seller claim/i);
 });
 
+test("Storefront keeps its full marketplace shell API-backed, navigable, and motion-safe", () => {
+  assert.match(storefront, /<header id="top" className="marketplace-header"/);
+  assert.match(storefront, /aria-label="Search the marketplace"/);
+  assert.match(storefront, /headerWishlistPath\(cart\.authenticated\)/);
+  assert.match(storefront, /aria-label="Open shopping bag"/);
+  assert.match(storefront, /aria-label="Product search and filters"/);
+  assert.doesNotMatch(storefront, /reference-recently-viewed|Clear recently viewed/);
+  assert.match(styles, /:global\(\.storefront \.marketplace-topbar\)\s*\{[\s\S]*?min-height: 64px;/);
+  assert.match(styles, /:global\(\.storefront \.reference-explore-content \.product-grid\)\s*\{[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/);
+  assert.match(styles, /:global\(\.storefront \.department-showcase\),[\s\S]*?:global\(\.storefront \.deal-showcase\)\s*\{[\s\S]*?max-width: min\(100%, 1240px\);/);
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.spotlightCardVisible[\s\S]*?animation: none;/);
+  assert.doesNotMatch(storefront, /rating|review|discount percentage|delivery estimate/i);
+});
+
 test("Storefront gives its sidebar, hero, cards, and brand rail local responsive safeguards", () => {
   assert.match(styles, /\.storefrontLayout[\s,]*:global\(\.storefront \.reference-explore-content\)\s*\{[\s\S]*?grid-template-columns: minmax\(12rem, 14rem\) minmax\(0, 1fr\);/);
   assert.match(styles, /\.heroHeading[\s,]*:global\(\.storefront #explore-heading\)\s*\{[\s\S]*?max-width: 13ch;/);
