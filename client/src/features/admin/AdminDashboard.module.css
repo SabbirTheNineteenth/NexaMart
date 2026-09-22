@@ -390,3 +390,36 @@
   :global(.admin-taxonomy-create-page) :global(.admin-context-link){width:100%;justify-content:space-between}
   :global(.admin-taxonomy-create-page) :global(.admin-inspector-form),:global(.admin-taxonomy-create-page) :global(.admin-taxonomy-create-context){padding:14px}
 }
+
+/* Pale operational canvases must never inherit the legacy dark-shell text treatment. */
+:global(.admin-workspace){--admin-content-text:#21183b;--admin-content-muted:#5d536e;--admin-content-placeholder:#746b82}
+:global(.admin-workspace) :global(.admin-workspace-content){align-content:start;padding-bottom:32px}
+:global(.admin-workspace) :global(.admin-panel){color:var(--admin-content-text)}
+:global(.admin-workspace) :global(.admin-panel h1),:global(.admin-workspace) :global(.admin-panel h2),:global(.admin-workspace) :global(.admin-panel h3),:global(.admin-workspace) :global(.admin-panel strong){color:var(--admin-content-text)}
+:global(.admin-workspace) :global(.admin-panel p),:global(.admin-workspace) :global(.admin-panel label),:global(.admin-workspace) :global(.admin-panel small),:global(.admin-workspace) :global(.admin-panel time),:global(.admin-workspace) :global(.admin-panel td),:global(.admin-workspace) :global(.admin-panel th){color:var(--admin-content-muted)}
+:global(.admin-workspace) :global(.admin-panel .eyebrow){color:#6547a6}
+:global(.admin-workspace) :global(.admin-panel input),:global(.admin-workspace) :global(.admin-panel select),:global(.admin-workspace) :global(.admin-panel textarea){background:#fff;border-color:#cfc5df;color:var(--admin-content-text)}
+:global(.admin-workspace) :global(.admin-panel input::placeholder),:global(.admin-workspace) :global(.admin-panel textarea::placeholder){color:var(--admin-content-placeholder);opacity:1}
+:global(.admin-workspace) :global(.admin-panel input:focus-visible),:global(.admin-workspace) :global(.admin-panel select:focus-visible),:global(.admin-workspace) :global(.admin-panel textarea:focus-visible){border-color:#7046cf;outline:3px solid rgba(112,70,207,.2);outline-offset:2px}
+:global(.admin-taxonomy-create-page) :global(.admin-panel-head){display:flex;justify-content:space-between;gap:18px;padding:20px 22px;border-bottom:1px solid #e4dfef;background:#fff}
+:global(.admin-taxonomy-create-page) :global(.admin-panel-head h2){color:var(--admin-content-text);margin:4px 0 6px;font-size:clamp(22px,2.4vw,30px);letter-spacing:-.04em}
+:global(.admin-taxonomy-create-page) :global(.admin-panel-head p){margin:0;max-width:660px;color:var(--admin-content-muted);font-size:13px;line-height:1.55}
+:global(.admin-taxonomy-create-page) :global(.admin-taxonomy-fields label){color:var(--admin-content-muted);font-size:12px;font-weight:700;letter-spacing:.01em}
+:global(.admin-taxonomy-create-page) :global(.admin-taxonomy-fields){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+:global(.admin-taxonomy-create-page[data-admin-taxonomy-kind="subcategory"]) :global(.admin-taxonomy-fields label:last-child){grid-column:1/-1}
+:global(.admin-taxonomy-create-page) :global(.admin-taxonomy-row-actions){display:flex;justify-content:flex-start;padding-top:4px}
+:global(.admin-taxonomy-create-page) :global(.primary-button){min-height:42px;padding:0 16px;border:1px solid #653cc6;background:#653cc6;color:#fff;font-weight:800;box-shadow:0 4px 10px rgba(82,49,163,.18)}
+:global(.admin-taxonomy-create-page) :global(.primary-button:hover:not(:disabled)){background:#5632ae;border-color:#5632ae}
+:global(.admin-taxonomy-create-page) :global(.admin-context-link){min-height:40px;padding:0 12px;border:1px solid #cfc5df;border-radius:7px;background:#fff;color:#5133a0;font-size:12px;font-weight:750;text-decoration:none}
+:global(.admin-taxonomy-create-page) :global(.admin-context-link:hover){border-color:#9f82dc;background:#f8f5ff;color:#3f2387}
+
+@media(max-width:700px){
+  :global(.admin-taxonomy-create-page) :global(.admin-panel-head){padding:18px 14px}
+  :global(.admin-taxonomy-create-page) :global(.admin-taxonomy-fields){grid-template-columns:1fr}
+  :global(.admin-taxonomy-create-page[data-admin-taxonomy-kind="subcategory"]) :global(.admin-taxonomy-fields label:last-child){grid-column:auto}
+}
+@media(max-width:420px){
+  :global(.admin-taxonomy-create-page) :global(.admin-panel-head){gap:14px}
+  :global(.admin-taxonomy-create-page) :global(.admin-panel-head h2){font-size:24px}
+  :global(.admin-taxonomy-create-page) :global(.admin-taxonomy-row-actions),:global(.admin-taxonomy-create-page) :global(.primary-button){width:100%}
+}

@@ -95,6 +95,12 @@ const adminOverviewQuickActions = [
   { label: "Manage taxonomy", href: "/admin/taxonomy", description: "Maintain catalog vocabulary" },
 ] as const;
 
+const adminCreateBreadcrumbLabels: Record<AdminTaxonomyKind, string> = {
+  category: "Categories",
+  subcategory: "Subcategories",
+  brand: "Brands",
+};
+
 const isAdminSection = (value: string | undefined): value is AdminSection => adminSections.some((item) => item.section === value);
 
 const adminProductLinks = [
@@ -116,6 +122,7 @@ export function AdminDashboard() {
   const activeSection: AdminSection = isAdminSection(requestedSection) ? requestedSection : "overview";
   const productOperation = pathname.split("/").filter(Boolean)[2];
   const productCreateKind: AdminTaxonomyKind | undefined = productOperation === "brands" ? "brand" : productOperation === "categories" ? "category" : productOperation === "subcategories" ? "subcategory" : undefined;
+  const createBreadcrumbLabel = productCreateKind ? adminCreateBreadcrumbLabels[productCreateKind] : null;
   const workspaceContentRef = useRef<HTMLDivElement>(null);
   const [data, setData] = useState<AdminDashboardData>(initialData);
   const [reviewLoading, setReviewLoading] = useState(true);
@@ -624,7 +631,7 @@ export function AdminDashboard() {
       <Link className="admin-sidebar-return admin-action-control" href="/">View storefront <span aria-hidden="true">↗</span></Link>
     </aside>
     <div className="admin-workspace-content" id="admin-workspace-content" ref={workspaceContentRef} tabIndex={-1}>
-      <header className="admin-utility-bar admin-command-bar"><div className="admin-command-context"><nav className="admin-breadcrumb" aria-label="Breadcrumb"><Link href="/">NexaMart</Link><span aria-hidden="true">/</span><span aria-current="page">Administration</span></nav><span className="admin-command-scope">Monitor / operate</span></div><Link className="admin-command-link admin-action-control" href="/admin/audit">Audit trail <span aria-hidden="true">→</span></Link></header>
+      <header className="admin-utility-bar admin-command-bar"><div className="admin-command-context"><nav className="admin-breadcrumb" aria-label="Breadcrumb">{createBreadcrumbLabel ? <span className="admin-create-breadcrumb" aria-label={`Admin / Catalog / ${createBreadcrumbLabel} / Create`}><Link href="/admin">Admin</Link><span aria-hidden="true">/</span><Link href="/admin/taxonomy">Catalog</Link><span aria-hidden="true">/</span><span>{createBreadcrumbLabel}</span><span aria-hidden="true">/</span><span aria-current="page">Create</span></span> : <><Link href="/">NexaMart</Link><span aria-hidden="true">/</span><span aria-current="page">Administration</span></>}</nav><span className="admin-command-scope">{createBreadcrumbLabel ? `Create ${createBreadcrumbLabel.toLowerCase()}` : "Monitor / operate"}</span></div><Link className="admin-command-link admin-action-control" href="/admin/audit">Audit trail <span aria-hidden="true">→</span></Link></header>
       {activeSection === "overview" && <>
       <section className="admin-overview-briefing" aria-labelledby="admin-workspace-title">
         <section className="admin-context-header" aria-labelledby="admin-workspace-title"><div><p className="eyebrow">Catalog governance</p><h1 id="admin-workspace-title">Keep NexaMart’s catalog healthy and compliant.</h1><p>Review content, manage taxonomy, and ensure a trusted marketplace.</p></div><Link className="admin-context-link admin-action-control" href="/admin/feedback">Open feedback queue <span aria-hidden="true">→</span></Link></section>
