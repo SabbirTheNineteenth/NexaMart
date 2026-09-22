@@ -221,10 +221,8 @@
 :global(.admin-taxonomy-create-group),:global(.admin-taxonomy-record-group),:global(.admin-taxonomy-proposals){overflow:hidden;border:1px solid var(--admin-line);border-radius:9px;background:#fff}
 :global(.admin-taxonomy-section-head){display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:15px 16px;border-bottom:1px solid var(--admin-line);background:var(--admin-surface-soft)}
 :global(.admin-taxonomy-section-head p),:global(.admin-taxonomy-form-heading p){margin:5px 0 0;color:var(--admin-muted);font-size:11px;line-height:1.45}
-:global(.admin-taxonomy-create-grid){display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
 :global(.admin-inspector-form){display:grid;gap:13px;min-width:0}
 :global(.admin-category-create){display:grid;gap:13px;align-content:start;min-width:0;padding:16px;background:#fff}
-:global(.admin-taxonomy-create-grid .admin-category-create + .admin-category-create){border-left:1px solid var(--admin-line)}
 :global(.admin-taxonomy-fields){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;min-width:0;margin:0;padding:0;border:0}
 :global(.admin-taxonomy-fields label){display:grid;gap:6px;min-width:0;color:var(--admin-muted);font-size:11px;font-weight:800}
 :global(.admin-taxonomy-action){min-height:44px}
@@ -243,6 +241,25 @@
 :global(.admin-taxonomy-create-page .admin-panel-head){padding:21px 22px}
 :global(.admin-taxonomy-create-page .admin-panel-head h2){font-size:clamp(22px,2.5vw,30px)}
 :global(.admin-taxonomy-create-page .admin-taxonomy-row-actions){padding-top:2px}
+:global(.admin-taxonomy-create-section-head){padding:20px 22px}
+:global(.admin-taxonomy-create-section-head h3){font-size:20px;line-height:1.25}
+:global(.admin-taxonomy-create-section-head p){max-width:700px;margin-top:7px;font-size:12px}
+:global(.admin-taxonomy-create-section-head small){display:block;margin-top:6px;color:var(--admin-subtle);font-size:11px;line-height:1.45}
+:global(.admin-taxonomy-create-stack){display:grid;gap:12px;padding:16px}
+:global(.admin-taxonomy-create-card){grid-template-columns:minmax(210px,.48fr) minmax(0,1fr) auto;grid-template-areas:"heading fields action" ". feedback feedback";align-items:end;gap:16px;padding:18px;border:1px solid var(--admin-line);border-radius:9px;background:var(--admin-surface)}
+:global(.admin-taxonomy-create-card + .admin-taxonomy-create-card){margin-top:0}
+:global(.admin-taxonomy-create-card .admin-taxonomy-form-heading){grid-area:heading;display:flex;align-self:stretch;gap:10px;min-width:0;padding-right:16px;border-right:1px solid var(--admin-line)}
+:global(.admin-taxonomy-create-icon){flex:0 0 34px;width:34px;height:34px;padding:7px;border-radius:8px;background:var(--admin-accent-soft);color:var(--admin-accent-dark)}
+:global(.admin-taxonomy-form-heading > div){min-width:0}
+:global(.admin-taxonomy-create-card .admin-taxonomy-form-heading h3){margin:0;color:var(--admin-ink);font-size:15px;line-height:1.3}
+:global(.admin-taxonomy-create-card .admin-taxonomy-form-heading p){margin-top:5px;font-size:11px}
+:global(.admin-taxonomy-create-card .admin-taxonomy-form-heading small){display:block;margin-top:7px;color:var(--admin-accent-dark);font-size:10px;font-weight:800;line-height:1.4}
+:global(.admin-taxonomy-create-card .admin-taxonomy-fields){grid-area:fields;grid-template-columns:repeat(2,minmax(0,1fr));align-self:end}
+:global(.admin-taxonomy-create-card[data-taxonomy-create-kind="subcategory"] .admin-taxonomy-fields > label:first-child){grid-column:1/-1}
+:global(.admin-taxonomy-create-card .admin-taxonomy-row-actions){grid-area:action;align-self:end}
+:global(.admin-taxonomy-create-card .admin-taxonomy-action){min-width:132px}
+:global(.admin-taxonomy-create-card > [role]){grid-area:feedback;margin:0;color:var(--admin-muted);font-size:11px;font-weight:700}
+:global(.admin-taxonomy-create-card > [role="alert"]){color:var(--admin-danger)}
 
 @media(max-width:1050px){
   :global(.admin-overview-command-deck){grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -274,8 +291,8 @@
   :global(.admin-workspace-content){padding-right:20px;padding-left:20px}
   :global(.admin-grid){grid-template-columns:1fr}
   :global(.admin-overview-secondary){grid-template-columns:1fr}
-  :global(.admin-taxonomy-create-grid){grid-template-columns:1fr}
-  :global(.admin-taxonomy-create-grid .admin-category-create + .admin-category-create){border-top:1px solid var(--admin-line);border-left:0}
+  :global(.admin-taxonomy-create-card){grid-template-columns:1fr;grid-template-areas:"heading" "fields" "action" "feedback";gap:13px}
+  :global(.admin-taxonomy-create-card .admin-taxonomy-form-heading){padding:0 0 13px;border-right:0;border-bottom:1px solid var(--admin-line)}
   :global(.admin-taxonomy-focused-form){grid-template-columns:1fr}
   :global(.admin-taxonomy-create-context){border-top:3px solid var(--admin-accent);border-left:0}
 }
@@ -305,7 +322,7 @@
   :global(.admin-taxonomy-create-page .admin-panel-head){padding:18px 14px}
   :global(.admin-taxonomy-create-header-actions){justify-content:flex-start}
   :global(.admin-governance-table),:global(.admin-operations-table){overflow-x:auto;scroll-snap-type:inline proximity}
-  :global(.admin-taxonomy-create-grid){grid-template-columns:1fr}
+  :global(.admin-taxonomy-create-stack){padding:14px}
   :global(.admin-guidance-layout){padding:16px 14px}
   :global(.admin-guidance-actions-grid){padding:14px}
 }

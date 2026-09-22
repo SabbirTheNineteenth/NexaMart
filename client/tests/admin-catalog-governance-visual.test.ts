@@ -20,7 +20,7 @@ test("catalog governance routes retain real actions inside the shared operationa
 
 test("catalog records and inspector forms have responsive containment hooks", () => {
   assert.match(dashboard, /className="admin-list admin-governance-table"/);
-  assert.match(taxonomy, /className="admin-category-create admin-inspector-form"/);
+  assert.match(taxonomy, /admin-category-create admin-inspector-form/);
   assert.match(styles, /admin-catalog-governance/);
   assert.match(styles, /admin-governance-table/);
   assert.match(styles, /admin-inspector-form/);

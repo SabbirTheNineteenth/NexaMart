@@ -93,5 +93,5 @@ test("taxonomy management groups active work, gives each action context, and ref
   assert.match(taxonomy, /aria-live="polite"/);
   assert.match(taxonomy, /className="admin-taxonomy-proposal-actions"/);
   assert.match(dashboardStyles, /admin-taxonomy-action\)\{min-height:44px/);
-  assert.match(dashboardStyles, /@media\(max-width:700px\)[\s\S]*admin-taxonomy-create-grid/);
+  assert.match(dashboardStyles, /@media\(max-width:700px\)[\s\S]*admin-taxonomy-create-stack/);
 });
