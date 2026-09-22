@@ -44,21 +44,17 @@ test("seller taxonomy proposals are scoped, withdrawable, status-aware, and acce
 test("seller proposal withdrawal requires an accessible confirmation before its protected DELETE", () => {
   assert.match(taxonomy, /const \[withdrawalConfirmation, setWithdrawalConfirmation\] = useState<SellerTaxonomyProposal \| null>\(null\)/);
   assert.match(taxonomy, /setWithdrawalConfirmation\(proposal\)/);
-  assert.match(taxonomy, /role="alertdialog" aria-modal="true" aria-labelledby="taxonomy-withdrawal-confirmation-title"/);
+  assert.match(taxonomy, /import \{ ConfirmationDialog \} from "@\/components\/ConfirmationDialog"/);
+  assert.match(taxonomy, /<ConfirmationDialog title="Withdraw proposal\?"/);
   assert.match(taxonomy, /Cancel withdrawal/);
   assert.match(taxonomy, /Confirm withdrawal/);
   assert.match(taxonomy, /await deleteJSON<void>\(`\/seller\/taxonomy\/proposals\/\$\{proposal\.id\}`\)/);
   assert.match(taxonomy, /setWithdrawalConfirmation\(null\);/);
 });
 
-test("seller taxonomy withdrawal confirmation dismisses with Escape and restores initiating trigger focus", () => {
-  assert.match(taxonomy, /import type \{ FormEvent, KeyboardEvent \} from "react";/);
-  assert.match(taxonomy, /const withdrawalTriggerRef = useRef<HTMLButtonElement>\(null\);/);
-  assert.match(taxonomy, /const closeWithdrawalConfirmation = \(\) => \{\s*setWithdrawalConfirmation\(null\);\s*withdrawalTriggerRef\.current\?\.focus\(\);\s*\};/);
-  assert.match(taxonomy, /const handleWithdrawalConfirmationKeyDown = \(event: KeyboardEvent<HTMLDivElement>\) => \{\s*if \(event\.key === "Escape" && !pendingIds\.has\(withdrawalConfirmation!?\.id\)\) closeWithdrawalConfirmation\(\);\s*\};/);
-  assert.match(taxonomy, /onClick=\{\(event\) => \{ withdrawalTriggerRef\.current = event\.currentTarget; setWithdrawalConfirmation\(proposal\); \}\}/);
-  assert.match(taxonomy, /seller-delete-confirmation-backdrop" onKeyDown=\{handleWithdrawalConfirmationKeyDown\}/);
-  assert.match(taxonomy, /onClick=\{closeWithdrawalConfirmation\}/);
+test("seller taxonomy withdrawal confirmation delegates Escape and trigger restoration to the shared dialog", () => {
+  assert.match(taxonomy, /<ConfirmationDialog title="Withdraw proposal\?"[\s\S]*pending=\{pendingIds\.has\(withdrawalConfirmation\.id\)\}[\s\S]*onCancel=\{\(\) => setWithdrawalConfirmation\(null\)\}/);
+  assert.doesNotMatch(taxonomy, /seller-delete-confirmation-backdrop|handleWithdrawalConfirmationKeyDown|withdrawalTriggerRef/);
 });
 
 test("product creation does not invent taxonomy fields and directs sellers to classify drafts", () => {

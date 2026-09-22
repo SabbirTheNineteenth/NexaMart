@@ -1,8 +1,9 @@
 "use client";
 
-import type { FormEvent, KeyboardEvent } from "react";
+import type { FormEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ApiError, deleteJSON, getJSON, patchJSON, postJSON } from "@/lib/api";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 import styles from "./SellerEditorForms.module.css";
 import type { SellerProduct, SellerTaxonomyKind, SellerTaxonomyOptions, SellerTaxonomyProposal } from "@/types/seller";
 
@@ -33,22 +34,6 @@ export function SellerTaxonomyManagement({ products, onClassified }: { products:
   const taxonomyRequestController = useRef<AbortController | null>(null);
   const proposalRequestController = useRef<AbortController | null>(null);
   const pendingMutationIds = useRef(new Set<string>());
-  const confirmWithdrawalButtonRef = useRef<HTMLButtonElement>(null);
-  const withdrawalTriggerRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (withdrawalConfirmation) confirmWithdrawalButtonRef.current?.focus();
-  }, [withdrawalConfirmation]);
-
-  const closeWithdrawalConfirmation = () => {
-    setWithdrawalConfirmation(null);
-    withdrawalTriggerRef.current?.focus();
-  };
-
-  const handleWithdrawalConfirmationKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Escape" && !pendingIds.has(withdrawalConfirmation!.id)) closeWithdrawalConfirmation();
-  };
-
   const loadTaxonomy = useCallback(() => {
     taxonomyRequestController.current?.abort();
     const controller = new AbortController();
@@ -153,7 +138,7 @@ export function SellerTaxonomyManagement({ products, onClassified }: { products:
       </form>
       <div className="seller-taxonomy-proposals">{proposalForm("category")}{proposalForm("subcategory")}{proposalForm("brand")}</div>
     </>}
-    <section aria-labelledby="seller-taxonomy-proposals-heading"><h3 id="seller-taxonomy-proposals-heading">Your taxonomy proposals</h3>{proposalState === "loading" ? <p className="seller-state" role="status" aria-live="polite">Loading your taxonomy proposals…</p> : proposalState === "error" ? <div className="seller-empty" role="alert"><strong>Unable to load your taxonomy proposals.</strong><p>{proposalError}</p><button type="button" onClick={loadProposals} aria-label="Retry your taxonomy proposals">Retry proposals</button></div> : proposals.length ? <div className="seller-taxonomy-proposal-list">{proposals.map((proposal) => { const isPending = pendingIds.has(proposal.id); const itemFeedback = feedback[proposal.id]; return <article key={proposal.id} className="seller-taxonomy-proposal"><div><strong>{proposal.name}</strong><small>{proposal.kind} · {proposal.slug}{proposal.categoryId ? ` · parent ${proposal.categoryId}` : ""}</small><span className="status">{proposal.status}</span></div>{proposal.status === "pending" && <button type="button" onClick={(event) => { withdrawalTriggerRef.current = event.currentTarget; setWithdrawalConfirmation(proposal); }} disabled={isPending}>{isPending ? "Withdrawing…" : "Withdraw proposal"}</button>}{itemFeedback && <p role={itemFeedback.kind === "error" ? "alert" : "status"}>{itemFeedback.message}</p>}</article>; })}</div> : <p className="seller-state">No taxonomy proposals yet.</p>}</section>
-    {withdrawalConfirmation && <div className="seller-delete-confirmation-backdrop" onKeyDown={handleWithdrawalConfirmationKeyDown}><div className="seller-delete-confirmation" role="alertdialog" aria-modal="true" aria-labelledby="taxonomy-withdrawal-confirmation-title" aria-describedby="taxonomy-withdrawal-confirmation-description"><h2 id="taxonomy-withdrawal-confirmation-title">Withdraw proposal?</h2><p id="taxonomy-withdrawal-confirmation-description">This withdraws “{withdrawalConfirmation.name}” from review. You will need to submit a new proposal to request it again.</p><div className="seller-delete-confirmation-actions"><button type="button" onClick={closeWithdrawalConfirmation} disabled={pendingIds.has(withdrawalConfirmation.id)}>Cancel withdrawal</button><button ref={confirmWithdrawalButtonRef} className="seller-promotion-delete" type="button" onClick={() => void withdrawProposal(withdrawalConfirmation)} disabled={pendingIds.has(withdrawalConfirmation.id)}>Confirm withdrawal</button></div></div></div>}
+    <section aria-labelledby="seller-taxonomy-proposals-heading"><h3 id="seller-taxonomy-proposals-heading">Your taxonomy proposals</h3>{proposalState === "loading" ? <p className="seller-state" role="status" aria-live="polite">Loading your taxonomy proposals…</p> : proposalState === "error" ? <div className="seller-empty" role="alert"><strong>Unable to load your taxonomy proposals.</strong><p>{proposalError}</p><button type="button" onClick={loadProposals} aria-label="Retry your taxonomy proposals">Retry proposals</button></div> : proposals.length ? <div className="seller-taxonomy-proposal-list">{proposals.map((proposal) => { const isPending = pendingIds.has(proposal.id); const itemFeedback = feedback[proposal.id]; return <article key={proposal.id} className="seller-taxonomy-proposal"><div><strong>{proposal.name}</strong><small>{proposal.kind} · {proposal.slug}{proposal.categoryId ? ` · parent ${proposal.categoryId}` : ""}</small><span className="status">{proposal.status}</span></div>{proposal.status === "pending" && <button type="button" onClick={() => setWithdrawalConfirmation(proposal)} disabled={isPending}>{isPending ? "Withdrawing…" : "Withdraw proposal"}</button>}{itemFeedback && <p role={itemFeedback.kind === "error" ? "alert" : "status"}>{itemFeedback.message}</p>}</article>; })}</div> : <p className="seller-state">No taxonomy proposals yet.</p>}</section>
+    {withdrawalConfirmation && <ConfirmationDialog title="Withdraw proposal?" description={`This withdraws “${withdrawalConfirmation.name}” from review. You will need to submit a new proposal to request it again.`} confirmLabel="Confirm withdrawal" cancelLabel="Cancel withdrawal" tone="danger" pending={pendingIds.has(withdrawalConfirmation.id)} onCancel={() => setWithdrawalConfirmation(null)} onConfirm={() => void withdrawProposal(withdrawalConfirmation)} />}
   </section>;
 }

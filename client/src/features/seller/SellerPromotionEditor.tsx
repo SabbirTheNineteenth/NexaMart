@@ -1,8 +1,9 @@
 "use client";
 
-import type { FormEvent, KeyboardEvent } from "react";
-import { useEffect, useRef, useState } from "react";
+import type { FormEvent } from "react";
+import { useState } from "react";
 import { ApiError, deleteJSON, patchJSON } from "@/lib/api";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 import {
   buildSellerPromotionUpdate,
   validateSellerPromotionUpdate,
@@ -34,11 +35,6 @@ export function SellerPromotionEditor({
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const confirmDeleteButtonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (deleteConfirmationOpen) confirmDeleteButtonRef.current?.focus();
-  }, [deleteConfirmationOpen]);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -101,12 +97,6 @@ export function SellerPromotionEditor({
     } finally {
       setDeleting(false);
     }
-  };
-
-  const handleDeleteConfirmationKeyDown = (
-    event: KeyboardEvent<HTMLDivElement>,
-  ) => {
-    if (event.key === "Escape" && !deleting) setDeleteConfirmationOpen(false);
   };
 
   return (
@@ -201,44 +191,7 @@ export function SellerPromotionEditor({
           </p>
         )}
       </form>
-      {deleteConfirmationOpen && (
-        <div
-          className="seller-delete-confirmation-backdrop"
-          onKeyDown={handleDeleteConfirmationKeyDown}
-        >
-          <div
-            className="seller-delete-confirmation"
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="promotion-delete-confirmation-title"
-            aria-describedby="promotion-delete-confirmation-description"
-          >
-            <h2 id="promotion-delete-confirmation-title">Delete promotion?</h2>
-            <p id="promotion-delete-confirmation-description">
-              This permanently removes “{promotion.name}”. This action cannot be
-              undone.
-            </p>
-            <div className="seller-delete-confirmation-actions">
-              <button
-                type="button"
-                onClick={() => setDeleteConfirmationOpen(false)}
-                disabled={saving || deleting}
-              >
-                Cancel deletion
-              </button>
-              <button
-                ref={confirmDeleteButtonRef}
-                className="seller-promotion-delete"
-                type="button"
-                onClick={() => void remove()}
-                disabled={saving || deleting}
-              >
-                Confirm deletion
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {deleteConfirmationOpen && <ConfirmationDialog title="Delete promotion?" description={`This permanently removes “${promotion.name}”. This action cannot be undone.`} confirmLabel="Confirm deletion" cancelLabel="Cancel deletion" tone="danger" pending={saving || deleting} onCancel={() => setDeleteConfirmationOpen(false)} onConfirm={() => void remove()} />}
     </details>
   );
 }

@@ -453,7 +453,7 @@ export function SellerDashboard() {
     </section>}
     </>}</div>
     </div>
-    {fulfillmentConfirmation && <ConfirmationDialog title={`Mark ${fulfillmentConfirmation.item.productName} as ${fulfillmentConfirmation.status}?`} description="This records the next fulfillment status for this order line only." confirmLabel={`Confirm ${fulfillmentConfirmation.status}`} onCancel={() => setFulfillmentConfirmation(null)} onConfirm={confirmFulfillmentUpdate} />}
-    {payoutConfirmation && <ConfirmationDialog title="Request payout review?" description="This creates a review request only. It does not transfer or settle money." confirmLabel="Request review" pending={payoutSubmitting} onCancel={() => setPayoutConfirmation(false)} onConfirm={() => void requestPayout()} />}
+    {fulfillmentConfirmation && <ConfirmationDialog title={`Mark ${fulfillmentConfirmation.item.productName} as ${fulfillmentConfirmation.status}?`} description="This records the next fulfillment status for this order line only." confirmLabel={`Confirm ${fulfillmentConfirmation.status}`} tone="primary" onCancel={() => setFulfillmentConfirmation(null)} onConfirm={confirmFulfillmentUpdate} />}
+    {payoutConfirmation && <ConfirmationDialog title="Request payout review?" description="This creates a review request only. It does not transfer or settle money." confirmLabel="Request review" tone="neutral" pending={payoutSubmitting} onCancel={() => setPayoutConfirmation(false)} onConfirm={() => void requestPayout()} />}
   </main>;
 }

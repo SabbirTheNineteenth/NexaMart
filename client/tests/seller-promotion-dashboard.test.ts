@@ -59,10 +59,11 @@ test("seller promotion rows delete locally only after a successful DELETE respon
   assert.match(editor, /const \[deleteConfirmationOpen, setDeleteConfirmationOpen\] = useState\(false\)/);
   assert.match(editor, /aria-label=\{`Delete \$\{promotion\.name\} promotion`\}/);
   assert.match(editor, /onClick=\{\(\) => setDeleteConfirmationOpen\(true\)\}/);
-  assert.match(editor, /role="alertdialog"\s+aria-modal="true"\s+aria-labelledby="promotion-delete-confirmation-title"/);
+  assert.match(editor, /import \{ ConfirmationDialog \} from "@\/components\/ConfirmationDialog"/);
+  assert.match(editor, /<ConfirmationDialog title="Delete promotion\?"/);
   assert.match(editor, /Cancel deletion/);
   assert.match(editor, /Confirm deletion/);
-  assert.match(editor, /disabled=\{saving \|\| deleting\}/);
+  assert.match(editor, /pending=\{saving \|\| deleting\}/);
   assert.match(editor, /deleting \? "Deleting promotion…" : "Delete promotion"/);
   assert.match(editor, /await deleteJSON<void>\(`\/seller\/promotions\/\$\{promotion\.id\}`\)/);
   assert.match(editor, /onRemoved\(promotion\.id\)/);

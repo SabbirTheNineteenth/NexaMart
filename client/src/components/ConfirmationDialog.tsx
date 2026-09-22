@@ -1,7 +1,10 @@
 "use client";
 
-import type { KeyboardEvent, ReactNode } from "react";
+import { CheckCircle2, CircleAlert, CircleX, ShieldCheck, X } from "lucide-react";
+import type { KeyboardEvent, MouseEvent, ReactNode } from "react";
 import { useEffect, useId, useRef } from "react";
+
+type ConfirmationTone = "primary" | "caution" | "danger" | "neutral";
 
 type ConfirmationDialogProps = {
   title: string;
@@ -9,23 +12,37 @@ type ConfirmationDialogProps = {
   confirmLabel: string;
   cancelLabel?: string;
   pending?: boolean;
+  tone?: ConfirmationTone;
   onConfirm(): void;
   onCancel(): void;
   children?: ReactNode;
 };
 
-export function ConfirmationDialog({ title, description, confirmLabel, cancelLabel = "Cancel", pending = false, onConfirm, onCancel, children }: ConfirmationDialogProps) {
+const toneIcons = {
+  primary: CheckCircle2,
+  caution: CircleAlert,
+  danger: CircleX,
+  neutral: ShieldCheck,
+} as const;
+
+export function ConfirmationDialog({ title, description, confirmLabel, cancelLabel = "Cancel", pending = false, tone = "primary", onConfirm, onCancel, children }: ConfirmationDialogProps) {
   const titleId = useId();
   const descriptionId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
   const previouslyFocusedElement = useRef<HTMLElement | null>(null);
+  const Icon = toneIcons[tone];
 
   useEffect(() => {
     previouslyFocusedElement.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    confirmButtonRef.current?.focus();
+    const requiredField = dialogRef.current?.querySelector<HTMLElement>("input[required]:not([disabled]),textarea[required]:not([disabled]),select[required]:not([disabled])");
+    (requiredField ?? confirmButtonRef.current)?.focus();
     return () => previouslyFocusedElement.current?.focus();
   }, []);
+
+  const handleBackdropClick = (event: MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget && !pending) onCancel();
+  };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Escape" && !pending) onCancel();
@@ -38,15 +55,11 @@ export function ConfirmationDialog({ title, description, confirmLabel, cancelLab
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
   };
 
-  return <div className="confirmation-dialog-backdrop" onKeyDown={handleKeyDown}>
-    <div ref={dialogRef} className="confirmation-dialog" role="alertdialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId}>
-      <h2 id={titleId}>{title}</h2>
-      <p id={descriptionId}>{description}</p>
-      {children}
-      <div className="confirmation-dialog-actions">
-        <button type="button" onClick={onCancel} disabled={pending}>{cancelLabel}</button>
-        <button ref={confirmButtonRef} className="confirmation-dialog-confirm" type="button" onClick={onConfirm} disabled={pending}>{pending ? "Saving…" : confirmLabel}</button>
-      </div>
+  return <div className="confirmation-dialog-backdrop" onClick={handleBackdropClick} onKeyDown={handleKeyDown}>
+    <div ref={dialogRef} className={`confirmation-dialog confirmation-dialog--${tone}`} role="alertdialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId} onClick={(event) => event.stopPropagation()}>
+      <header className="confirmation-dialog-header"><span className="confirmation-dialog-icon" aria-hidden="true"><Icon size={20} strokeWidth={1.9} /></span><div><h2 id={titleId}>{title}</h2><p id={descriptionId}>{description}</p></div><button className="confirmation-dialog-close" type="button" aria-label="Close dialog" onClick={onCancel} disabled={pending}><X size={18} strokeWidth={2} /></button></header>
+      {children && <div className="confirmation-dialog-body">{children}</div>}
+      <footer className="confirmation-dialog-actions"><button type="button" onClick={onCancel} disabled={pending}>{cancelLabel}</button><button ref={confirmButtonRef} className={`confirmation-dialog-confirm confirmation-dialog-confirm--${tone}`} type="button" onClick={onConfirm} disabled={pending}>{pending ? "Saving…" : confirmLabel}</button></footer>
     </div>
   </div>;
 }

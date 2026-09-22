@@ -11,11 +11,11 @@ test("admin state-changing actions use the reusable accessible confirmation dial
   assert.match(dialog, /role="alertdialog"/);
   assert.match(dialog, /aria-modal="true"/);
   assert.match(dialog, /if \(event\.key === "Escape" && !pending\) onCancel\(\);/);
-  assert.match(dialog, /confirmButtonRef\.current\?\.focus\(\);/);
+  assert.match(dialog, /\(requiredField \?\? confirmButtonRef\.current\)\?\.focus\(\);/);
   assert.match(dialog, /event\.key !== "Tab"/);
   assert.match(dialog, /textarea:not\(\[disabled\]\)/);
   assert.match(dialog, /previouslyFocusedElement\.current\?\.focus\(\);/);
-  assert.match(styles, /\.confirmation-dialog\{[^}]*max-height:calc\(100dvh - 40px\)[^}]*overflow-y:auto/);
+  assert.match(styles, /\.confirmation-dialog\{[^}]*max-height:calc\(100dvh - 32px\)[^}]*overflow-y:auto/);
 
   assert.match(dashboard, /const \[confirmation, setConfirmation\] = useState<AdminConfirmation \| null>\(null\);/);
   assert.match(dashboard, /onClick=\{\(\) => setConfirmation\(\{ kind: "seller", change: \{ sellerId: seller\.id, action \} \}\)\}/);
