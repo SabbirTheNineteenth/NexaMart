@@ -12,6 +12,7 @@ import { checkoutPayload } from "@/features/cart/checkout.utils";
 import { catalogLoadFailure, catalogLoadSuccess } from "@/features/catalog/catalog-load-state";
 import { buildCatalogDiscoveryPath, catalogDiscoveryFacets, catalogFiltersFromSearchParams, catalogFiltersToSearchParams, type CatalogTaxonomy } from "@/features/catalog/catalog-discovery";
 import { headerWishlistPath } from "@/features/catalog/header-wishlist";
+import { accountDestination, accountDestinationLabel } from "@/features/account/account-destination";
 import { buildProductPresentation, productImageSource } from "@/features/catalog/product-presentation";
 import { wishlistSaveError } from "@/features/catalog/wishlist-save";
 import { referenceFacetProducts, type AvailabilityFacet, type ProductTypeFacet } from "@/features/catalog/reference-facets";
@@ -378,13 +379,13 @@ export function Storefront() {
         <nav className="reference-explore-tabs" aria-label="Explore sections"><a href="#collection">Shop</a><a href="#collection">Categories</a><a href="#new-arrivals-heading">New Arrivals</a><a href="#collection">For You</a></nav>
         <label className="marketplace-search"><Search size={17}/><span className="sr-only">Search the marketplace</span><input id="product-search" aria-label="Search the marketplace" value={query} onChange={(event) => { setCatalogLoaded(false); setQuery(event.target.value); }} placeholder="Search products, brands, and departments" /></label>
         <div className="marketplace-actions"><Link className="marketplace-action-icon" href={headerWishlistPath(cart.authenticated)} aria-label="Open saved pieces"><Heart size={17}/></Link>
-          <a className="marketplace-action-icon" href="/account" aria-label="Open account"><UserRound size={17}/></a>
+          <Link className="marketplace-action-icon" href={accountDestination(cart.accountRole)} aria-label={accountDestinationLabel(cart.accountRole)}><UserRound size={17}/></Link>
           <button ref={mobileNavToggleRef} className="icon-button mobile-menu-toggle" type="button" aria-label="Toggle marketplace categories" aria-expanded={mobileNavOpen} aria-controls="marketplace-category-navigation" onClick={() => mobileNavOpen ? closeMobileNav() : setMobileNavOpen(true)}><Menu size={18} /></button>
           <button className="marketplace-bag" aria-label="Open shopping bag" onClick={(event) => openCart(event.currentTarget)}><ShoppingBag size={18}/><span>Bag{cart.totalItems ? ` ${cart.totalItems}` : ""}</span></button>
         </div>
       </div>
       <nav id="marketplace-category-navigation" className={`marketplace-category-nav ${mobileNavOpen ? "is-open" : ""}`} aria-label="Marketplace categories">
-        <div className="shell marketplace-rail"><button type="button" aria-label="Browse all departments" className={!category ? "active" : ""} aria-pressed={!category} onClick={() => { setCatalogLoaded(false); setCategory(""); setSubcategory(""); }}>Browse all departments</button>{taxonomy.categories.map((item) => <button key={item.id} type="button" className={category === item.name ? "active" : ""} aria-pressed={category === item.name} onClick={() => selectDepartment(item.name)}>{item.name}</button>)}<Link className="mobile-marketplace-account" href="/stores" onClick={() => setMobileNavOpen(false)}>Stores</Link><Link className="mobile-marketplace-account" href={headerWishlistPath(cart.authenticated)} onClick={() => setMobileNavOpen(false)}>Wishlist</Link><a className="mobile-marketplace-account" href="/account" onClick={() => setMobileNavOpen(false)}>Account</a><a href="#catalog-information" onClick={() => setMobileNavOpen(false)}>Catalog information</a></div>
+        <div className="shell marketplace-rail"><button type="button" aria-label="Browse all departments" className={!category ? "active" : ""} aria-pressed={!category} onClick={() => { setCatalogLoaded(false); setCategory(""); setSubcategory(""); }}>Browse all departments</button>{taxonomy.categories.map((item) => <button key={item.id} type="button" className={category === item.name ? "active" : ""} aria-pressed={category === item.name} onClick={() => selectDepartment(item.name)}>{item.name}</button>)}<Link className="mobile-marketplace-account" href="/stores" onClick={() => setMobileNavOpen(false)}>Stores</Link><Link className="mobile-marketplace-account" href={headerWishlistPath(cart.authenticated)} onClick={() => setMobileNavOpen(false)}>Wishlist</Link><Link className="mobile-marketplace-account" href={accountDestination(cart.accountRole)} aria-label={accountDestinationLabel(cart.accountRole)} onClick={() => setMobileNavOpen(false)}>Account</Link><a href="#catalog-information" onClick={() => setMobileNavOpen(false)}>Catalog information</a></div>
       </nav>
     </header>
 

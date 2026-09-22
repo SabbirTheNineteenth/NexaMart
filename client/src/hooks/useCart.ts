@@ -5,10 +5,10 @@ import { cartReducer, initialCart, type CartItem } from "@/features/cart/cart.re
 import { cartRemovalPath, toCartItems, type PersistentCartLine } from "@/features/cart/cart-api.utils";
 import { deleteJSON, getJSON, patchJSON, postJSON } from "@/lib/api";
 import type { CartProduct } from "@/types/catalog";
+import type { Account } from "@/types/account";
 
 const key = "nexamart-cart";
 const handoffKey = "nexamart-cart-handoff";
-type Account = { id: string };
 
 export type CartQuantityUpdate = { state: "pending" } | { state: "error"; message: string };
 export type CartLoadState = { state: "idle" } | { state: "loading" } | { state: "error"; message: string };
@@ -79,6 +79,7 @@ export function useCart() {
   const [cart, dispatch] = useReducer(cartReducer, initialCart);
   const [hydrated, setHydrated] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
+  const [accountRole, setAccountRole] = useState<Account["role"] | null>(null);
   const [cartLoadState, setCartLoadState] = useState<CartLoadState>({ state: "idle" });
   const [cartHandoffState, setCartHandoffState] = useState<CartHandoffState>({ state: "idle" });
   const [removingItemId, setRemovingItemId] = useState<string | null>(null);
@@ -136,6 +137,7 @@ export function useCart() {
       try {
         const { account } = await getJSON<{ account: Account }>("/auth/me");
         setAuthenticated(true);
+        setAccountRole(account.role);
         guestCartItems.current = savedItems;
         guestCartAccountId.current = account.id;
         const savedProgress = window.localStorage.getItem(handoffKey);
@@ -189,5 +191,5 @@ export function useCart() {
     if (!authenticated) return;
     if (await handoffGuestCart()) await loadServerCart();
   };
-  return { ...cart, add, setQuantity, retryQuantity, remove, clear, authenticated, cartLoadState, cartHandoffState, retryCartLoad, removingItemId, quantityUpdates };
+  return { ...cart, add, setQuantity, retryQuantity, remove, clear, authenticated, accountRole, cartLoadState, cartHandoffState, retryCartLoad, removingItemId, quantityUpdates };
 }

@@ -8,6 +8,7 @@ import { cartAddError } from "@/features/cart/cart-add-feedback";
 import { productImageSource } from "@/features/catalog/product-presentation";
 import { recordRecentlyViewedProduct } from "@/features/catalog/recently-viewed";
 import { headerWishlistPath } from "@/features/catalog/header-wishlist";
+import { accountDestination, accountDestinationLabel } from "@/features/account/account-destination";
 import { useCart } from "@/hooks/useCart";
 import { getJSON, postJSON } from "@/lib/api";
 import { wishlistSaveError } from "@/features/catalog/wishlist-save";
@@ -20,6 +21,7 @@ type CartAddState = { state: "pending" } | { state: "success" } | { state: "erro
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 
 function DetailHeader({ authenticated, totalItems }: { authenticated: boolean; totalItems: number }) {
+  const cart = useCart();
   return <header className="marketplace-header product-detail-header">
     <div className="shell marketplace-topbar">
       <Link href="/" className="marketplace-brand" aria-label="NexaMart marketplace"><BrandLogo monogram className="marketplace-brand-mark" priority /><span>NexaMart</span></Link>
@@ -32,7 +34,7 @@ function DetailHeader({ authenticated, totalItems }: { authenticated: boolean; t
       <div className="marketplace-actions">
         <Link className="marketplace-action-icon" href="/stores" aria-label="Browse stores"><Store size={16} aria-hidden="true" /></Link>
         <Link className="marketplace-action-icon" href={headerWishlistPath(authenticated)} aria-label="View saved pieces"><Heart size={16} aria-hidden="true" /></Link>
-        <Link className="marketplace-action-icon" href="/account" aria-label="Open account"><UserRound size={16} aria-hidden="true" /></Link>
+        <Link className="marketplace-action-icon" href={accountDestination(cart.accountRole)} aria-label={accountDestinationLabel(cart.accountRole)}><UserRound size={16} aria-hidden="true" /></Link>
         <Link className="marketplace-bag" href="/?bag=1" aria-label="Open shopping bag"><ShoppingBag size={18} /><span>Bag{totalItems ? ` ${totalItems}` : ""}</span></Link>
       </div>
     </div>
