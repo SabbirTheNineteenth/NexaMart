@@ -63,6 +63,14 @@ test("Storefront keeps its full marketplace shell API-backed, navigable, and mot
   assert.doesNotMatch(storefront, /rating|review|discount percentage|delivery estimate/i);
 });
 
+test("Storefront keeps the catalog toolbar and results in one content-driven flow column", () => {
+  assert.match(storefront, /<div className=\{styles\.catalogWorkspace\}>[\s\S]*?className="reference-product-toolbar"[\s\S]*?className=\{styles\.catalogResults\}/);
+  assert.match(styles, /\.catalogWorkspace\s*\{[\s\S]*?display: grid;[\s\S]*?gap: clamp\(1rem, 1\.5vw, 1\.25rem\);[\s\S]*?align-content: start;/);
+  assert.match(styles, /grid-template-areas:[\s\S]*?"hero hero"[\s\S]*?"filters catalog";/);
+  assert.doesNotMatch(styles, /grid-area: toolbar;[\s\S]*?\.catalogResults\s*\{\s*grid-area: results;/);
+  assert.doesNotMatch(styles, /"filters toolbar"|"filters results"|"recent/);
+});
+
 test("Storefront gives its sidebar, hero, cards, and brand rail local responsive safeguards", () => {
   assert.match(styles, /\.storefrontLayout[\s,]*:global\(\.storefront \.reference-explore-content\)\s*\{[\s\S]*?grid-template-columns: minmax\(12rem, 14rem\) minmax\(0, 1fr\);/);
   assert.match(styles, /\.heroHeading[\s,]*:global\(\.storefront #explore-heading\)\s*\{[\s\S]*?max-width: 13ch;/);
