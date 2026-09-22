@@ -4,6 +4,7 @@ import test from "node:test";
 
 const dashboard = readFileSync(new URL("../src/features/admin/AdminDashboard.tsx", import.meta.url), "utf8");
 const taxonomy = readFileSync(new URL("../src/features/admin/AdminTaxonomyManagement.tsx", import.meta.url), "utf8");
+const dashboardStyles = readFileSync(new URL("../src/features/admin/AdminDashboard.module.css", import.meta.url), "utf8");
 const adminTypes = readFileSync(new URL("../src/types/admin.ts", import.meta.url), "utf8");
 
 test("admin dashboard uses the canonical taxonomy governance workspace", () => {
@@ -91,5 +92,6 @@ test("taxonomy management groups active work, gives each action context, and ref
   assert.match(taxonomy, /className="admin-taxonomy-row-actions"/);
   assert.match(taxonomy, /aria-live="polite"/);
   assert.match(taxonomy, /className="admin-taxonomy-proposal-actions"/);
-  assert.match(taxonomy, /<style jsx global>\{`[\s\S]*min-height: 44px[\s\S]*@media \(max-width: 700px\)[\s\S]*`\}<\/style>/);
+  assert.match(dashboardStyles, /admin-taxonomy-action\)\{min-height:44px/);
+  assert.match(dashboardStyles, /@media\(max-width:700px\)[\s\S]*admin-taxonomy-create-grid/);
 });

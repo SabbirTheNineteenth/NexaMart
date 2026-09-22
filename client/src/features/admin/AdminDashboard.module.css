@@ -206,3 +206,57 @@
   :global(.admin-finance) :global(.admin-finance-summary),:global(.admin-analytics) :global(.admin-analytics-scope){grid-template-columns:1fr}
   :global(.admin-finance) :global(.admin-finance-summary article),:global(.admin-analytics) :global(.admin-analytics-scope span){border-right:0;border-bottom:1px solid #e4dfef}
 }
+
+/* Final parity pass: canonical taxonomy and compact navigation use the same
+   light operational surface as every other Admin route. */
+:global(.admin-taxonomy-workspace){display:grid;gap:18px;padding:18px 22px 22px;background:#fff}
+:global(.admin-taxonomy-create-group),:global(.admin-taxonomy-record-group),:global(.admin-taxonomy-proposals){overflow:hidden;border:1px solid #e4dfef;border-radius:9px;background:#fff}
+:global(.admin-taxonomy-section-head){display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:14px 16px;border-bottom:1px solid #e4dfef;background:#faf9fe}
+:global(.admin-taxonomy-section-head h3),:global(.admin-taxonomy-form-heading h3){margin:0;color:#21183b;font-size:13px}
+:global(.admin-taxonomy-section-head p),:global(.admin-taxonomy-form-heading p){margin:5px 0 0;color:#6d6480;font-size:11px;line-height:1.45}
+:global(.admin-taxonomy-section-head > span),:global(.admin-taxonomy-row-heading > span){flex:0 0 auto;padding:5px 8px;border:1px solid #e4dfef;border-radius:999px;background:#f4f0ff;color:#56349e;font-size:10px;font-weight:800}
+:global(.admin-taxonomy-create-grid){display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+:global(.admin-taxonomy-create-grid) :global(.admin-category-create){display:grid;gap:12px;align-content:start;min-width:0;padding:16px;border:0;background:#fff}
+:global(.admin-taxonomy-create-grid) :global(.admin-category-create + .admin-category-create){border-left:1px solid #e4dfef}
+:global(.admin-taxonomy-fields){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0;margin:0;padding:0;border:0}
+:global(.admin-taxonomy-fields label){display:grid;gap:5px;min-width:0;color:#6d6480;font-size:11px;font-weight:800}
+:global(.admin-taxonomy-fields input),:global(.admin-taxonomy-fields select),:global(.admin-taxonomy-fields textarea){width:100%;min-width:0;min-height:44px;box-sizing:border-box;padding:9px 10px;border:1px solid #d9d0ec;border-radius:7px;background:#fff;color:#21183b;font:inherit}
+:global(.admin-taxonomy-fields textarea){min-height:88px;resize:vertical}
+:global(.admin-taxonomy-fields :focus-visible),:global(.admin-taxonomy-action:focus-visible){outline:3px solid #7b4ee3;outline-offset:2px}
+:global(.admin-taxonomy-availability){grid-column:1 / -1;grid-template-columns:auto 1fr!important;align-items:center;min-height:44px;padding:0 2px}
+:global(.admin-taxonomy-availability input){width:18px!important;min-height:18px!important}
+:global(.admin-taxonomy-row-actions),:global(.admin-taxonomy-proposal-actions){display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+:global(.admin-taxonomy-action){min-height:44px;padding:10px 14px;border:1px solid #d9d0ec;border-radius:7px;background:#fff;color:#392363;font-size:12px;font-weight:800;cursor:pointer}
+:global(.admin-taxonomy-action:hover:not(:disabled)){border-color:#7b4ee3;background:#f7f3ff;color:#56349e}
+:global(.admin-taxonomy-action:disabled){cursor:wait;opacity:.65}
+:global(.admin-taxonomy-create-grid) :global(.primary-button){border-color:#653cc6;background:#653cc6;color:#fff}
+:global(.admin-taxonomy-records){display:grid;gap:14px}
+:global(.admin-taxonomy-record-group) :global(.admin-category-list),:global(.admin-taxonomy-proposals) :global(.admin-category-list){display:grid}
+:global(.admin-taxonomy-record-group) :global(.admin-category-row),:global(.admin-taxonomy-proposals) :global(.admin-category-row){display:grid;grid-template-columns:minmax(150px,.8fr) minmax(0,2fr) auto;gap:14px;align-items:end;padding:14px 16px;border:0;border-bottom:1px solid #ece8f4;background:#fff}
+:global(.admin-taxonomy-record-group) :global(.admin-category-row:last-child),:global(.admin-taxonomy-proposals) :global(.admin-category-row:last-child){border-bottom:0}
+:global(.admin-taxonomy-row-heading){align-self:start;display:grid;gap:5px;min-width:0}
+:global(.admin-taxonomy-row-heading strong){font-size:13px;overflow-wrap:anywhere}
+:global(.admin-taxonomy-row-heading small){color:#6d6480;font-size:11px;overflow-wrap:anywhere}
+:global(.admin-taxonomy-proposals){margin-top:18px}
+:global(.admin-taxonomy-proposals) :global(.admin-panel-head){padding:14px 16px;border-bottom:1px solid #e4dfef;background:#faf9fe}
+:global(.admin-taxonomy-focused-form){display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,.4fr);gap:16px;padding:18px 22px 22px;background:#fff}
+:global(.admin-taxonomy-focused-form) :global(.admin-category-create){display:grid;gap:12px;padding:16px;border:1px solid #e4dfef;border-radius:9px;background:#fff}
+:global(.admin-taxonomy-focused-form aside){padding:16px;border-left:3px solid #7b4ee3;border-radius:8px;background:#f4f0ff;color:#6d6480;font-size:12px;line-height:1.5}
+:global(.admin-taxonomy-focused-form aside strong){color:#21183b}
+:global(.admin-taxonomy-focused-form aside p){margin:6px 0 0}
+@media(max-width:900px){
+  :global(.admin-products-subnav){position:static;z-index:auto;margin:0 0 5px 18px;padding:4px 0 4px 9px;border:0;border-left:1px solid #5d477f;border-radius:0;background:transparent}
+}
+@media(max-width:700px){
+  :global(.admin-taxonomy-workspace){gap:14px;padding:14px}
+  :global(.admin-taxonomy-create-grid),:global(.admin-taxonomy-fields),:global(.admin-taxonomy-focused-form){grid-template-columns:1fr}
+  :global(.admin-taxonomy-create-grid) :global(.admin-category-create + .admin-category-create){border-top:1px solid #e4dfef;border-left:0}
+  :global(.admin-taxonomy-record-group) :global(.admin-category-row),:global(.admin-taxonomy-proposals) :global(.admin-category-row){grid-template-columns:1fr;gap:12px}
+  :global(.admin-taxonomy-focused-form){padding:14px}
+  :global(.admin-taxonomy-focused-form aside){border-top:3px solid #7b4ee3;border-left:0}
+}
+@media(max-width:390px){
+  :global(.admin-taxonomy-workspace),:global(.admin-taxonomy-focused-form){padding:12px}
+  :global(.admin-taxonomy-section-head){padding:14px 12px}
+  :global(.admin-taxonomy-proposal-actions) :global(button),:global(.admin-taxonomy-row-actions) :global(button){width:100%}
+}

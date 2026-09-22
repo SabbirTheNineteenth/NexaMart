@@ -188,8 +188,7 @@ export function AdminTaxonomyManagement({ createKind }: { createKind?: AdminTaxo
   if (createKind) return <section className="admin-panel admin-taxonomy admin-taxonomy-create-page" aria-labelledby="taxonomy-create-heading">
     <div className="admin-panel-head"><div><p className="eyebrow">Products / Catalog vocabulary</p><h2 id="taxonomy-create-heading">Create canonical {createKind}</h2><p>Add a controlled catalog term. It is immediately available to approved seller workflows.</p></div><Link className="admin-context-link" href="/admin/products">Back to products</Link></div>
     {taxonomyState === "loading" ? <p className="admin-state">Loading catalog vocabulary…</p> : taxonomyState === "error" ? <div className="admin-empty" role="alert"><strong>Unable to prepare this create form.</strong><p>{taxonomyError}</p><button type="button" onClick={loadTaxonomy}>Try again</button></div> : <div className="admin-taxonomy-focused-form">{createForm(createKind)}<aside><strong>Canonical terms only</strong><p>Use a concise name and a stable lowercase slug. Subcategories require their parent category.</p></aside></div>}
-    <TaxonomyStyles />
-  </section>;
+      </section>;
 
   return <section className="admin-panel admin-taxonomy" aria-labelledby="taxonomy-heading">
     <div className="admin-panel-head"><div><p className="eyebrow">Catalog governance</p><h2 id="taxonomy-heading">Canonical taxonomy governance</h2><p>Maintain active and archived catalog vocabulary, then review pending seller proposals.</p></div><span>{taxonomyState === "loading" ? "Loading" : `${taxonomy.categories.length + taxonomy.subcategories.length + taxonomy.brands.length} nodes`}</span></div>
@@ -201,60 +200,5 @@ export function AdminTaxonomyManagement({ createKind }: { createKind?: AdminTaxo
     {archiveConfirmation && <ConfirmationDialog title={`Archive ${archiveConfirmation.node.name}?`} description="Archived taxonomy terms are no longer available for new catalog classifications." confirmLabel="Confirm archive" pending={pendingIds.has(archiveConfirmation.node.id)} onCancel={() => setArchiveConfirmation(null)} onConfirm={confirmArchive} />}
     {nodeUpdateConfirmation && <ConfirmationDialog title={`Save changes to ${nodeUpdateConfirmation.node.name}?`} description="This updates the canonical taxonomy term and its classification availability." confirmLabel="Save changes" pending={pendingIds.has(nodeUpdateConfirmation.node.id)} onCancel={() => setNodeUpdateConfirmation(null)} onConfirm={confirmNodeUpdate} />}
     {proposalReviewConfirmation && <ConfirmationDialog title={`${proposalReviewConfirmation.decision === "approve" ? "Approve" : "Reject"} ${proposalReviewConfirmation.proposal.name}?`} description={`This will ${proposalReviewConfirmation.decision} the seller taxonomy proposal.`} confirmLabel={proposalReviewConfirmation.decision === "approve" ? "Approve proposal" : "Reject proposal"} pending={pendingIds.has(proposalReviewConfirmation.proposal.id)} onCancel={() => setProposalReviewConfirmation(null)} onConfirm={confirmProposalReview} />}
-    <TaxonomyStyles />
   </section>;
-}
-
-function TaxonomyStyles() {
-  return <style jsx global>{`
-    .admin-taxonomy-workspace { display: grid; gap: 18px; padding: 18px 22px 22px; }
-    .admin-taxonomy-create-group, .admin-taxonomy-record-group, .admin-taxonomy-proposals { border: 1px solid var(--line); background: var(--soft); }
-    .admin-taxonomy-section-head { display: flex; align-items: start; justify-content: space-between; gap: 16px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
-    .admin-taxonomy-section-head h3 { margin: 0; font-size: 14px; }
-    .admin-taxonomy-section-head p { margin: 5px 0 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
-    .admin-taxonomy-section-head > span, .admin-taxonomy-row-heading > span { flex: 0 0 auto; padding: 4px 7px; background: #fff; border: 1px solid var(--line); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 10px; }
-    .admin-taxonomy-create-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .admin-taxonomy-create-grid .admin-category-create { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 16px; border: 0; background: #fff; align-content: start; }
-    .admin-taxonomy-create-grid .admin-category-create + .admin-category-create { border-left: 1px solid var(--line); }
-    .admin-taxonomy-form-heading h3 { margin: 0; font-size: 13px; text-transform: capitalize; }
-    .admin-taxonomy-form-heading p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
-    .admin-taxonomy-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; min-width: 0; margin: 0; padding: 0; border: 0; }
-    .admin-taxonomy-fields label { display: grid; gap: 5px; min-width: 0; color: var(--muted); font-size: 11px; font-weight: 700; }
-    .admin-taxonomy-fields input, .admin-taxonomy-fields select, .admin-taxonomy-fields textarea { width: 100%; min-width: 0; min-height: 40px; box-sizing: border-box; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); padding: 9px 10px; font: inherit; }
-    .admin-taxonomy-fields textarea { min-height: 76px; resize: vertical; }
-    .admin-taxonomy-fields input:focus-visible, .admin-taxonomy-fields select:focus-visible, .admin-taxonomy-fields textarea:focus-visible, .admin-taxonomy-action:focus-visible { outline: 3px solid var(--purple); outline-offset: 2px; }
-    .admin-taxonomy-availability { grid-column: 1 / -1; grid-template-columns: auto 1fr !important; align-items: center; min-height: 40px; padding: 0 2px; }
-    .admin-taxonomy-availability input { width: 18px !important; min-height: 18px !important; }
-    .admin-taxonomy-row-actions, .admin-taxonomy-proposal-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-    .admin-taxonomy-action { min-height: 44px; padding: 10px 14px; border: 1px solid var(--ink); border-radius: 8px; background: #fff; color: var(--ink); font-size: 12px; font-weight: 800; cursor: pointer; }
-    .admin-taxonomy-action:hover:not(:disabled) { border-color: var(--purple); color: var(--purple); }
-    .admin-taxonomy-action:disabled { cursor: wait; opacity: .65; }
-    .admin-taxonomy-create-grid .primary-button { background: var(--ink); color: #fff; }
-    .admin-taxonomy-records { display: grid; gap: 14px; }
-    .admin-taxonomy-record-group { overflow: hidden; }
-    .admin-taxonomy-record-group .admin-category-list, .admin-taxonomy-proposals .admin-category-list { display: grid; }
-    .admin-taxonomy-record-group .admin-category-row, .admin-taxonomy-proposals .admin-category-row { display: grid; grid-template-columns: minmax(150px, .8fr) minmax(0, 2fr) auto; gap: 14px; align-items: end; padding: 14px 16px; border: 0; border-bottom: 1px solid var(--line); background: #fff; }
-    .admin-taxonomy-record-group .admin-category-row:last-child, .admin-taxonomy-proposals .admin-category-row:last-child { border-bottom: 0; }
-    .admin-taxonomy-row-heading { align-self: start; display: grid; gap: 5px; }
-    .admin-taxonomy-row-heading strong { font-size: 13px; overflow-wrap: anywhere; }
-    .admin-taxonomy-row-heading small { color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
-    .admin-taxonomy-proposals { margin-top: 18px; overflow: hidden; }
-    .admin-taxonomy-proposals .admin-panel-head { padding: 14px 16px; border-bottom: 1px solid var(--line); }
-    .admin-taxonomy-proposals .admin-panel-head p:last-child { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
-    .admin-taxonomy-focused-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, .4fr); gap: 16px; padding: 18px 22px 22px; }
-    .admin-taxonomy-focused-form .admin-category-create { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 16px; border: 1px solid var(--line); background: var(--soft); }
-    .admin-taxonomy-focused-form aside { padding: 16px; border-left: 3px solid var(--purple); background: var(--soft); color: var(--muted); font-size: 12px; line-height: 1.5; }
-    .admin-taxonomy-focused-form aside strong { color: var(--ink); }
-    .admin-taxonomy-focused-form aside p { margin: 6px 0 0; }
-    @media (max-width: 700px) {
-      .admin-taxonomy-workspace { gap: 14px; padding: 14px; }
-      .admin-taxonomy-create-grid { grid-template-columns: 1fr; }
-      .admin-taxonomy-create-grid .admin-category-create + .admin-category-create { border-top: 1px solid var(--line); border-left: 0; }
-      .admin-taxonomy-record-group .admin-category-row, .admin-taxonomy-proposals .admin-category-row { grid-template-columns: 1fr; gap: 12px; }
-      .admin-taxonomy-fields { grid-template-columns: 1fr; }
-      .admin-taxonomy-section-head { align-items: start; }
-      .admin-taxonomy-focused-form { grid-template-columns: 1fr; padding: 14px; }
-      .admin-taxonomy-focused-form aside { border-top: 3px solid var(--purple); border-left: 0; }
-    }
-  `}</style>;
 }
