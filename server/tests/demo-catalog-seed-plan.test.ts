@@ -22,14 +22,14 @@ test("demo catalog seed plan has the constrained display-only product shape", ()
   }
 });
 
-test("demo catalog seed plan has at least 100 deterministic, unique products", () => {
-  assert.ok(DEMO_CATALOG_SEED_PLAN.length >= 100);
+test("demo catalog seed plan has exactly 150 deterministic, unique products", () => {
+  assert.equal(DEMO_CATALOG_SEED_PLAN.length, 150);
   assert.equal(new Set(DEMO_CATALOG_SEED_PLAN.map((product) => product.id)).size, DEMO_CATALOG_SEED_PLAN.length);
   assert.equal(new Set(DEMO_CATALOG_SEED_PLAN.map((product) => product.name)).size, DEMO_CATALOG_SEED_PLAN.length);
   assert.equal(new Set(DEMO_CATALOG_SEED_PLAN.map((product) => product.imageUrl)).size, DEMO_CATALOG_SEED_PLAN.length);
 });
 
-test("demo catalog seed plan uses a broad explicit category and subcategory taxonomy", () => {
+test("demo catalog seed plan has 25 categories, three subcategories each, and 60 brands", () => {
   const categories = new Map<string, Set<string>>();
   for (const product of DEMO_CATALOG_SEED_PLAN) {
     const subcategories = categories.get(product.category) ?? new Set<string>();
@@ -37,7 +37,7 @@ test("demo catalog seed plan uses a broad explicit category and subcategory taxo
     categories.set(product.category, subcategories);
   }
 
-  assert.ok(categories.size >= 10);
-  assert.ok([...categories.values()].every((subcategories) => subcategories.size >= 2));
-  assert.ok(new Set(DEMO_CATALOG_SEED_PLAN.map((product) => product.brand)).size >= 20);
+  assert.equal(categories.size, 25);
+  assert.ok([...categories.values()].every((subcategories) => subcategories.size === 3));
+  assert.equal(new Set(DEMO_CATALOG_SEED_PLAN.map((product) => product.brand)).size, 60);
 });

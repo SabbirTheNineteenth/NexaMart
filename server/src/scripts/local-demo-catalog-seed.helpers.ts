@@ -35,7 +35,7 @@ export const localDemoCatalogSeedRepository: LocalDemoCatalogSeedRepository = {
     return new Map(rows.map((row) => [row.slug, row.id]));
   },
   async upsertProduct(value) {
-    const [product] = await db.insert(products).values(value).onConflictDoUpdate({ target: products.slug, set: { sellerId: value.sellerId, categoryId: value.categoryId, subcategoryId: value.subcategoryId, brandId: value.brandId, brand: value.brand, name: value.name, description: value.description, primaryImageUrl: value.primaryImageUrl, price: value.price, originalPrice: value.originalPrice, stock: value.stock, rating: value.rating, reviewCount: value.reviewCount, colors: value.colors, isPublished: true, updatedAt: new Date() } }).returning({ id: products.id });
+    const [product] = await db.insert(products).values(value).onConflictDoUpdate({ target: products.slug, set: { sellerId: value.sellerId, categoryId: value.categoryId, subcategoryId: value.subcategoryId, brandId: value.brandId, brand: value.brand, name: value.name, description: value.description, primaryImageUrl: value.primaryImageUrl, price: value.price, originalPrice: value.originalPrice, stock: value.stock, rating: value.rating, reviewCount: value.reviewCount, colors: value.colors, isPublished: true, createdAt: value.createdAt, updatedAt: new Date() } }).returning({ id: products.id });
     if (!product) throw new Error("Unable to upsert local demo product.");
     return product.id;
   },

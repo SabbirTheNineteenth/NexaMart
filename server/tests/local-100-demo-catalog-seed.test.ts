@@ -16,19 +16,19 @@ test("local 100-product runner refuses production before any repository write", 
   assert.equal(writes, 0);
 });
 
-test("local 100-product runner seeds namespaced seller, canonical taxonomy, published products, and an active deal idempotently", async () => {
+test("local 150-product runner seeds namespaced seller, canonical taxonomy, published products, and active deals idempotently", async () => {
   const calls: string[] = [];
   const repository = fakeRepository((call) => calls.push(call));
 
   const result = await runLocalDemoCatalogSeed(repository, localEnvironment);
   const repeatedResult = await runLocalDemoCatalogSeed(repository, localEnvironment);
 
-  assert.deepEqual(result, { categoryCount: 10, productCount: 100, promotionCount: 1 });
+  assert.deepEqual(result, { categoryCount: 25, subcategoryCount: 75, brandCount: 60, productCount: 150, promotionCount: 8 });
   assert.deepEqual(repeatedResult, result);
-  assert.equal(DEMO_CATALOG_SEED_PLAN.length, 100);
-  assert.deepEqual(calls.slice(0, 4), ["seller", "categories:10", "subcategories:81", "brands:50"]);
-  assert.equal(calls.filter((call) => call.startsWith("product:")).length, 200);
-  assert.equal(calls.at(-1), "promotion:local-demo-catalog-demo-audio-01");
+  assert.equal(DEMO_CATALOG_SEED_PLAN.length, 150);
+  assert.deepEqual(calls.slice(0, 4), ["seller", "categories:25", "subcategories:75", "brands:60"]);
+  assert.equal(calls.filter((call) => call.startsWith("product:")).length, 300);
+  assert.equal(calls.filter((call) => call.startsWith("promotion:")).length, 16);
   assert.ok(calls.includes("product:local-demo-catalog-demo-audio-01:published"));
 });
 

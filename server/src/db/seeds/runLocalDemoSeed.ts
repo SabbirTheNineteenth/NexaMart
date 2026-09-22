@@ -43,11 +43,12 @@ type SeedProduct = {
   description: string;
   primaryImageUrl: string;
   price: string;
-  originalPrice: string;
+  originalPrice: string | null;
   stock: number;
   rating: string;
   reviewCount: number;
   colors: string[];
+  createdAt: Date;
   isPublished: true;
 };
 type SeedPromotion = { sellerId: string; productId: string; productSlug: string; name: string; discountPercent: string; startsAt: Date; endsAt: Date };
@@ -101,14 +102,17 @@ export async function runLocalDemoCatalogSeed(repository: LocalDemoCatalogSeedRe
     productIds.set(slug, await repository.upsertProduct({
       sellerId, categoryId, subcategoryId, brandId, brand: plan.brand, slug, name: plan.name,
       description: `${plan.name} is a local development catalog item from ${plan.brand}.`, primaryImageUrl: plan.imageUrl,
-      price, originalPrice: (Number(price) + 12).toFixed(2), stock: 20 + (index % 30), rating: "4.50", reviewCount: 10 + index,
-      colors: ["Demo"], isPublished: true,
+      price, originalPrice: null, stock: 20 + (index % 30), rating: "0", reviewCount: 0,
+      colors: ["Demo"], createdAt: new Date(Date.UTC(2025, 0, 1 + index)), isPublished: true,
     }));
   }
 
-  const promotionSlug = `${LOCAL_DEMO_PRODUCT_PREFIX}-${DEMO_CATALOG_SEED_PLAN[0]!.id}`;
-  const promotionProductId = productIds.get(promotionSlug);
-  if (!promotionProductId) throw new Error("Refusing local demo seed: promotion product could not be resolved.");
-  await repository.upsertPromotion({ sellerId, productId: promotionProductId, productSlug: promotionSlug, name: "Local Demo Catalog Deal", discountPercent: "15.00", startsAt: new Date("2020-01-01T00:00:00.000Z"), endsAt: new Date("2100-01-01T00:00:00.000Z") });
-  return { categoryCount: categories.length, productCount: DEMO_CATALOG_SEED_PLAN.length, promotionCount: 1 };
+  const promotionPlans = [2, 17, 34, 51, 68, 85, 102, 119].map((index) => DEMO_CATALOG_SEED_PLAN[index]!);
+  for (const plan of promotionPlans) {
+    const productSlug = `${LOCAL_DEMO_PRODUCT_PREFIX}-${plan.id}`;
+    const productId = productIds.get(productSlug);
+    if (!productId) throw new Error("Refusing local demo seed: promotion product could not be resolved.");
+    await repository.upsertPromotion({ sellerId, productId, productSlug, name: "Local Demo Flash Sale", discountPercent: "15.00", startsAt: new Date("2025-01-01T00:00:00.000Z"), endsAt: new Date("2030-01-01T00:00:00.000Z") });
+  }
+  return { categoryCount: categories.length, subcategoryCount: subcategories.length, brandCount: brands.length, productCount: DEMO_CATALOG_SEED_PLAN.length, promotionCount: promotionPlans.length };
 }
