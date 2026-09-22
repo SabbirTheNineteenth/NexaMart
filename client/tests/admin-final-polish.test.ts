@@ -34,10 +34,10 @@ test("taxonomy create routes have distinct truthful inspector contracts", () => 
 test("Admin pale workspaces explicitly keep headers, forms, and action rows readable", () => {
   assert.match(dashboard, /admin-create-breadcrumb/);
   assert.match(dashboard, /Admin\s*\/\s*Catalog/);
-  for (const token of ["admin-content-text", "admin-content-muted", "admin-content-placeholder"]) assert.match(styles, new RegExp(`--${token}:`));
-  assert.match(styles, /admin-taxonomy-create-page\) :global\(\.admin-panel-head h2\)\{color:var\(--admin-content-text\)/);
-  assert.match(styles, /admin-taxonomy-create-page\) :global\(\.admin-taxonomy-fields label\)\{color:var\(--admin-content-muted\)/);
-  assert.match(styles, /admin-taxonomy-create-page\) :global\(\.admin-context-link\)\{[^}]*min-height:40px/);
+  for (const token of ["admin-ink", "admin-muted", "admin-subtle"]) assert.match(styles, new RegExp(`--${token}:`));
+  assert.match(styles, /admin-panel h1\),:global\(\.admin-panel h2\),:global\(\.admin-panel h3\),:global\(\.admin-panel strong\)\{color:var\(--admin-ink\)/);
+  assert.match(styles, /admin-taxonomy-fields label\)\{[^}]*color:var\(--admin-muted\)/);
+  assert.match(styles, /admin-context-link\),:global\(\.admin-action-control\)\{[^}]*min-height:40px/);
   assert.match(styles, /admin-panel input::placeholder/);
   assert.doesNotMatch(styles, /admin-taxonomy-create-page[^\n]*opacity:\.(?:[0-3])/);
 });
