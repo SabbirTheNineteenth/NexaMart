@@ -102,3 +102,23 @@ test("does not apply CSRF checks to cookie-bearing GET, HEAD, or OPTIONS request
   assert.equal(optionsResponse.status, 204);
   assert.equal(getReached, true);
 });
+
+test("explicit local QA accepts only the local QA UI origin for cookie-authenticated mutations", async () => {
+  const app = createApp(
+    { NODE_ENV: "production", NEXAMART_LOCAL_QA: "1", PORT: "3004", CLIENT_ORIGIN: "http://localhost:3005" },
+    appDependencies,
+  );
+  let reached = false;
+  app.post("/__local-qa-probe", (c) => {
+    reached = true;
+    return c.json({ ok: true });
+  });
+
+  const response = await app.request("http://localhost:3004/api/__local-qa-probe", {
+    method: "POST",
+    headers: { Cookie: sessionCookie, Origin: "http://localhost:3006" },
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(reached, true);
+});
