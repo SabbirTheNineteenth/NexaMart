@@ -10,7 +10,7 @@ test("admin operations navigation reaches every supported governance and oversig
 
   assert.match(navigation, /href=\{`\/admin\/\$\{item\.section\}`\}/);
   assert.match(navigation, /aria-current=\{isActive \? "page" : undefined\}/);
-  assert.match(navigation, /<AdminNavIcon symbol=\{item\.icon\} \/>/);
+  assert.match(navigation, /<AdminNavIcon Icon=\{item\.icon\} \/>/);
   for (const section of ["overview", "orders", "feedback", "finance", "analytics", "audit", "sellers", "products", "taxonomy", "promotions", "accounts"]) assert.match(dashboard, new RegExp(`section: "${section}"`));
 
   for (const heading of [

@@ -8,13 +8,13 @@ const styles = readFileSync(new URL("../src/app/globals.css", import.meta.url), 
 test("admin dashboard provides an accessible responsive operate workspace shell", () => {
   assert.match(dashboard, /<main className="admin-workspace"/);
   assert.match(dashboard, /<a className="admin-skip-link" href="#admin-workspace-content" onClick=\{focusWorkspace\}>Skip to workspace content<\/a>/);
-  assert.match(dashboard, /<aside className="admin-sidebar" aria-label="Administration workspace">/);
+  assert.match(dashboard, /<aside className="admin-sidebar admin-sidebar-premium" aria-label="Administration workspace">/);
   assert.match(dashboard, /<nav className="admin-workspace-nav" aria-label="Administration sections">/);
-  assert.match(dashboard, /const adminControlRoomOrder: AdminSection\[\] = \[/);
-  assert.match(dashboard, /adminControlRoomOrder\.map\(\(section\) =>/);
+  assert.match(dashboard, /const adminNavigationGroups: AdminNavigationGroup\[\] = \[/);
+  assert.match(dashboard, /adminNavigationGroups\.map\(\(group\) =>/);
   assert.match(dashboard, /href=\{`\/admin\/\$\{item\.section\}`\}/);
   assert.match(dashboard, /aria-current=\{isActive \? "page" : undefined\}/);
-  assert.match(dashboard, /<AdminNavIcon symbol=\{item\.icon\} \/>/);
+  assert.match(dashboard, /<AdminNavIcon Icon=\{item\.icon\} \/>/);
   assert.match(dashboard, /<div className="admin-workspace-content" id="admin-workspace-content" ref=\{workspaceContentRef\} tabIndex=\{-1\}>/);
   assert.match(dashboard, /<nav className="admin-breadcrumb" aria-label="Breadcrumb">/);
   assert.match(dashboard, /<section className="admin-context-header" aria-labelledby="admin-workspace-title">/);

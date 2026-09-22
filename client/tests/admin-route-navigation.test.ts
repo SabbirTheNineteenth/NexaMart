@@ -8,7 +8,8 @@ const styles = readFileSync(new URL("../src/features/admin/AdminDashboard.module
 test("admin navigation gives every operational panel its own route and a labeled icon", () => {
   assert.equal(existsSync(new URL("../src/app/admin/[section]/page.tsx", import.meta.url)), true);
 
-  assert.match(dashboard, /const adminSections: AdminSectionDefinition\[\] = \[/);
+  assert.match(dashboard, /const adminNavigationGroups: AdminNavigationGroup\[\] = \[/);
+  assert.match(dashboard, /const adminSections = adminNavigationGroups\.flatMap/);
   assert.match(dashboard, /section: "overview"/);
   assert.match(dashboard, /section: "orders"/);
   assert.match(dashboard, /section: "feedback"/);

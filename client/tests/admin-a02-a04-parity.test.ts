@@ -6,12 +6,12 @@ const dashboard = readFileSync(new URL("../src/features/admin/AdminDashboard.tsx
 const styles = readFileSync(new URL("../src/features/admin/AdminDashboard.module.css", import.meta.url), "utf8");
 
 test("A02 keeps the compact rail in the real governance workflow order before secondary work", () => {
-  assert.match(dashboard, /const adminPrimaryWorkflowOrder: AdminSection\[\] = \["overview", "applications", "products", "taxonomy", "finance", "audit", "accounts"\]/);
-  assert.match(dashboard, /const adminSecondaryWorkflowOrder: AdminSection\[\] = \["sellers", "orders", "feedback", "analytics", "promotions"\]/);
-  assert.match(dashboard, /railLabel: "Seller Review"/);
-  assert.match(dashboard, /railLabel: "Product Moderation"/);
-  assert.match(dashboard, /railLabel: "Payout Review"/);
-  assert.match(dashboard, /railLabel: "Admin Audit"/);
+  assert.match(dashboard, /const adminNavigationGroups: AdminNavigationGroup\[\] = \[/);
+  for (const label of ["Workspace", "Catalog", "Seller operations", "Marketplace activity", "Governance"]) assert.match(dashboard, new RegExp(`label: "${label}"`));
+  assert.match(dashboard, /label: "Seller Review"/);
+  assert.match(dashboard, /label: "Product Moderation"/);
+  assert.match(dashboard, /label: "Payout Review"/);
+  assert.match(dashboard, /label: "Admin Audit"/);
   assert.match(styles, /grid-template-columns:216px minmax\(0,1fr\)/);
 });
 

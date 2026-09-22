@@ -5,7 +5,7 @@ import test from "node:test";
 const dashboard = readFileSync(new URL("../src/features/admin/AdminDashboard.tsx", import.meta.url), "utf8");
 
 test("reference-style Admin sidebar separates seller applications from the Sellers directory", () => {
-  assert.match(dashboard, /section: "applications", label: "Seller applications"/);
+  assert.match(dashboard, /section: "applications", label: "Seller Review"/);
   assert.match(dashboard, /activeSection === "applications"/);
   assert.match(dashboard, /activeSection === "sellers"/);
   assert.match(dashboard, /sellers\.filter\(\(seller\) => seller\.status === "pending"\)/);

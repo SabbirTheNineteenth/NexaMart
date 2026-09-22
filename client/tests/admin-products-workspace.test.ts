@@ -10,7 +10,7 @@ test("products workspace exposes dedicated canonical creation destinations", () 
     assert.equal(existsSync(new URL(`../src/app/admin/products/${destination}/page.tsx`, import.meta.url)), true);
   }
   assert.match(dashboard, /section: "products"/);
-  assert.match(dashboard, /label: "Products"/);
+  assert.match(dashboard, /label: "Product Moderation"/);
   assert.match(taxonomy, /createKind\?: AdminTaxonomyKind/);
   assert.match(taxonomy, /Create canonical \{createKind\}/);
 });

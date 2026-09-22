@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { type FormEvent, type MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BadgePercent, Banknote, ChartNoAxesCombined, ClipboardCheck, FileSearch, LayoutDashboard, MessageSquare, PackageCheck, Settings, ShoppingBag, Store, Tags } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { getJSON, patchJSON, postJSON } from "@/lib/api";
 import { adminOverview } from "@/features/admin/admin-overview.utils";
 import { auditMetadataText, auditRecordsPath, type AuditRecordFilters } from "@/features/admin/audit-log.utils";
@@ -56,26 +58,33 @@ export function createAuditRequestTracker() {
 
 type AdminSection = "overview" | "applications" | "orders" | "feedback" | "finance" | "analytics" | "audit" | "sellers" | "products" | "taxonomy" | "promotions" | "accounts";
 
-type AdminSectionDefinition = { section: AdminSection; label: string; railLabel?: string; group: "Operate" | "Configure"; icon: string };
+type AdminSectionDefinition = { section: AdminSection; label: string; icon: LucideIcon };
+type AdminNavigationGroup = { label: string; items: AdminSectionDefinition[] };
 
-const adminSections: AdminSectionDefinition[] = [
-  { section: "overview", label: "Overview", group: "Operate", icon: "▦" },
-  { section: "applications", label: "Seller applications", railLabel: "Seller Review", group: "Operate", icon: "◫" },
-  { section: "orders", label: "Orders", group: "Operate", icon: "□" },
-  { section: "feedback", label: "Feedback", group: "Operate", icon: "◌" },
-  { section: "finance", label: "Finance", railLabel: "Payout Review", group: "Operate", icon: "$" },
-  { section: "analytics", label: "Analytics", group: "Operate", icon: "⌁" },
-  { section: "audit", label: "Audit trail", railLabel: "Admin Audit", group: "Operate", icon: "≡" },
-  { section: "sellers", label: "Sellers", group: "Configure", icon: "♙" },
-  { section: "products", label: "Products", railLabel: "Product Moderation", group: "Configure", icon: "◇" },
-  { section: "taxonomy", label: "Taxonomy", group: "Configure", icon: "⌘" },
-  { section: "promotions", label: "Promotions", group: "Configure", icon: "✦" },
-  { section: "accounts", label: "Accounts", railLabel: "Settings", group: "Configure", icon: "◉" },
+const adminNavigationGroups: AdminNavigationGroup[] = [
+  { label: "Workspace", items: [{ section: "overview", label: "Overview", icon: LayoutDashboard }] },
+  { label: "Catalog", items: [
+    { section: "products", label: "Product Moderation", icon: PackageCheck },
+    { section: "taxonomy", label: "Taxonomy", icon: Tags },
+    { section: "promotions", label: "Promotions", icon: BadgePercent },
+  ] },
+  { label: "Seller operations", items: [
+    { section: "applications", label: "Seller Review", icon: ClipboardCheck },
+    { section: "sellers", label: "Sellers", icon: Store },
+    { section: "finance", label: "Payout Review", icon: Banknote },
+  ] },
+  { label: "Marketplace activity", items: [
+    { section: "orders", label: "Orders", icon: ShoppingBag },
+    { section: "feedback", label: "Feedback", icon: MessageSquare },
+    { section: "analytics", label: "Analytics", icon: ChartNoAxesCombined },
+  ] },
+  { label: "Governance", items: [
+    { section: "audit", label: "Admin Audit", icon: FileSearch },
+    { section: "accounts", label: "Settings", icon: Settings },
+  ] },
 ];
 
-const adminPrimaryWorkflowOrder: AdminSection[] = ["overview", "applications", "products", "taxonomy", "finance", "audit", "accounts"];
-const adminSecondaryWorkflowOrder: AdminSection[] = ["sellers", "orders", "feedback", "analytics", "promotions"];
-const adminControlRoomOrder: AdminSection[] = [...adminPrimaryWorkflowOrder, ...adminSecondaryWorkflowOrder];
+const adminSections = adminNavigationGroups.flatMap((group) => group.items);
 
 const isAdminSection = (value: string | undefined): value is AdminSection => adminSections.some((item) => item.section === value);
 
@@ -87,8 +96,8 @@ const adminProductLinks = [
   { href: "/admin/products/add", label: "Seller catalog guidance" },
 ] as const;
 
-function AdminNavIcon({ symbol }: { symbol: string }) {
-  return <span className="admin-nav-icon" aria-hidden="true">{symbol}</span>;
+function AdminNavIcon({ Icon }: { Icon: LucideIcon }) {
+  return <Icon className="admin-nav-icon" aria-hidden="true" size={18} strokeWidth={1.8} />;
 }
 
 export function AdminDashboard() {
@@ -587,14 +596,16 @@ export function AdminDashboard() {
       <Link className="admin-workspace-brand" href="/" aria-label="NexaMart storefront"><BrandLogo monogram className="admin-brand-logo" /></Link>
       <div className="admin-sidebar-context"><strong>NexaMart Admin</strong><small>Marketplace administration</small></div>
       <nav className="admin-workspace-nav" aria-label="Administration sections">
-        {adminControlRoomOrder.map((section) => {
-          const item = adminSections.find((candidate) => candidate.section === section)!;
-          const isActive = item.section === activeSection;
-          return <div key={item.section} className="admin-nav-item"><Link href={`/admin/${item.section}`} aria-label={item.label} aria-current={isActive ? "page" : undefined} className={isActive ? "is-active admin-action-control" : "admin-action-control"}><AdminNavIcon symbol={item.icon} /><span>{item.railLabel ?? item.label}</span></Link>{item.section === "products" && isActive && <div className="admin-products-subnav" aria-label="Products workspace pages">{adminProductLinks.map((child) => {
-            const isProductChildActive = pathname === child.href;
-            return <Link key={child.href} href={child.href} aria-current={isProductChildActive ? "page" : undefined} className={isProductChildActive ? "is-active" : undefined}>{child.label}</Link>;
-          })}</div>}</div>;
-        })}
+        {adminNavigationGroups.map((group) => <div className="admin-nav-group" key={group.label} aria-label={group.label}>
+          <p className="admin-nav-group-label">{group.label}</p>
+          {group.items.map((item) => {
+            const isActive = item.section === activeSection;
+            return <div key={item.section} className="admin-nav-item"><Link href={`/admin/${item.section}`} aria-label={item.label} aria-current={isActive ? "page" : undefined} className={isActive ? "is-active admin-action-control" : "admin-action-control"}><AdminNavIcon Icon={item.icon} /><span>{item.label}</span></Link>{item.section === "products" && isActive && <div className="admin-products-subnav" aria-label="Products workspace pages">{adminProductLinks.map((child) => {
+              const isProductChildActive = pathname === child.href;
+              return <Link key={child.href} href={child.href} aria-current={isProductChildActive ? "page" : undefined} className={isProductChildActive ? "is-active" : undefined}>{child.label}</Link>;
+            })}</div>}</div>;
+          })}
+        </div>)}
       </nav>
       <div className="admin-sidebar-session" aria-live="polite">
         <div className="admin-sidebar-profile"><span className="admin-sidebar-avatar" aria-hidden="true">A</span><div><strong>Administrator</strong><small>Protected workspace</small></div></div>

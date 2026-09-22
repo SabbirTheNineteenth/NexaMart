@@ -310,3 +310,37 @@
   :global(.admin-sidebar-premium) :global(.admin-sidebar-logout){min-height:34px;padding:0 7px;font-size:10px}
   :global(.admin-sidebar-premium) :global(.admin-workspace-nav){margin:0 -12px;padding-right:12px;padding-left:12px}
 }
+
+/* Grouped navigation keeps the operational map scannable without adding a
+   second visual system to the existing Admin shell. */
+:global(.admin-sidebar-premium) :global(.admin-sidebar-context small){overflow:visible;text-overflow:clip;white-space:normal}
+:global(.admin-sidebar-premium) :global(.admin-workspace-nav){gap:9px;padding-top:2px}
+:global(.admin-sidebar-premium) :global(.admin-nav-group){display:grid;gap:2px}
+:global(.admin-sidebar-premium) :global(.admin-nav-group-label){display:block;margin:0;padding:5px 9px 3px;color:#bdaed6;font-size:9px;font-weight:800;letter-spacing:.12em;line-height:1.25;text-transform:uppercase}
+:global(.admin-sidebar-premium) :global(.admin-workspace-nav > div > .admin-nav-item > a){gap:10px;color:#e9e2f4;font-weight:700}
+:global(.admin-sidebar-premium) :global(.admin-workspace-nav > div > .admin-nav-item > a:not(.is-active):hover){color:#fff}
+:global(.admin-sidebar-premium) :global(.admin-workspace-nav > div > .admin-nav-item > a:active){background:rgba(168,120,244,.22)}
+:global(.admin-sidebar-premium) :global(.admin-workspace-nav > div > .admin-nav-item > a:focus-visible){outline:2px solid #e0c6ff;outline-offset:2px}
+:global(.admin-sidebar-premium) :global(.admin-nav-icon){display:block;stroke-width:1.8}
+:global(.admin-sidebar-premium) :global(.admin-sidebar-logout){border-color:rgba(248,184,205,.36);background:rgba(165,42,79,.11);color:#f8dce5}
+:global(.admin-sidebar-premium) :global(.admin-sidebar-logout:hover:not(:disabled)){border-color:#f1a7bd;background:rgba(189,58,97,.2);color:#fff}
+:global(.admin-sidebar-premium) :global(.admin-sidebar-return){gap:5px;color:#e5d9f3}
+
+@media(max-width:900px){
+  :global(.admin-sidebar-premium) :global(.admin-workspace-nav){gap:10px}
+  :global(.admin-sidebar-premium) :global(.admin-workspace-nav > .admin-nav-group){display:flex;align-items:center;gap:3px}
+  :global(.admin-sidebar-premium) :global(.admin-nav-group-label){display:block;padding:0 5px 0 0;color:#cfc1e5;font-size:8px;white-space:nowrap}
+  :global(.admin-sidebar-premium) :global(.admin-workspace-nav > .admin-nav-group > .admin-nav-item){display:flex}
+  :global(.admin-sidebar-premium) :global(.admin-workspace-nav > .admin-nav-group > .admin-nav-item > a){gap:7px;min-height:40px;padding:0 9px}
+  :global(.admin-sidebar-premium) :global(.admin-workspace-nav > .admin-nav-group > .admin-nav-item > a .admin-nav-icon){width:16px;height:16px;flex-basis:16px}
+}
+
+@media(max-width:420px){
+  :global(.admin-sidebar-premium) :global(.admin-workspace-nav){gap:8px}
+  :global(.admin-sidebar-premium) :global(.admin-nav-group-label){font-size:7px}
+  :global(.admin-sidebar-premium) :global(.admin-workspace-nav > .admin-nav-group > .admin-nav-item > a){gap:6px;padding:0 8px;font-size:11px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  :global(.admin-sidebar-premium) :global(.admin-workspace-nav > div > .admin-nav-item > a){transition:none}
+}

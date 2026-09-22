@@ -5,7 +5,7 @@ import test from "node:test";
 const dashboard = readFileSync(new URL("../src/features/admin/AdminDashboard.tsx", import.meta.url), "utf8");
 
 test("ADMIN-TRUTH-01 keeps administration status and product guidance truthful", () => {
-  assert.match(dashboard, /<small>Protected administration workspace<\/small>/);
+  assert.match(dashboard, /<small>Protected workspace<\/small>/);
   assert.doesNotMatch(dashboard, /aria-label="Workspace online"/);
 
   assert.match(dashboard, /href: "\/admin\/products\/add", label: "Seller catalog guidance"/);
