@@ -1,7 +1,10 @@
 import type { SellerCatalogRepository, SellerGalleryImageDeleteInput, SellerGalleryImageInput, SellerGalleryImageUpdateInput, SellerProductArchiveInput, SellerProductInput, SellerProductVariantDeleteInput, SellerProductVariantInput, SellerProductVariantUpdateInput } from "../seller-catalog.repository.js";
+import { TaxonomyValidationError, type ActiveTaxonomy } from "../../taxonomy/taxonomy.repository.js";
+
+type ProductTaxonomy = { activeOptions(): Promise<ActiveTaxonomy> };
 
 export class SellerCatalogService {
-  constructor(private readonly repository: SellerCatalogRepository) {}
+  constructor(private readonly repository: SellerCatalogRepository, private readonly taxonomy?: ProductTaxonomy) {}
 
   async listProducts(sellerId: string) { return this.repository.listProducts(sellerId); }
 
@@ -12,7 +15,24 @@ export class SellerCatalogService {
     if (!updated) throw new Error("Product not found");
   }
 
-  async createProduct(input: SellerProductInput) { return this.repository.createProduct(input); }
+  async createProduct(input: SellerProductInput) {
+    await this.validateProductClassification(input);
+    return this.repository.createProduct(input);
+  }
+
+  private async validateProductClassification(input: SellerProductInput) {
+    if (!input.categoryId && !input.subcategoryId && !input.brandId) return;
+    if (!input.categoryId) throw new TaxonomyValidationError("Category is not active");
+    if (!this.taxonomy) throw new TaxonomyValidationError("Approved taxonomy is unavailable");
+    const options = await this.taxonomy.activeOptions();
+    if (!options.categories.some((category) => category.id === input.categoryId)) throw new TaxonomyValidationError("Category is not active");
+    if (input.subcategoryId) {
+      const subcategory = options.subcategories.find((item) => item.id === input.subcategoryId);
+      if (!subcategory) throw new TaxonomyValidationError("Subcategory is not active");
+      if (subcategory.categoryId !== input.categoryId) throw new TaxonomyValidationError("Subcategory does not belong to category");
+    }
+    if (input.brandId && !options.brands.some((brand) => brand.id === input.brandId)) throw new TaxonomyValidationError("Brand is not active");
+  }
 
   async updateProduct(input: import("../seller-catalog.repository.js").SellerProductUpdateInput) {
     const { sellerId: _sellerId, productId: _productId, ...editable } = input;

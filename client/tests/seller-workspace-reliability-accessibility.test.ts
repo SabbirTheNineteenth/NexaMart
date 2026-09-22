@@ -23,11 +23,10 @@ test("seller workspaces have guarded route-specific loaders with loading ready e
   assert.match(dashboard, /activeSection !== "analytics" && activeSection !== "reviews" && workspaceState === "error"/);
 });
 
-test("seller creation calls to action open disclosures and focus each first input", () => {
-  assert.match(dashboard, /const \[createTarget, setCreateTarget\] = useState<"product" \| "promotion" \| null>\(null\);/);
-  assert.match(dashboard, /onClick=\{\(\) => setCreateTarget\("product"\)\}/);
+test("seller creation actions preserve the dedicated product workspace and promotion disclosure", () => {
+  assert.match(dashboard, /const \[createTarget, setCreateTarget\] = useState<"promotion" \| null>\(null\);/);
+  assert.match(dashboard, /href="\/seller\/catalog\/add"/);
   assert.match(dashboard, /onClick=\{\(\) => setCreateTarget\("promotion"\)\}/);
-  assert.match(dashboard, /<SellerProductForm[\s\S]*?open=\{createTarget === "product"\}/);
   assert.match(dashboard, /<SellerPromotionForm[\s\S]*?open=\{createTarget === "promotion"\}/);
   assert.match(productForm, /useEffect/);
   assert.match(productForm, /inputRef\.current\?\.focus\(\)/);

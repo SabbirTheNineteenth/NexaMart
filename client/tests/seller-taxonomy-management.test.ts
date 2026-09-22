@@ -57,9 +57,11 @@ test("seller taxonomy withdrawal confirmation delegates Escape and trigger resto
   assert.doesNotMatch(taxonomy, /seller-delete-confirmation-backdrop|handleWithdrawalConfirmationKeyDown|withdrawalTriggerRef/);
 });
 
-test("product creation does not invent taxonomy fields and directs sellers to classify drafts", () => {
-  assert.doesNotMatch(productForm, /categoryId|subcategoryId|brandId/);
-  assert.match(productForm, /Classify it in the approved taxonomy section before it can be moderated\./);
+test("product creation classifies drafts using approved taxonomy without granting taxonomy administration", () => {
+  assert.match(productForm, /name="categoryId"/);
+  assert.match(productForm, /name="subcategoryId"/);
+  assert.match(productForm, /name="brandId"/);
+  assert.match(productForm, /getJSON<SellerTaxonomyOptions>\("\/seller\/taxonomy\/options"/);
   assert.doesNotMatch(editor, /name="categoryId"|clearCategory/);
 });
 

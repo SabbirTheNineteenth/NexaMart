@@ -1,4 +1,4 @@
-export type SellerProductInput = { sellerId: string; name: string; brand?: string; slug: string; description: string; primaryImageUrl: string; price: number; stock: number; colors: string[] };
+export type SellerProductInput = { sellerId: string; name: string; brand?: string; slug: string; description: string; primaryImageUrl: string; price: number; stock: number; colors: string[]; categoryId?: string; subcategoryId?: string; brandId?: string };
 export type SellerProductSummary = { id: string; sellerId: string; name: string; brand?: string; stock: number; isPublished: boolean; moderationStatus: "draft" | "pending_review" | "approved" | "rejected" | "changes_requested"; moderationReason: string | null };
 export type SellerProductUpdateInput = {
   sellerId: string;

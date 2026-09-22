@@ -2,8 +2,9 @@ import { Hono, type Context } from "hono";
 import { z } from "zod";
 import { createAuthGuard, getAuthenticatedAccount } from "../auth/auth.guard.js";
 import type { PublicAccount } from "../auth/auth.types.js";
+import { TaxonomyValidationError } from "../taxonomy/taxonomy.repository.js";
 
-const productSchema = z.object({ name: z.string().min(2).max(180), brand: z.string().trim().min(1).max(120).optional(), slug: z.string().min(2).max(220).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/), description: z.string().min(10), primaryImageUrl: z.string().min(1), price: z.number().positive(), stock: z.number().int().nonnegative(), colors: z.array(z.string().min(1)).max(12) });
+const productSchema = z.object({ name: z.string().min(2).max(180), brand: z.string().trim().min(1).max(120).optional(), slug: z.string().min(2).max(220).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/), description: z.string().min(10), primaryImageUrl: z.string().min(1), price: z.number().positive(), stock: z.number().int().nonnegative(), colors: z.array(z.string().min(1)).max(12), categoryId: z.string().uuid().optional(), subcategoryId: z.string().uuid().optional(), brandId: z.string().uuid().optional() });
 const productUpdateSchema = z.object({ name: z.string().trim().min(2).max(180).optional(), brand: z.string().trim().min(1).max(120).optional(), slug: z.string().trim().min(2).max(220).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).optional(), description: z.string().trim().min(10).max(10_000).optional(), price: z.number().finite().positive().max(9_999_999_999.99).optional(), primaryImageUrl: z.string().url().max(2_000).optional(), colors: z.array(z.string().trim().min(1).max(80)).min(1).max(12).refine((colors) => new Set(colors).size === colors.length).optional() }).strict().refine((input) => Object.keys(input).length > 0);
 type SellerProductInput = z.infer<typeof productSchema> & { sellerId: string };
 const variantSchema = z.object({ sku: z.string().trim().min(1).max(120), options: z.record(z.string().trim().min(1).max(80)).default({}), price: z.number().positive(), stock: z.number().int().nonnegative() });
@@ -13,7 +14,7 @@ const galleryImageUpdateSchema = galleryImageSchema.partial().strict().refine((i
 
 const isUniqueViolation = (error: unknown) => typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "23505";
 const notFoundMessage = (error: unknown) => error instanceof Error && ["Product not found", "Variant not found", "Gallery image not found"].includes(error.message) ? error.message : null;
-const catalogError = (error: unknown, fallback: string) => { const message = notFoundMessage(error); if (message) return { status: 404 as const, error: message }; if (error instanceof Error && error.message === "Product cannot be submitted for review") return { status: 409 as const, error: error.message }; return { status: 500 as const, error: fallback }; };
+const catalogError = (error: unknown, fallback: string) => { const message = notFoundMessage(error); if (message) return { status: 404 as const, error: message }; if (error instanceof TaxonomyValidationError) return { status: 400 as const, error: error.message }; if (error instanceof Error && error.message === "Product cannot be submitted for review") return { status: 409 as const, error: error.message }; return { status: 500 as const, error: fallback }; };
 
 type SessionResolver = { resolve(token: string): Promise<PublicAccount | null> };
 type SellerCatalog = {

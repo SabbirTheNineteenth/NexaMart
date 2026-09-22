@@ -69,10 +69,10 @@ const sellerSectionContext: Record<SellerSection, { eyebrow: string; description
 
 const isSellerSection = (value: string | undefined): value is SellerSection => sellerSections.some((item) => item.section === value);
 
-export function SellerDashboard() {
+export function SellerDashboard({ productCreationOnly = false }: { productCreationOnly?: boolean } = {}) {
   const pathname = usePathname();
   const requestedSection = pathname.split("/").filter(Boolean)[1];
-  const activeSection: SellerSection = isSellerSection(requestedSection) ? requestedSection : "overview";
+  const activeSection: SellerSection = productCreationOnly ? "catalog" : isSellerSection(requestedSection) ? requestedSection : "overview";
   const commandTarget = activeSection === "catalog" ? "inventory" : "catalog";
   const activeContext = sellerSectionContext[activeSection];
   const [products, setProducts] = useState<SellerProduct[]>([]);
@@ -99,7 +99,7 @@ export function SellerDashboard() {
   const [promotionSuccess, setPromotionSuccess] = useState("");
   const [workspaceState, setWorkspaceState] = useState<WorkspaceState>("loading");
   const [logoutState, setLogoutState] = useState<LogoutState>({ state: "idle" });
-  const [createTarget, setCreateTarget] = useState<"product" | "promotion" | null>(null);
+  const [createTarget, setCreateTarget] = useState<"promotion" | null>(null);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
   const [productFilters, setProductFilters] = useState<SellerProductFilters>({ query: "", categoryId: "all", status: "all" });
@@ -206,10 +206,11 @@ export function SellerDashboard() {
   }
 
   useEffect(() => {
+    if (productCreationOnly) return;
     if (activeSection === "analytics" || activeSection === "reviews") return;
     const timer = window.setTimeout(loadWorkspace, 0);
     return () => { window.clearTimeout(timer); workspaceRequestController.current?.abort(); };
-  }, [activeSection, loadWorkspace]);
+  }, [activeSection, loadWorkspace, productCreationOnly]);
 
   useEffect(() => {
     if (activeSection !== "reviews") return;
@@ -357,10 +358,10 @@ export function SellerDashboard() {
       </footer>
     </aside>
     <div className={styles.sellerContent} id="seller-workspace-content" tabIndex={-1}>
-    <header className={`seller-topbar seller-workspace-topbar ${styles.commandBar}`} aria-label="Seller workspace command"><div className={styles.operationsHeader}><div className={styles.workspaceContext}><span>Seller</span><span className={styles.liveMarker}>Workspace</span><span className={styles.sectionContext}>{sellerSections.find((item) => item.section === activeSection)?.label}</span></div><div className={styles.topbarActions}><Link className={styles.topbarAction} href={`/seller/${commandTarget}`}>{activeSection === "catalog" ? "Manage inventory" : "Manage catalog"}</Link></div></div></header>
-    <section className={styles.workspaceIntro} aria-labelledby="seller-workspace-heading"><p className="eyebrow">{activeContext.eyebrow}</p><h1 id="seller-workspace-heading">{sellerSections.find((item) => item.section === activeSection)?.label}</h1><p>{activeContext.description}</p></section>
+    <header className={`seller-topbar seller-workspace-topbar ${styles.commandBar}`} aria-label="Seller workspace command"><div className={styles.operationsHeader}><div className={styles.workspaceContext}><span>Seller</span><span className={styles.liveMarker}>Workspace</span><span className={styles.sectionContext}>{productCreationOnly ? "Catalog / Add product" : sellerSections.find((item) => item.section === activeSection)?.label}</span></div><div className={styles.topbarActions}><Link className={styles.topbarAction} href={productCreationOnly ? "/seller/catalog" : `/seller/${commandTarget}`}>{productCreationOnly ? "Back to catalog" : activeSection === "catalog" ? "Manage inventory" : "Manage catalog"}</Link></div></div></header>
+    <section className={styles.workspaceIntro} aria-labelledby="seller-workspace-heading"><p className="eyebrow">{productCreationOnly ? "Seller catalog" : activeContext.eyebrow}</p><h1 id="seller-workspace-heading">{productCreationOnly ? "Add a product" : sellerSections.find((item) => item.section === activeSection)?.label}</h1><p>{productCreationOnly ? "Create a seller-owned product draft using approved catalog taxonomy. Products are reviewed before publication." : activeContext.description}</p></section>
     <div className={styles.activeWorkspace}>
-    {activeSection !== "analytics" && activeSection !== "reviews" && workspaceState === "loading" ? <p className={styles.workspaceState} role="status" aria-live="polite">Loading your seller workspace…</p> : activeSection !== "analytics" && activeSection !== "reviews" && workspaceState === "error" ? <section className="seller-empty" role="alert" aria-labelledby="seller-workspace-error-heading"><p className="eyebrow">Workspace unavailable</p><h2 id="seller-workspace-error-heading">Unable to load {sellerSections.find((item) => item.section === activeSection)?.label}</h2><p>Your seller data was not loaded. Try again to request the selected workspace.</p><strong>{error}</strong><button className="primary-button" type="button" onClick={loadWorkspace}>Retry workspace</button></section> : <>
+    {productCreationOnly ? <SellerProductForm /> : <>{activeSection !== "analytics" && activeSection !== "reviews" && workspaceState === "loading" ? <p className={styles.workspaceState} role="status" aria-live="polite">Loading your seller workspace…</p> : activeSection !== "analytics" && activeSection !== "reviews" && workspaceState === "error" ? <section className="seller-empty" role="alert" aria-labelledby="seller-workspace-error-heading"><p className="eyebrow">Workspace unavailable</p><h2 id="seller-workspace-error-heading">Unable to load {sellerSections.find((item) => item.section === activeSection)?.label}</h2><p>Your seller data was not loaded. Try again to request the selected workspace.</p><strong>{error}</strong><button className="primary-button" type="button" onClick={loadWorkspace}>Retry workspace</button></section> : <>
     {activeSection === "notifications" && <section className="seller-notifications" aria-labelledby="seller-notifications-heading" aria-busy={notificationsLoading}><div className="seller-queue-head"><div><p className="eyebrow">Store activity</p><h2 id="seller-notifications-heading" tabIndex={-1}>Notifications</h2><p className="seller-form-note">In-app records for your store activity.</p></div><p className="seller-state" aria-live="polite">{unreadCount} unread</p></div>{notificationsLoading ? <p className={styles.workspaceState} role="status" aria-live="polite">Loading notifications…</p> : notificationsError ? <section className={`seller-empty ${styles.workspaceState}`} role="alert"><strong>{notificationsError}</strong><button type="button" onClick={loadNotifications}>Retry</button></section> : notifications.length ? <div className="seller-list">{notifications.map((notification) => <article className="seller-row" key={notification.id}><div><strong>{notification.title}</strong><small>{notification.body}</small><time dateTime={notification.createdAt}>{new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(notification.createdAt))}</time></div>{notification.readAt ? <span className="status">Read</span> : <button type="button" onClick={() => void markNotificationRead(notification)} disabled={readingNotificationId === notification.id}>{readingNotificationId === notification.id ? "Marking read…" : "Mark as read"}</button>}</article>)}</div> : <section className={`seller-empty ${styles.workspaceState}`}><h3>No notifications yet.</h3><p>Moderation decisions and new owned order lines will appear here.</p></section>}</section>}
     {activeSection === "overview" && <>
       <div className={styles.priorityGrid}><section className="seller-metrics" aria-label="Catalog summary"><article><span>Total products</span><strong>{summary.total}</strong></article><article><span>Published</span><strong>{summary.live}</strong></article><article className={styles.inventorySignal}><span>Low stock</span><strong>{summary.lowStock}</strong></article></section></div>
@@ -407,7 +408,7 @@ export function SellerDashboard() {
       {reviewsLoading ? <p className={styles.workspaceState} role="status" aria-live="polite">Loading customer reviews…</p> : reviewError ? <div className={`seller-empty ${styles.workspaceState}`} role="alert"><strong>{reviewError}</strong><button type="button" onClick={loadReviews} disabled={reviewsLoading} aria-label="Retry customer reviews">Retry reviews</button></div> : reviews.length ? <div className="seller-review-list">{reviews.map((review) => <article className="seller-review" key={review.id}><div><strong>{review.product.name}</strong><small>{review.rating}/5 · <time dateTime={review.createdAt}>{new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(new Date(review.createdAt))}</time></small>{review.title && <b>{review.title}</b>}{review.body ? <p>{review.body}</p> : <p>No written feedback.</p>}</div><span className={`status ${review.isVisible ? "visible" : "hidden"}`}>{review.isVisible ? "Visible" : "Hidden"}</span></article>)}</div> : <div className={`seller-empty ${styles.workspaceState}`}><strong>No customer reviews for your products yet.</strong><p>Customer feedback will appear here after eligible purchases are reviewed.</p></div>}
     </section>}
     {activeSection === "catalog" && <section className="seller-queue">
-      <div className="seller-queue-head seller-catalog-workspace"><div><p className="eyebrow">Catalog queue</p><h2 id="seller-catalog-heading">Your products</h2></div><button className="primary-button" type="button" onClick={() => setCreateTarget("product")}>Add a product</button></div>
+      <div className="seller-queue-head seller-catalog-workspace"><div><p className="eyebrow">Catalog queue</p><h2 id="seller-catalog-heading">Your products</h2></div><Link className="primary-button" href="/seller/catalog/add">Add a product</Link></div>
       {products.length ? <>
         <div className={styles.catalogFilters} aria-label="Filter your products">
           <label>Search<input type="search" value={productFilters.query} onChange={(event) => setProductFilters((filters) => ({ ...filters, query: event.target.value }))} aria-label="Search your products" placeholder="Search name or brand" /></label>
@@ -422,9 +423,8 @@ export function SellerDashboard() {
             <SellerProductEditor product={product} onSaved={(details) => setProducts((items) => items.map((item) => item.id === product.id ? { ...item, ...details } : item))} />
             <SellerProductAssets product={product} />
           </article>)}</div> : <div className="seller-empty"><h3>No products match these filters.</h3><p>Adjust or clear the filters to see products in your loaded catalog.</p><button type="button" onClick={() => setProductFilters({ query: "", categoryId: "all", status: "all" })}>Clear filters</button></div>}
-      </> : <div className="seller-empty"><h3>Your catalog is clear.</h3><p>Add your first product to begin building the NexaMart collection.</p><button className="primary-button" type="button" onClick={() => setCreateTarget("product")}>Create product</button></div>}
+      </> : <div className="seller-empty"><h3>Your catalog is clear.</h3><p>Add your first product to begin building the NexaMart collection.</p><Link className="primary-button" href="/seller/catalog/add">Create product</Link></div>}
     </section>}
-    {activeSection === "catalog" && <SellerProductForm onCreated={(product) => setProducts((items) => [product, ...items])} open={createTarget === "product"} onOpenChange={(open) => setCreateTarget(open ? "product" : null)} />}
     {activeSection === "inventory" && <section className="seller-queue" aria-labelledby="seller-inventory-heading">
       <div className="seller-queue-head"><div><p className="eyebrow">Stock control</p><h2 id="seller-inventory-heading">Inventory</h2><p className="seller-form-note">Update the available stock for products you own.</p></div></div>
       {products.length ? <>
@@ -470,7 +470,7 @@ export function SellerDashboard() {
         return <section className="seller-fulfillment-line" key={item.id}><div><strong>{item.productName}</strong><small>Quantity: {item.quantity}</small></div><span className="status">{item.fulfillmentStatus}</span>{nextStatuses.length ? <fieldset aria-label={`Update ${item.productName} fulfillment status`} disabled={feedback?.kind === "pending"}><legend>Next status</legend><div className="seller-fulfillment-actions">{fulfillmentNextStatuses[item.fulfillmentStatus].map((status) => <button key={status} type="button" onClick={() => setFulfillmentConfirmation({ order, item, status })}>{status}</button>)}</div></fieldset> : <span className="seller-fulfillment-complete">No further status changes</span>}{feedback && <p className={`seller-fulfillment-feedback ${feedback.kind}`} role={feedback.kind === "error" ? "alert" : "status"}>{feedback.message}</p>}{feedback?.kind === "error" && failedFulfillmentChange?.item.id === item.id && <button type="button" onClick={() => setFulfillmentConfirmation(failedFulfillmentChange)}>Retry {failedFulfillmentChange.status}</button>}</section>;
       })}</div></div><time dateTime={order.createdAt}>{new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date(order.createdAt))}</time><span className={`status order-${order.status}`}>{order.status}</span></article>)}</div> : <p className="seller-state">No fulfillment actions are currently available. No product orders yet. New orders appear here once customers check out.</p>}
     </section>}
-    </>}</div>
+    </>}</>}</div>
     </div>
     {fulfillmentConfirmation && <ConfirmationDialog title={`Mark ${fulfillmentConfirmation.item.productName} as ${fulfillmentConfirmation.status}?`} description="This records the next fulfillment status for this order line only." confirmLabel={`Confirm ${fulfillmentConfirmation.status}`} tone="primary" onCancel={() => setFulfillmentConfirmation(null)} onConfirm={confirmFulfillmentUpdate} />}
     {payoutConfirmation && <ConfirmationDialog title="Request payout review?" description="This creates a review request only. It does not transfer or settle money." confirmLabel="Request review" tone="neutral" pending={payoutSubmitting} onCancel={() => setPayoutConfirmation(false)} onConfirm={() => void requestPayout()} />}

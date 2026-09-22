@@ -23,7 +23,7 @@ test("catalog and inventory both expose real product editing while stock saving 
   const inventoryWorkspace = dashboard.slice(inventoryStart, dashboard.indexOf('activeSection === "promotions" && <section', inventoryStart));
   assert.match(catalogWorkspace, /<SellerProductEditor product=\{product\} onSaved=/);
   assert.match(catalogWorkspace, /<SellerProductAssets product=\{product\} \/>/);
-  assert.match(catalogWorkspace, /<SellerProductForm/);
+  assert.doesNotMatch(catalogWorkspace, /<SellerProductForm/);
   assert.doesNotMatch(catalogWorkspace, /seller-stock-form|Save stock/);
   assert.match(inventoryWorkspace, /seller-stock-form/);
   assert.match(inventoryWorkspace, /Save stock/);
