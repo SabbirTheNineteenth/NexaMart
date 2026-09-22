@@ -74,6 +74,23 @@
 :global(.admin-workspace) :global(textarea){min-height:88px;box-sizing:border-box}
 :global(.admin-empty){overflow-wrap:anywhere}
 
+/* Phase-one operational shell: pale canvas, ink navigation, and compact reference geometry. */
+:global(.admin-workspace){--admin-obsidian:#f7f6fc;--admin-plum:#21153f;--admin-surface:#fff;--admin-surface-raised:#f2effa;--admin-line:#e4dfef;--admin-text:#21183b;--admin-muted:#6d6480;--admin-violet:#653cc6;--admin-orchid:#7b4ee3;--admin-success:#26745a;--admin-danger:#a62c5d;background:#f7f6fc;color:#21183b}
+:global(.admin-workspace) :global(.admin-sidebar){background:linear-gradient(180deg,#21153f,#160e2c);border-color:#332353;color:#f7f2ff}
+:global(.admin-workspace) :global(.admin-workspace-content){background:#f7f6fc}
+:global(.admin-workspace) :global(.admin-utility-bar){background:rgba(255,255,255,.94);border-color:#e4dfef;color:#21183b}
+:global(.admin-workspace) :global(.admin-context-header){padding:32px 4px 24px;background:linear-gradient(110deg,#fff 0%,#fbfaff 68%,#eee8ff 100%)}
+:global(.admin-workspace) :global(.admin-context-header h1){color:#19122f;font-size:clamp(30px,3vw,44px)}
+:global(.admin-workspace) :global(.admin-panel),:global(.admin-workspace) :global(.admin-overview-command-deck){border-color:#e4dfef;background:#fff;box-shadow:0 8px 22px rgba(42,28,74,.06)}
+:global(.admin-workspace) :global(.admin-overview-command-deck) :global(article){background:#fff}
+:global(.admin-workspace) :global(.admin-overview-command-deck) :global(article:nth-child(1)){background:#f3eeff}:global(.admin-workspace) :global(.admin-overview-command-deck) :global(article:nth-child(2)){background:#edf4ff}:global(.admin-workspace) :global(.admin-overview-command-deck) :global(article:nth-child(3)){background:#edf9f2}
+:global(.admin-workspace) :global(.admin-health){background:#fff5f8}
+:global(.admin-workspace) :global(.admin-sidebar-context),:global(.admin-workspace) :global(.admin-sidebar-profile){background:transparent;border-color:rgba(255,255,255,.15)}
+:global(.admin-workspace) :global(.admin-sidebar-context span),:global(.admin-workspace) :global(.admin-sidebar-context small),:global(.admin-workspace) :global(.admin-nav-group-label){color:#c9bedc}
+:global(.admin-workspace) :global(.admin-workspace-nav > div > .admin-nav-item > a){color:#ded5ed}
+:global(.admin-workspace) :global(.admin-workspace-nav > div > .admin-nav-item > a.is-active){background:#4d337d;border-color:#654a98;color:#fff;box-shadow:none}
+@media(max-width:900px){:global(.admin-workspace) :global(.admin-sidebar){background:#21153f}:global(.admin-workspace) :global(.admin-workspace-content){padding-top:0}}
+
 @media(max-width:700px){
   :global(.admin-command-bar){align-items:flex-start;flex-wrap:wrap;padding:6px 0}
   :global(.admin-command-context){flex:1 1 220px}
