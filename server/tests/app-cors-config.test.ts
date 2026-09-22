@@ -32,8 +32,7 @@ test("does not initialize an app with invalid production CORS configuration", ()
 test("local QA origin is accepted only with the explicit local QA marker", () => {
   assert.doesNotThrow(() =>
     createApp(
-      { NODE_ENV: "production", NEXAMART_LOCAL_QA: "1", PORT: "3004", CLIENT_ORIGIN: "http://localhost:3005" },
-      { authAdmission: { limiter: sharedLimiter } },
+      { NODE_ENV: "test", NEXAMART_LOCAL_QA: "1", PORT: "3004", CLIENT_ORIGIN: "http://localhost:3005" },
     ),
   );
   assert.throws(
@@ -41,7 +40,11 @@ test("local QA origin is accepted only with the explicit local QA marker", () =>
     /CLIENT_ORIGIN must be an exact HTTPS origin/,
   );
   assert.throws(
-    () => createApp({ NODE_ENV: "production", NEXAMART_LOCAL_QA: "1", PORT: "3005" }),
+    () => createApp({ NODE_ENV: "test", NEXAMART_LOCAL_QA: "1", PORT: "3005" }),
     /NEXAMART_LOCAL_QA requires PORT=3004/,
+  );
+  assert.throws(
+    () => createApp({ NODE_ENV: "production", NEXAMART_LOCAL_QA: "1", PORT: "3004" }),
+    /NEXAMART_LOCAL_QA is not available in production/,
   );
 });

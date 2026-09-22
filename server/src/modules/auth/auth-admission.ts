@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { isIP } from "node:net";
 import type { Context } from "hono";
+import { isLocalQaRuntime } from "../../config/environment.js";
 
 /**
  * Injectable admission contract. Deployments with more than one API instance
@@ -51,6 +52,9 @@ type LocalWindow = { startedAt: number; used: number };
 const defaultIpLimit = 20;
 const defaultAccountLimit = 5;
 const defaultWindowMs = 15 * 60_000;
+const localQaIpLimit = 60;
+const localQaAccountLimit = 12;
+const localQaWindowMs = 15 * 60_000;
 const retryAfterOnLimiterFailure = 60;
 
 const positiveInteger = (value: string | undefined, fallback: number) => {
@@ -96,12 +100,13 @@ const accountKey = (email: string) => `account:${hashKeyIdentity(normalizeEmail(
 
 const resolveConfiguration = (configuration: AuthAdmissionConfiguration = {}): ResolvedAuthAdmissionConfiguration => {
   const environment = configuration.environment ?? process.env;
+  const localQa = isLocalQaRuntime(environment);
   const trustedProxyAddresses = exactIpAllowlist(configuration.trustedProxyAddresses ?? environment.AUTH_TRUSTED_PROXY_ADDRESSES?.split(","));
   return {
     limiter: configuration.limiter ?? new LocalAuthAdmissionLimiter(),
-    ipLimit: configuration.ipLimit ?? positiveInteger(environment.AUTH_ADMISSION_IP_LIMIT, defaultIpLimit),
-    accountLimit: configuration.accountLimit ?? positiveInteger(environment.AUTH_ADMISSION_ACCOUNT_LIMIT, defaultAccountLimit),
-    windowMs: configuration.windowMs ?? positiveInteger(environment.AUTH_ADMISSION_WINDOW_SECONDS, defaultWindowMs / 1_000) * 1_000,
+    ipLimit: configuration.ipLimit ?? (localQa ? localQaIpLimit : positiveInteger(environment.AUTH_ADMISSION_IP_LIMIT, defaultIpLimit)),
+    accountLimit: configuration.accountLimit ?? (localQa ? localQaAccountLimit : positiveInteger(environment.AUTH_ADMISSION_ACCOUNT_LIMIT, defaultAccountLimit)),
+    windowMs: configuration.windowMs ?? (localQa ? localQaWindowMs : positiveInteger(environment.AUTH_ADMISSION_WINDOW_SECONDS, defaultWindowMs / 1_000) * 1_000),
     trustProxy: configuration.trustProxy ?? environment.AUTH_TRUST_PROXY === "true",
     trustedProxyAddresses,
     getDirectClientAddress: configuration.getDirectClientAddress ?? directTransportAddress,

@@ -51,6 +51,57 @@ test("login keeps incorrect credentials indistinguishable from a missing account
   assert.deepEqual(await response.json(), { error: "Invalid email or password" });
 });
 
+test("local QA allows a bounded practical number of invalid login attempts before admission blocks them", async () => {
+  const routes = createAuthRoutes({
+    auth: { async register() { return account; }, async login() { return null; } },
+    sessions,
+    secureCookies: false,
+    admission: {
+      environment: { NODE_ENV: "test", NEXAMART_LOCAL_QA: "1", PORT: "3004" },
+      getDirectClientAddress: () => "127.0.0.1",
+    },
+  });
+  const app = new Hono().basePath("/api");
+  app.route("/auth", routes);
+  const request = () => app.request("http://localhost:3004/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: account.email, password: "wrong-password" }),
+  });
+
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    assert.equal((await request()).status, 401);
+  }
+
+  const blocked = await request();
+  assert.equal(blocked.status, 429);
+  assert.equal(blocked.headers.get("Retry-After"), "900");
+  assert.deepEqual(await blocked.json(), { error: "Too many authentication attempts" });
+});
+
+test("local QA admission still permits a valid login below its bounded threshold", async () => {
+  const routes = createAuthRoutes({
+    auth: { async register() { return account; }, async login() { return account; } },
+    sessions,
+    secureCookies: false,
+    admission: {
+      environment: { NODE_ENV: "test", NEXAMART_LOCAL_QA: "1", PORT: "3004" },
+      getDirectClientAddress: () => "127.0.0.1",
+    },
+  });
+  const app = new Hono().basePath("/api");
+  app.route("/auth", routes);
+
+  const response = await app.request("http://localhost:3004/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: account.email, password: "secure-pass" }),
+  });
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { account });
+});
+
 test("login rejects malformed JSON with its established credential contract", async () => {
   let attemptedLogin = false;
   const routes = createAuthRoutes({

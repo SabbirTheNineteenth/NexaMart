@@ -105,7 +105,7 @@ test("does not apply CSRF checks to cookie-bearing GET, HEAD, or OPTIONS request
 
 test("explicit local QA accepts only the local QA UI origin for cookie-authenticated mutations", async () => {
   const app = createApp(
-    { NODE_ENV: "production", NEXAMART_LOCAL_QA: "1", PORT: "3004", CLIENT_ORIGIN: "http://localhost:3005" },
+    { NODE_ENV: "test", NEXAMART_LOCAL_QA: "1", PORT: "3004", CLIENT_ORIGIN: "http://localhost:3005" },
     appDependencies,
   );
   let reached = false;

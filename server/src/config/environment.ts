@@ -2,6 +2,13 @@ type Environment = Record<string, string | undefined>;
 
 const localClientOrigin = "http://localhost:3001";
 const localQaClientOrigin = "http://localhost:3006";
+const localQaApiPort = "3004";
+
+export function isLocalQaRuntime(environment: Environment = process.env): boolean {
+  return environment.NODE_ENV !== "production"
+    && environment.NEXAMART_LOCAL_QA === "1"
+    && environment.PORT === localQaApiPort;
+}
 
 function isExactHttpsOrigin(value: string): boolean {
   try {
@@ -16,8 +23,11 @@ export function resolveClientOrigin(environment: Environment = process.env): str
   const clientOrigin = environment.CLIENT_ORIGIN;
 
   if (environment.NEXAMART_LOCAL_QA === "1") {
-    if (environment.PORT !== "3004") {
-      throw new Error("NEXAMART_LOCAL_QA requires PORT=3004.");
+    if (environment.NODE_ENV === "production") {
+      throw new Error("NEXAMART_LOCAL_QA is not available in production.");
+    }
+    if (environment.PORT !== localQaApiPort) {
+      throw new Error(`NEXAMART_LOCAL_QA requires PORT=${localQaApiPort}.`);
     }
 
     return localQaClientOrigin;
