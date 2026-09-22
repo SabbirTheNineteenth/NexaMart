@@ -25,3 +25,26 @@
 @media(max-width:420px){.shell{width:100%;padding-right:12px;padding-left:12px}.content :global(.account-orders),.content :global(.account-addresses){padding:16px}.content :global(.wishlist-list article){padding:14px 16px}.content :global(.customer-review){padding:18px 16px}.content :global(.account-section-navigation){margin:0 -2px}.content :global(.account-section-navigation a){padding:0 12px}.content :global(.account-address-form-grid){grid-template-columns:1fr}}
 @media(max-width:390px){.statePanel{padding:22px 16px}.statePanel h1{font-size:clamp(30px,10vw,40px)}.authStateActions{gap:10px}}
 @media(prefers-reduced-motion:reduce){.shell :global(*),.shell :global(*::before),.shell :global(*::after){scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+.roleTransition {
+  display: grid;
+  gap: 1rem;
+  max-width: 42rem;
+  margin: clamp(2rem, 7vw, 5rem) auto;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  animation: account-role-enter 180ms ease-out both;
+}
+
+.roleTransition h1,
+.roleTransition p { margin: 0; }
+
+.roleTransition :global(.primary-button),
+.roleTransition :global(.account-switch) { min-height: 44px; }
+
+@keyframes account-role-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roleTransition { animation: none; }
+}
