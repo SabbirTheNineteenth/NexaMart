@@ -70,7 +70,7 @@ export const createAuthRoutes = ({ auth, sessions, secureCookies, admission }: A
     if (token) {
       try { await sessions.revoke(token); } catch { return c.json({ error: "Unable to log out" }, 500); }
     }
-    deleteCookie(c, "nexamart_session", { path: "/", secure: secureCookies, httpOnly: true, sameSite: "Lax" });
+    deleteCookie(c, "nexamart_session", { path: "/", secure: secureCookies, httpOnly: true, sameSite: "Lax", expires: new Date(0) });
     return c.body(null, 204);
   });
   routes.get("/me", guard.requireAccount, (c) => c.json({ account: getAuthenticatedAccount(c) }));

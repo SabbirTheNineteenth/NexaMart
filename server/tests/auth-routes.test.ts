@@ -460,5 +460,9 @@ test("logout revokes the server session and clears its cookie", async () => {
   const response = await app.request("http://localhost/api/auth/logout", { method: "POST", headers: { Cookie: "nexamart_session=opaque-session-token" } });
   assert.equal(response.status, 204);
   assert.equal(revokedToken, "opaque-session-token");
-  assert.match(response.headers.get("set-cookie") ?? "", /nexamart_session=;/);
+  const clearedCookie = response.headers.get("set-cookie") ?? "";
+  assert.match(clearedCookie, /nexamart_session=;/);
+  assert.match(clearedCookie, /Path=\//i);
+  assert.match(clearedCookie, /Max-Age=0/i);
+  assert.match(clearedCookie, /Expires=/i);
 });
