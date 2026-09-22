@@ -156,3 +156,53 @@
   :global(.admin-products-action-grid) :global(a){min-height:76px;border-right:0}
   :global(.admin-catalog-governance) :global(.admin-panel-head > span){margin-top:2px}
 }
+
+/* Phase three extends the same operational canvas to every real admin queue. */
+:global(.admin-operations-workspace){min-width:0;overflow:hidden}
+:global(.admin-operations-workspace) :global(.admin-panel-head){padding:20px 22px 16px;background:linear-gradient(105deg,#fff,#fbfaff)}
+:global(.admin-operations-workspace) :global(.admin-panel-head > span){flex:0 0 auto;padding:6px 9px;border:1px solid #e4dfef;border-radius:999px;background:#f4f0ff;color:#56349e;font-size:11px;font-weight:800}
+:global(.admin-operations-workspace) :global(.admin-list),:global(.admin-operations-workspace) :global(.admin-search-results){border-top:1px solid #e4dfef;background:#fff}
+:global(.admin-operations-workspace) :global(.admin-list > article){padding:16px 22px;border-bottom:1px solid #ece8f4;background:#fff}
+:global(.admin-operations-workspace) :global(.admin-list > article:hover){background:#fdfcff}
+:global(.admin-operations-workspace) :global(.admin-list strong){font-size:13px;line-height:1.35}
+:global(.admin-operations-workspace) :global(.admin-list small),:global(.admin-operations-workspace) :global(.admin-list time){color:#6d6480;font-size:11px;line-height:1.45}
+:global(.admin-operations-workspace) :global(.admin-status),:global(.admin-operations-workspace) :global(.admin-role){align-self:start;justify-self:start;padding:5px 8px;border-radius:999px;font-size:10px;line-height:1.2}
+:global(.admin-operations-workspace) :global(button){min-height:38px;padding:8px 10px;border:1px solid #d9d0ec;border-radius:7px;background:#fff;color:#392363;font-size:11px;font-weight:800}
+:global(.admin-operations-workspace) :global(.admin-empty),:global(.admin-operations-empty){display:grid;gap:7px;place-items:start;padding:24px 22px;background:linear-gradient(180deg,#fff,#fbfaff);color:#6d6480}
+:global(.admin-operations-workspace) :global(.admin-empty strong),:global(.admin-operations-empty strong){color:#21183b;font-size:14px}
+:global(.admin-seller-moderation) :global(.admin-seller-record){display:grid;grid-template-columns:minmax(210px,1.5fr) minmax(120px,.7fr) 112px minmax(230px,.9fr);gap:16px;align-items:start}
+:global(.admin-order-oversight) :global(.admin-order-record){display:grid;gap:12px}
+:global(.admin-order-oversight) :global(.admin-order-detail){padding:12px;border:1px solid #e4dfef;border-radius:8px;background:#faf9fe}
+:global(.admin-order-oversight) :global(.admin-order-detail summary){min-height:32px;color:#52358f;font-size:11px;font-weight:800;cursor:pointer}
+:global(.admin-reviews) :global(.admin-review){display:grid;grid-template-columns:minmax(0,1fr) 110px auto;gap:16px;align-items:start}
+:global(.admin-promotion-oversight) :global(.admin-promotion-record),:global(.admin-accounts) :global(.admin-account),:global(.admin-audit) :global(.admin-audit-record){display:grid;grid-template-columns:minmax(0,1fr) minmax(132px,.45fr) auto;gap:16px;align-items:start}
+:global(.admin-audit) :global(.admin-audit-filters),:global(.admin-accounts) :global(.admin-account-controls){display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:12px;align-items:end;padding:16px 22px;border-top:1px solid #e4dfef;border-bottom:1px solid #e4dfef;background:#faf9fe}
+:global(.admin-audit) :global(.admin-audit-filters label),:global(.admin-accounts) :global(.admin-account-controls label){display:grid;gap:6px;color:#6d6480;font-size:11px;font-weight:800}
+:global(.admin-audit) :global(.admin-audit-filter-actions){display:flex;gap:8px;align-items:center}
+:global(.admin-finance) :global(.admin-finance-summary),:global(.admin-analytics) :global(.admin-analytics-scope){display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin:0;border-top:1px solid #e4dfef;border-bottom:1px solid #e4dfef;background:#faf9fe}
+:global(.admin-finance) :global(.admin-finance-summary article),:global(.admin-analytics) :global(.admin-analytics-scope span){min-width:0;padding:14px 16px;border-right:1px solid #e4dfef;color:#56349e;font-size:11px;overflow-wrap:anywhere}
+:global(.admin-finance) :global(.admin-finance-summary article:last-child),:global(.admin-analytics) :global(.admin-analytics-scope span:last-child){border-right:0}
+:global(.admin-finance) :global(.admin-finance-records),:global(.admin-analytics) :global(.admin-analytics-grid){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:18px 22px;background:#fff}
+:global(.admin-finance) :global(.admin-finance-records > div),:global(.admin-analytics) :global(.admin-analytics-grid article),:global(.admin-analytics) :global(.admin-analytics-fulfillment){min-width:0;border:1px solid #e4dfef;border-radius:9px;background:#fff;overflow:hidden}
+:global(.admin-finance) :global(.admin-finance-records h3),:global(.admin-analytics) :global(.admin-analytics-grid h3),:global(.admin-analytics) :global(.admin-analytics-fulfillment h3){margin:0;padding:14px 16px;border-bottom:1px solid #e4dfef;color:#21183b;font-size:13px}
+:global(.admin-analytics) :global(.admin-analytics-grid article){padding:0 0 14px}
+:global(.admin-analytics) :global(.admin-analytics-grid article > p),:global(.admin-analytics) :global(.admin-analytics-grid article > small){display:block;margin:12px 16px 0}
+:global(.admin-analytics) :global(.admin-analytics-fulfillment){margin:0 22px 22px}
+:global(.admin-operations-table){width:100%;min-width:0;overflow-x:auto;overscroll-behavior-inline:contain}
+@media(max-width:700px){
+  :global(.admin-operations-workspace) :global(.admin-panel-head){padding:16px 14px}
+  :global(.admin-operations-workspace) :global(.admin-list > article){padding:14px}
+  :global(.admin-seller-moderation) :global(.admin-seller-record),:global(.admin-reviews) :global(.admin-review),:global(.admin-promotion-oversight) :global(.admin-promotion-record),:global(.admin-accounts) :global(.admin-account),:global(.admin-audit) :global(.admin-audit-record){grid-template-columns:1fr;gap:10px}
+  :global(.admin-audit) :global(.admin-audit-filters){grid-template-columns:1fr;padding:14px}
+  :global(.admin-accounts) :global(.admin-account-controls){grid-template-columns:1fr;padding:14px}
+  :global(.admin-finance) :global(.admin-finance-summary),:global(.admin-analytics) :global(.admin-analytics-scope){grid-template-columns:repeat(2,minmax(0,1fr))}
+  :global(.admin-finance) :global(.admin-finance-records),:global(.admin-analytics) :global(.admin-analytics-grid){grid-template-columns:1fr;padding:14px}
+  :global(.admin-analytics) :global(.admin-analytics-fulfillment){margin:0 14px 14px}
+  :global(.admin-operations-table){scroll-snap-type:inline proximity}
+}
+@media(max-width:420px){
+  :global(.admin-operations-workspace) :global(.admin-panel-head){gap:8px;padding:14px 12px}
+  :global(.admin-operations-workspace) :global(.admin-empty),:global(.admin-operations-empty){padding:20px 14px}
+  :global(.admin-finance) :global(.admin-finance-summary),:global(.admin-analytics) :global(.admin-analytics-scope){grid-template-columns:1fr}
+  :global(.admin-finance) :global(.admin-finance-summary article),:global(.admin-analytics) :global(.admin-analytics-scope span){border-right:0;border-bottom:1px solid #e4dfef}
+}
