@@ -113,3 +113,46 @@
   :global(.admin-workspace) :global(.admin-sidebar){padding-right:12px;padding-left:12px}
   :global(.admin-workspace) :global(.admin-workspace-nav){margin-right:-12px;padding-right:12px}
 }
+
+/* Catalog routes keep the operational shell's restrained hierarchy: dense records
+   and inspector controls rather than a second, decorative dashboard. */
+:global(.admin-catalog-governance){display:grid;gap:18px;min-width:0}
+:global(.admin-catalog-governance) :global(.admin-panel){overflow:hidden}
+:global(.admin-catalog-governance) :global(.admin-panel-head){padding:20px 22px 16px;background:linear-gradient(105deg,#fff,#fbfaff)}
+:global(.admin-catalog-governance) :global(.admin-panel-head > span){flex:0 0 auto;padding:6px 9px;border:1px solid #e4dfef;border-radius:999px;background:#f4f0ff;color:#56349e;font-size:11px;font-weight:800}
+:global(.admin-products-action-grid){display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-top:1px solid #e4dfef;background:#fff}
+:global(.admin-products-action-grid) :global(a){display:grid;gap:6px;min-height:118px;padding:17px 18px;box-sizing:border-box;border-right:1px solid #e4dfef;color:#21183b;text-decoration:none;transition:background .16s ease,color .16s ease}
+:global(.admin-products-action-grid) :global(a:last-child){border-right:0}
+:global(.admin-products-action-grid) :global(a:hover){background:#f7f3ff;color:#5a36af}
+:global(.admin-products-action-grid) :global(strong){font-size:13px;line-height:1.3}
+:global(.admin-products-action-grid) :global(span){color:#6d6480;font-size:11px;line-height:1.5}
+:global(.admin-governance-table){display:grid;gap:0;overflow:hidden;border-top:1px solid #e4dfef;background:#fff}
+:global(.admin-governance-table) :global(.admin-product-record){display:grid;grid-template-columns:minmax(280px,1.7fr) minmax(106px,.5fr) minmax(110px,.5fr) minmax(104px,.45fr) minmax(270px,.9fr);gap:16px;align-items:start;padding:17px 22px;border-bottom:1px solid #ece8f4;background:#fff}
+:global(.admin-governance-table) :global(.admin-product-record:hover){background:#fdfcff}
+:global(.admin-governance-table) :global(.admin-product-record > div:first-child){display:grid;gap:5px;min-width:0}
+:global(.admin-governance-table) :global(.admin-product-record strong){font-size:13px;line-height:1.35}
+:global(.admin-governance-table) :global(.admin-product-record small){color:#6d6480;font-size:11px;line-height:1.45;overflow-wrap:anywhere}
+:global(.admin-governance-table) :global(.admin-product-record time){color:#6d6480;font-size:11px;line-height:1.45}
+:global(.admin-governance-table) :global(.admin-product-record > div:last-child){display:flex;flex-wrap:wrap;gap:7px}
+:global(.admin-governance-table) :global(button){min-height:36px;padding:7px 10px;border:1px solid #d9d0ec;border-radius:7px;background:#fff;color:#392363;font-size:11px;font-weight:800}
+:global(.admin-governance-table) :global(.admin-publication-action){border-color:#6d45c8;background:#653cc6;color:#fff}
+:global(.admin-taxonomy-route) :global(.admin-taxonomy){box-shadow:0 8px 22px rgba(42,28,74,.06)}
+:global(.admin-taxonomy-route) :global(.admin-taxonomy-focused-form){align-items:start;background:#fff}
+:global(.admin-taxonomy-route) :global(.admin-inspector-form){border-radius:10px;box-shadow:0 5px 14px rgba(42,28,74,.05)}
+:global(.admin-taxonomy-route) :global(.admin-taxonomy-focused-form aside){border-radius:8px;background:#f4f0ff}
+:global(.admin-taxonomy-route) :global(.admin-taxonomy-record-group),:global(.admin-taxonomy-route) :global(.admin-taxonomy-proposals),:global(.admin-taxonomy-route) :global(.admin-taxonomy-create-group){border-color:#e4dfef;border-radius:10px;overflow:hidden}
+@media(max-width:700px){
+  :global(.admin-catalog-governance){gap:14px}
+  :global(.admin-catalog-governance) :global(.admin-panel-head){padding:16px 14px}
+  :global(.admin-products-action-grid){grid-template-columns:repeat(2,minmax(0,1fr))}
+  :global(.admin-products-action-grid) :global(a){min-height:104px;border-bottom:1px solid #e4dfef}
+  :global(.admin-products-action-grid) :global(a:nth-child(2n)){border-right:0}
+  :global(.admin-governance-table){overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:inline proximity}
+  :global(.admin-governance-table) :global(.admin-product-record){grid-template-columns:minmax(240px,1.45fr) 100px 104px 102px 240px;min-width:790px;padding:15px;scroll-snap-align:start}
+  :global(.admin-taxonomy-route) :global(.admin-taxonomy-focused-form){padding:14px}
+}
+@media(max-width:420px){
+  :global(.admin-products-action-grid){grid-template-columns:1fr}
+  :global(.admin-products-action-grid) :global(a){min-height:76px;border-right:0}
+  :global(.admin-catalog-governance) :global(.admin-panel-head > span){margin-top:2px}
+}

@@ -175,7 +175,7 @@ export function AdminTaxonomyManagement({ createKind }: { createKind?: AdminTaxo
   const canonicalOptions = (proposal: AdminTaxonomyProposal) => proposal.kind === "subcategory" ? taxonomy.subcategories.filter((node) => node.categoryId === proposal.categoryId) : nodesFor(proposal.kind);
   const createForm = (kind: AdminTaxonomyKind) => {
     const id = `create-${kind}`; const isPending = pendingIds.has(id); const itemFeedback = feedback[id];
-    return <form className="admin-category-create" aria-label={`Create canonical ${kind}`} onSubmit={(event) => void createNode(kind, event)}>
+    return <form className="admin-category-create admin-inspector-form" aria-label={`Create canonical ${kind}`} onSubmit={(event) => void createNode(kind, event)}>
       <div className="admin-taxonomy-form-heading"><h3>Create {kind}</h3><p>Add one controlled term at a time.</p></div>
       <fieldset className="admin-taxonomy-fields">
         <label>Name<input required name="name" minLength={1} maxLength={120} autoComplete="off" /></label><label>Slug<input required name="slug" minLength={1} maxLength={100} autoComplete="off" pattern="[a-z0-9]+(-[a-z0-9]+)*" title="Use lowercase letters, numbers, and hyphens." /></label>
