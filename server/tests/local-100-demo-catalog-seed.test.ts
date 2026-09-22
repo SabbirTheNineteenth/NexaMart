@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { DEMO_CATALOG_SEED_PLAN } from "../src/db/seeds/demo-catalog-plan.js";
 import { assertLocalDemoSeedGuard, runLocalDemoCatalogSeed, type LocalDemoCatalogSeedRepository } from "../src/db/seeds/runLocalDemoSeed.js";
+import { createLocalDemoCatalogSeedRepository } from "../src/scripts/local-demo-catalog-seed.helpers.js";
+import { accounts, sellerProfiles } from "../src/db/schema/index.js";
 
 const localEnvironment = { DATABASE_URL: "postgresql://demo:password@localhost:5432/nexamart", NEXAMART_DEMO_SEED: "local-confirmed" } as const;
 
@@ -39,6 +41,49 @@ test("local seed guard accepts only exact localhost PostgreSQL hosts and does no
   }
 });
 
+test("local demo seller rerun synchronizes only its stale credential hash while retaining its active store profile", async () => {
+  const accountRows = new Map([
+    ["local-demo-catalog@nexamart.local", { id: "demo-seller", passwordHash: "stale" }],
+    ["other@nexamart.local", { id: "other-account", passwordHash: "other" }],
+  ]);
+  let insertedAccount: Record<string, unknown> | undefined;
+  let updatedAccount: Record<string, unknown> | undefined;
+  let updatedProfile: Record<string, unknown> | undefined;
+  const database = {
+    insert(table: unknown) {
+      return {
+        values(value: Record<string, unknown>) {
+          if (table === accounts) {
+            insertedAccount = value;
+            return {
+              onConflictDoUpdate(configuration: { set: Record<string, unknown> }) {
+                updatedAccount = configuration.set;
+                const row = accountRows.get(String(value.email));
+                if (row) row.passwordHash = String(configuration.set.passwordHash);
+                return { async returning() { return [{ id: row?.id ?? "demo-seller" }]; } };
+              },
+            };
+          }
+          assert.equal(table, sellerProfiles);
+          return {
+            onConflictDoUpdate(configuration: { set: Record<string, unknown> }) {
+              updatedProfile = configuration.set;
+              return Promise.resolve();
+            },
+          };
+        },
+      };
+    },
+  };
+
+  await createLocalDemoCatalogSeedRepository(database as never).upsertSeller();
+
+  assert.equal(accountRows.get("local-demo-catalog@nexamart.local")?.passwordHash, insertedAccount?.passwordHash);
+  assert.equal(updatedAccount?.passwordHash, insertedAccount?.passwordHash);
+  assert.equal(accountRows.get("other@nexamart.local")?.passwordHash, "other");
+  assert.equal(updatedProfile?.status, "active");
+});
+
 test("local promotion persistence finds an overlapping product schedule before updating or inserting", async () => {
   const source = await import("node:fs/promises").then((fs) => fs.readFile(new URL("../src/scripts/local-demo-catalog-seed.helpers.ts", import.meta.url), "utf8"));
   const promotionUpsert = source.slice(source.indexOf("async upsertPromotion(value)"), source.indexOf("\n  },\n};", source.indexOf("async upsertPromotion(value)")));
@@ -47,8 +92,8 @@ test("local promotion persistence finds an overlapping product schedule before u
   assert.match(promotionUpsert, /eq\(promotions\.productId, value\.productId\)/);
   assert.match(promotionUpsert, /promotions\.startsAt\} < \$\{value\.endsAt\}/);
   assert.match(promotionUpsert, /promotions\.endsAt\} > \$\{value\.startsAt\}/);
-  assert.match(promotionUpsert, /if \(existing\)[\s\S]*db\.update\(promotions\)/);
-  assert.match(promotionUpsert, /await db\.insert\(promotions\)\.values\(promotion\)/);
+  assert.match(promotionUpsert, /if \(existing\)[\s\S]*database\.update\(promotions\)/);
+  assert.match(promotionUpsert, /await database\.insert\(promotions\)\.values\(promotion\)/);
   assert.doesNotMatch(promotionUpsert, /onConflictDoUpdate/);
 });
 
