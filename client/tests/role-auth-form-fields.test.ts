@@ -16,6 +16,13 @@ test("role auth fields are isolated when each controlled value changes", () => {
   }
 });
 
+test("RoleAuth captures an input value before its queued state update runs", () => {
+  const source = readFileSync(new URL("../src/features/auth/RoleAuth.tsx", import.meta.url), "utf8");
+
+  assert.match(source, /const updateFormField = \(field: AuthFormField\) => \(event: ChangeEvent<HTMLInputElement \| HTMLTextAreaElement>\) => \{\s+const value = event\.currentTarget\.value;\s+setFormState\(\(current\) => setAuthFormField\(current, field, value\)\);/);
+  assert.doesNotMatch(source, /setAuthFormField\(current, field, event\.currentTarget\.value\)/);
+});
+
 test("role auth field metadata gives each rendered control a unique id, name, label, and autocomplete contract", () => {
   const source = readFileSync(new URL("../src/features/auth/RoleAuth.tsx", import.meta.url), "utf8");
   const fields = ["name", "email", "password", "storeName", "storeSlug", "description"] as const;

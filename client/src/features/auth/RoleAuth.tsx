@@ -102,7 +102,8 @@ export function RoleAuth({ mode, role }: RoleAuthProps) {
   const title = mode === "login" ? `Sign in as ${roleNames[role]}.` : role === "seller" ? "Submit a seller application." : "Create your account.";
 
   const updateFormField = (field: AuthFormField) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormState((current) => setAuthFormField(current, field, event.currentTarget.value));
+    const value = event.currentTarget.value;
+    setFormState((current) => setAuthFormField(current, field, value));
   };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
