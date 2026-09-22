@@ -125,6 +125,20 @@ const adminProductOperationContext: Record<string, AdminRouteContext> = {
   brands: { title: "Create brand", trail: ["Catalog", "Taxonomy", "Brands", "Create"] },
 };
 
+const sellerCatalogGuidanceWorkflow: Array<{ title: string; description: string; icon: LucideIcon }> = [
+  { title: "Prepare approved taxonomy", description: "Sellers use approved category, subcategory, and brand values before preparing a listing.", icon: Tags },
+  { title: "Seller submits a product draft", description: "Sellers provide product details through their seller workspace.", icon: PackageCheck },
+  { title: "Admin reviews catalog quality", description: "Review taxonomy, listing quality, moderation status, and publication readiness in product oversight.", icon: FileSearch },
+  { title: "Publish or request corrections", description: "Use the supported oversight controls to approve, request changes, reject, publish, or unpublish a submitted record.", icon: ClipboardCheck },
+];
+
+const sellerCatalogGuidanceActions: Array<{ label: string; description: string; href: string; icon: LucideIcon }> = [
+  { label: "Manage categories", description: "Maintain the approved top-level catalog vocabulary.", href: "/admin/products/categories/create", icon: Tags },
+  { label: "Manage subcategories", description: "Maintain category-specific refinements for seller listings.", href: "/admin/products/subcategories/create", icon: Tags },
+  { label: "Manage brands", description: "Maintain approved brand values used in catalog records.", href: "/admin/products/brands/create", icon: Tags },
+  { label: "Open product oversight", description: "Review seller-submitted catalog records and publication controls.", href: "/admin/products", icon: PackageCheck },
+];
+
 const isAdminSection = (value: string | undefined): value is AdminSection => adminSections.some((item) => item.section === value);
 
 const adminProductLinks = [
@@ -710,7 +724,17 @@ export function AdminDashboard() {
         </article>;
       })}</div> : <div className="admin-empty"><strong>No seller applications are available for moderation.</strong><p>Seller applications will appear here when submitted.</p></div>}
     </section></div>}
-    {activeSection === "products" && productOperation === "add" && <section className="admin-panel admin-product-intake" aria-labelledby="product-intake-heading"><div className="admin-panel-head"><div><p className="eyebrow">Seller-owned catalog</p><h2 id="product-intake-heading">Seller catalog guidance</h2><p>Products remain seller-owned. This administration workspace governs taxonomy, moderation, and publication rather than creating inventory under an administrator account.</p></div><Link className="admin-context-link" href="/admin/products">Back to products</Link></div><div className="admin-empty"><strong>Use the seller product workflow for product creation.</strong><p>Once a seller submits a draft with approved category, subcategory, and brand values, it appears here for catalog oversight and publication review.</p></div></section>}
+    {activeSection === "products" && productOperation === "add" && <div className="admin-product-guidance">
+      <section className="admin-panel admin-product-intake" aria-labelledby="product-intake-heading">
+        <div className="admin-panel-head admin-guidance-header"><div><p className="eyebrow">Seller-owned catalog</p><h2 id="product-intake-heading">Seller catalog guidance</h2><p>Products remain seller-owned. This administration workspace governs taxonomy, moderation, and publication rather than creating inventory under an administrator account.</p></div><Link className="admin-context-link admin-action-control" href="/admin/products">Back to products <span aria-hidden="true">→</span></Link></div>
+        <div className="admin-guidance-layout">
+          <section className="admin-guidance-workflow" aria-labelledby="guidance-workflow-heading"><div><p className="eyebrow">Practical workflow</p><h3 id="guidance-workflow-heading">From seller draft to catalog review</h3><p>Follow the existing seller-owned catalog path without creating inventory from this workspace.</p></div><ol>{sellerCatalogGuidanceWorkflow.map((step, index) => { const Icon = step.icon; return <li key={step.title}><Icon aria-hidden="true" size={18} strokeWidth={1.8} /><div><span>Step {index + 1}</span><h4>{step.title}</h4><p>{step.description}</p></div></li>; })}</ol></section>
+          <aside className="admin-catalog-ownership" aria-labelledby="catalog-ownership-heading"><p className="eyebrow">Clear boundary</p><h3 id="catalog-ownership-heading">Catalog ownership</h3><p>Sellers create and submit product listings. Admin maintains the catalog vocabulary and moderates submission and publication.</p><p>Admin does not create seller inventory from this workspace.</p></aside>
+        </div>
+      </section>
+      <section className="admin-panel admin-guidance-actions" aria-labelledby="guidance-actions-heading"><div className="admin-panel-head"><div><p className="eyebrow">Admin next actions</p><h2 id="guidance-actions-heading">Keep the catalog ready for sellers</h2><p>These are the existing administration destinations for approved catalog vocabulary and submitted-product review.</p></div></div><div className="admin-guidance-actions-grid">{sellerCatalogGuidanceActions.map((action) => { const Icon = action.icon; return <Link key={action.href} href={action.href}><Icon aria-hidden="true" size={18} strokeWidth={1.8} /><div><strong>{action.label}</strong><span>{action.description}</span></div><span className="admin-guidance-action-arrow" aria-hidden="true">→</span></Link>; })}</div></section>
+      <section className="admin-panel admin-guidance-empty" aria-labelledby="guidance-empty-heading"><div><p className="eyebrow">Submission status</p><h2 id="guidance-empty-heading">No seller submission requires action from this page.</h2><p>Use Product oversight when seller-submitted catalog records are available for review.</p></div></section>
+    </div>}
     {activeSection === "products" && !productOperation && <div className="admin-catalog-governance"><section className="admin-panel admin-products-actions" aria-labelledby="products-actions-heading"><div className="admin-panel-head"><div><p className="eyebrow">Catalog setup</p><h2 id="products-actions-heading">Products workspace</h2><p>Create and maintain the canonical vocabulary that keeps the marketplace catalog consistent.</p></div></div><div className="admin-products-action-grid"><Link href="/admin/products/categories/create"><strong>Create category</strong><span>Define a top-level catalog department.</span></Link><Link href="/admin/products/subcategories/create"><strong>Create subcategory</strong><span>Add a category-specific refinement.</span></Link><Link href="/admin/products/brands/create"><strong>Create brand</strong><span>Add an approved manufacturer or label.</span></Link><Link href="/admin/products/add"><strong>Seller catalog guidance</strong><span>Open guidance for the seller-owned catalog workflow.</span></Link></div></section>
     <section className="admin-panel admin-product-oversight" aria-labelledby="product-oversight-heading">
       <div className="admin-panel-head"><div><p className="eyebrow">Catalog records</p><h2 id="product-oversight-heading">Product oversight</h2><p className="admin-product-oversight-note">Read-only catalog records with category, seller, store, and publication context.</p></div><span>{productLoading ? "Loading" : `${data.products.length} total`}</span></div>
