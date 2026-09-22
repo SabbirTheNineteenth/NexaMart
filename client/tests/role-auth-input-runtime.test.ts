@@ -7,9 +7,9 @@ import { tmpdir } from "node:os";
 
 const chromePath = process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe";
 const debugPort = 9234;
-const baseUrl = process.env.AUTH_RUNTIME_URL ?? "http://localhost:3007";
+const baseUrl = process.env.AUTH_RUNTIME_URL ?? "http://localhost:3006";
 
-type CdpResponse = { id?: number; result?: { result?: { value?: string } }; error?: unknown; method?: string; params?: { exceptionDetails?: { text?: string; exception?: { description?: string } } } };
+type CdpResponse = { id?: number; result?: { result?: { value?: unknown } }; error?: unknown; method?: string; params?: { exceptionDetails?: { text?: string; exception?: { description?: string } } } };
 
 const delay = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
@@ -59,7 +59,15 @@ async function openPage(path: "/login" | "/login/seller") {
 
   await call("Runtime.enable");
   await call("Page.enable");
-  await delay(1200);
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    const rendered = await call("Runtime.evaluate", {
+      expression: "(() => { const input = document.querySelector('input[name=email]'); return input instanceof HTMLInputElement && !document.body.innerText.includes('Something interrupted your visit'); })()",
+      returnByValue: true,
+    });
+    if (rendered?.result?.value === true) break;
+    if (attempt === 29) throw new Error(`RoleAuth did not render an email input at ${path}. Check AUTH_RUNTIME_URL.`);
+    await delay(100);
+  }
   await call("Runtime.evaluate", { expression: "document.querySelector('input[name=email]').focus()" });
   await call("Input.dispatchKeyEvent", { type: "keyDown", windowsVirtualKeyCode: 82, code: "KeyR", key: "r" });
   await call("Input.dispatchKeyEvent", { type: "char", text: "r", unmodifiedText: "r", key: "r" });

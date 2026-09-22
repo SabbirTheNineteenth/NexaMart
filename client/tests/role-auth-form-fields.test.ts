@@ -39,3 +39,8 @@ test("role auth field metadata gives each rendered control a unique id, name, la
   assert.match(source, /name="storeSlug"[\s\S]*autoComplete="off"/);
   assert.match(source, /name="description"[\s\S]*autoComplete="off"/);
 });
+
+test("switching to a different role-auth identity clears controlled state instead of carrying credentials", () => {
+  const source = readFileSync(new URL("../src/features/auth/RoleAuth.tsx", import.meta.url), "utf8");
+  assert.match(source, /<RoleAuthSurface key=\{`\$\{mode\}-\$\{role\}`\} mode=\{mode\} role=\{role\} \/>/);
+});

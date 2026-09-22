@@ -88,7 +88,7 @@ function AuthContext({ role }: Pick<RoleAuthProps, "role">) {
   </aside>;
 }
 
-export function RoleAuth({ mode, role }: RoleAuthProps) {
+function RoleAuthSurface({ mode, role }: RoleAuthProps) {
   const router = useRouter();
   const context = roleContexts[role];
   const [saving, setSaving] = useState(false);
@@ -198,4 +198,8 @@ export function RoleAuth({ mode, role }: RoleAuthProps) {
       </section>
     </div>
   </main></div>;
+}
+
+export function RoleAuth({ mode, role }: RoleAuthProps) {
+  return <RoleAuthSurface key={`${mode}-${role}`} mode={mode} role={role} />;
 }
