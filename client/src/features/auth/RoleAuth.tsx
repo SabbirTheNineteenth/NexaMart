@@ -7,12 +7,11 @@ import { type ChangeEvent, type FormEvent, useState } from "react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { postJSON } from "@/lib/api";
 import type { Account } from "@/types/account";
+import { authFieldId, createAuthFormState, setAuthFormField, type AuthFormField } from "./roleAuthForm";
 import styles from "./RoleAuth.module.css";
 
 export type AuthRouteRole = "customer" | "seller" | "admin";
 type AuthMode = "login" | "register";
-type FormField = "name" | "email" | "password" | "storeName" | "storeSlug" | "description";
-type FormState = Record<FormField, string>;
 type RoleAuthProps = { mode: AuthMode; role: AuthRouteRole };
 type RoleCapability = { label: string; detail: string };
 type RoleContext = { label: string; heading: string; emphasizedHeading: string; panelDetail: string; tagline: string; formCopy: string; image: string; imageAlt: string; capabilities: RoleCapability[] };
@@ -46,8 +45,6 @@ const roleContexts: Record<AuthRouteRole, RoleContext> = {
   seller: { label: "Seller application", heading: "Build your", emphasizedHeading: "store story.", panelDetail: "Create your account, submit store details, and manage your store after approval.", tagline: "Start with what you make.", formCopy: "Sign in to manage an approved store, or apply with your customer account.", image: "/auth/seller-panel.png", imageAlt: "Illustrative seller packing and product desk", capabilities: [{ label: "Store details", detail: "Tell your store story" }, { label: "Submit application", detail: "Send details for review" }, { label: "Approved store tools", detail: "Manage your active store" }] },
   admin: { label: "Administrator access", heading: "Guide the", emphasizedHeading: "workspace.", panelDetail: "Sign in with a locally provisioned account for your assigned governance workspace.", tagline: "Keep the work in view.", formCopy: "Use the administrator account provisioned for your local NexaMart team.", image: "/auth/admin-panel.png", imageAlt: "Illustrative administrator governance desk", capabilities: [{ label: "Local provisioning", detail: "Accounts are created locally" }, { label: "Administrator sign-in", detail: "Use your provisioned account" }, { label: "Governance workspace", detail: "Work within assigned access" }] },
 };
-
-const initialFormState: FormState = { name: "", email: "", password: "", storeName: "", storeSlug: "", description: "" };
 
 function roleRoute(mode: AuthMode, role: AuthRouteRole): string {
   const prefix = mode === "login" ? "/login" : "/register";
@@ -98,16 +95,14 @@ export function RoleAuth({ mode, role }: RoleAuthProps) {
   const [error, setError] = useState("");
   const [wrongRole, setWrongRole] = useState<AuthRouteRole | null>(null);
   const [success, setSuccess] = useState("");
-  const [formState, setFormState] = useState(initialFormState);
+  const [formState, setFormState] = useState(createAuthFormState);
   const isAdminRegistration = mode === "register" && role === "admin";
   const isSellerRegistration = mode === "register" && role === "seller";
   const formIntro = isSellerRegistration ? "Create your account, then submit store details for review." : context.formCopy;
   const title = mode === "login" ? `Sign in as ${roleNames[role]}.` : role === "seller" ? "Submit a seller application." : "Create your account.";
 
-  const updateFormField = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const field = event.currentTarget.name as FormField;
-    const value = event.currentTarget.value;
-    setFormState((current) => ({ ...current, [field]: value }));
+  const updateFormField = (field: AuthFormField) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormState((current) => setAuthFormField(current, field, event.currentTarget.value));
   };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -147,7 +142,7 @@ export function RoleAuth({ mode, role }: RoleAuthProps) {
           return;
         }
         event.currentTarget.reset();
-        setFormState(initialFormState);
+        setFormState(createAuthFormState());
         setSuccess("Seller application submitted. Seller access starts only after an administrator approves your application.");
         return;
       }
@@ -187,10 +182,10 @@ export function RoleAuth({ mode, role }: RoleAuthProps) {
           <h1 id="role-auth-heading">{title}</h1>
           <p className="role-auth-intro">{formIntro}</p>
           <form onSubmit={submit} aria-busy={saving}>
-            {mode === "register" && <label htmlFor="auth-name">Name<input id="auth-name" required name="name" value={formState.name} onChange={updateFormField} minLength={2} autoComplete="name" disabled={saving} /></label>}
-            <div className="role-auth-credentials"><label htmlFor="auth-email">Email<input id="auth-email" required name="email" value={formState.email} onChange={updateFormField} type="email" autoComplete="email" disabled={saving} /></label>
-            <label htmlFor="auth-password">Password<input id="auth-password" required name="password" value={formState.password} onChange={updateFormField} type="password" minLength={8} autoComplete={mode === "login" ? "current-password" : "new-password"} disabled={saving} /></label></div>
-            {isSellerRegistration && <fieldset className="role-auth-store-fields"><legend>Store application</legend><label htmlFor="store-name">Store name<input id="store-name" required name="storeName" value={formState.storeName} onChange={updateFormField} minLength={2} maxLength={120} disabled={saving} /></label><label htmlFor="store-slug">Store URL slug<input id="store-slug" required name="storeSlug" value={formState.storeSlug} onChange={updateFormField} minLength={2} maxLength={100} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" aria-describedby="store-slug-help" disabled={saving} /></label><small id="store-slug-help">Use lowercase letters, numbers, and hyphens only.</small><label htmlFor="store-description">Store description (optional)<textarea id="store-description" name="description" value={formState.description} onChange={updateFormField} minLength={10} maxLength={2000} rows={4} disabled={saving} /></label></fieldset>}
+            {mode === "register" && <label htmlFor={authFieldId(mode, role, "name")}>Name<input id={authFieldId(mode, role, "name")} required name="name" value={formState.name} onChange={updateFormField("name")} minLength={2} autoComplete="name" disabled={saving} /></label>}
+            <div className="role-auth-credentials"><label htmlFor={authFieldId(mode, role, "email")}>Email<input id={authFieldId(mode, role, "email")} required name="email" value={formState.email} onChange={updateFormField("email")} type="email" autoComplete="email" disabled={saving} /></label>
+            <label htmlFor={authFieldId(mode, role, "password")}>Password<input id={authFieldId(mode, role, "password")} required name="password" value={formState.password} onChange={updateFormField("password")} type="password" minLength={8} autoComplete={mode === "login" ? "current-password" : "new-password"} disabled={saving} /></label></div>
+            {isSellerRegistration && <fieldset className="role-auth-store-fields"><legend>Store application</legend><label htmlFor={authFieldId(mode, role, "storeName")}>Store name<input id={authFieldId(mode, role, "storeName")} required name="storeName" value={formState.storeName} onChange={updateFormField("storeName")} minLength={2} maxLength={120} autoComplete="organization" disabled={saving} /></label><label htmlFor={authFieldId(mode, role, "storeSlug")}>Store URL slug<input id={authFieldId(mode, role, "storeSlug")} required name="storeSlug" value={formState.storeSlug} onChange={updateFormField("storeSlug")} minLength={2} maxLength={100} autoComplete="off" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" aria-describedby="store-slug-help" disabled={saving} /></label><small id="store-slug-help">Use lowercase letters, numbers, and hyphens only.</small><label htmlFor={authFieldId(mode, role, "description")}>Store description (optional)<textarea id={authFieldId(mode, role, "description")} name="description" value={formState.description} onChange={updateFormField("description")} minLength={10} maxLength={2000} rows={4} autoComplete="off" disabled={saving} /></label></fieldset>}
             {saving && <p className="role-auth-pending" role="status" aria-live="polite">Submitting your details…</p>}
             {error && <p className="seller-error" role="alert">{error}</p>}
             {wrongRole && <Link className="role-auth-recovery-link" href={roleRoute("login", wrongRole)}>Continue to {roleNames[wrongRole]} sign in</Link>}
