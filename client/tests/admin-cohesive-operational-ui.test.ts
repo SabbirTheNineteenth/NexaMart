@@ -7,7 +7,7 @@ const styles = readFileSync(new URL("../src/features/admin/AdminDashboard.module
 
 test("every Admin route gets contextual shell copy and one readable operational foundation", () => {
   assert.match(dashboard, /const adminRouteContext/);
-  for (const label of ["Overview", "Seller review", "Product moderation", "Taxonomy", "Promotion oversight", "Audit trail", "Seller catalog guidance"]) {
+  for (const label of ["Overview", "Seller review", "Product oversight", "Taxonomy", "Promotion oversight", "Audit trail", "Seller catalog guidance"]) {
     assert.match(dashboard, new RegExp(`title: "${label}"`));
   }
   assert.match(styles, /ADMIN OPERATIONAL FOUNDATION/);

@@ -10,10 +10,11 @@ test("catalog governance routes retain real actions inside the shared operationa
   for (const route of ["add", "brands/create", "categories/create", "subcategories/create"]) {
     assert.equal(existsSync(new URL(`../src/app/admin/products/${route}/page.tsx`, import.meta.url)), true);
   }
-  assert.match(dashboard, /className="admin-catalog-governance"/);
-  assert.match(dashboard, /href="\/admin\/products\/categories\/create"/);
-  assert.match(dashboard, /href="\/admin\/products\/subcategories\/create"/);
-  assert.match(dashboard, /href="\/admin\/products\/brands\/create"/);
+  assert.match(dashboard, /className="admin-product-workspace"/);
+  assert.match(dashboard, /className="admin-product-tools-grid"/);
+  assert.match(dashboard, /href: "\/admin\/products\/categories\/create"/);
+  assert.match(dashboard, /href: "\/admin\/products\/subcategories\/create"/);
+  assert.match(dashboard, /href: "\/admin\/products\/brands\/create"/);
   assert.match(dashboard, /No products are available for oversight\./);
   assert.match(taxonomy, /No pending taxonomy proposals\./);
 });

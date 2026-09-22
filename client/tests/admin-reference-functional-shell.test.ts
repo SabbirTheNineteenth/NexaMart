@@ -29,7 +29,7 @@ test("admin operations navigation reaches every supported governance and oversig
 
 test("admin operations shell identifies its bounded read-only oversight sections", () => {
   for (const label of [
-    "Read-only catalog records",
+    "Review catalog context first, then use publication and moderation controls when they are needed.",
     "Review records only. Approval does not execute, transfer, or settle money.",
     "Read-only aggregate records.",
     "Read-only promotion records",

@@ -5,15 +5,16 @@ import test from "node:test";
 const dashboard = readFileSync(new URL("../src/features/admin/AdminDashboard.tsx", import.meta.url), "utf8");
 const adminTypes = readFileSync(new URL("../src/types/admin.ts", import.meta.url), "utf8");
 
-test("admin dashboard presents an accessible read-only product oversight panel", () => {
-  assert.match(dashboard, /<section className="admin-panel admin-product-oversight" aria-labelledby="product-oversight-heading">/);
-  assert.match(dashboard, /<h2 id="product-oversight-heading">Product oversight<\/h2>/);
-  assert.match(dashboard, /Read-only catalog records with category, seller, store, and publication context\./);
+test("admin dashboard presents an accessible product oversight workspace", () => {
+  assert.match(dashboard, /<header className="admin-product-overview-header" aria-labelledby="product-oversight-heading">/);
+  assert.match(dashboard, /<h1 id="product-oversight-heading">Product oversight<\/h1>/);
+  assert.match(dashboard, /Admin reviews seller-owned products for taxonomy quality, moderation readiness, and publication status\./);
+  assert.match(dashboard, /<section className="admin-panel admin-product-oversight" aria-labelledby="product-records-heading">/);
   assert.match(dashboard, /data\.products\.map\(\(product\)/);
   assert.match(dashboard, /Category: \{product\.category\?\.name \?\? "Uncategorized"\}/);
   assert.match(dashboard, /Seller: \{product\.seller\?\.name \?\? "Unassigned"\}/);
   assert.match(dashboard, /Store: \{product\.seller\?\.storeName \?\? "No store profile"\}/);
-  assert.match(dashboard, /product\.isPublished \? "Published" : "Unpublished"/);
+  assert.match(dashboard, /isPublished \? "Published" : "Unpublished"/);
 });
 
 test("admin product oversight communicates loading, errors, and an empty catalog", () => {
@@ -41,19 +42,21 @@ test("admin product oversight limits mutations to publication moderation", () =>
   assert.doesNotMatch(productPanel, /deleteJSON\([^)]*products/i);
 });
 
-test("admin product oversight shows seller revision details before its publication-only action", () => {
+test("admin product oversight keeps seller revision details in progressive disclosure", () => {
   const productPanelStart = dashboard.indexOf('className="admin-panel admin-product-oversight"');
   const productPanelEnd = dashboard.indexOf('className="admin-panel admin-finance"', productPanelStart);
   const productPanel = dashboard.slice(productPanelStart, productPanelEnd);
-  assert.match(productPanel, /Description: \{product\.description \?\? "No description provided\."\}/);
-  assert.match(productPanel, /Colors: \{product\.colors\?\.length \? product\.colors\.join\(", "\) : "No colors specified"\}/);
+  assert.match(productPanel, /<details className="admin-product-details">/);
+  assert.match(productPanel, /<summary>View catalog details<\/summary>/);
+  assert.match(productPanel, /<strong>Description<\/strong><p>\{product\.description \?\? "No description provided\."\}<\/p>/);
+  assert.match(productPanel, /<strong>Colors<\/strong><p>\{product\.colors\?\.length \? product\.colors\.join\(", "\) : "No colors specified"\}<\/p>/);
   assert.match(productPanel, /Gallery images/);
   assert.match(productPanel, /Variants/);
   assert.match(productPanel, /SKU: \{variant\.sku\}/);
-  assert.ok(productPanel.indexOf("Description:") < productPanel.indexOf("admin-publication-action"));
+  assert.ok(productPanel.indexOf("admin-product-actions") < productPanel.indexOf("admin-product-details"));
   assert.match(productPanel, /const galleryImages = \(product\.galleryImages \?\? \[\]\)\.flatMap/);
   assert.match(dashboard, /const safeReviewImageUrl = \(imageUrl: string\)[\s\S]*url\.protocol === "https:" \|\| url\.protocol === "http:"/);
-  assert.match(productPanel, /galleryImages\.length \? galleryImages\.map/);
+  assert.match(productPanel, /galleryImages\.length \? <div className="admin-product-gallery">\{galleryImages\.map/);
   assert.match(productPanel, /No gallery images provided\./);
   assert.match(productPanel, /alt=\{image\.altText \?\? `\$\{product\.name\} gallery image`\}/);
 });
