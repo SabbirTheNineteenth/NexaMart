@@ -344,3 +344,49 @@
 @media(prefers-reduced-motion:reduce){
   :global(.admin-sidebar-premium) :global(.admin-workspace-nav > div > .admin-nav-item > a){transition:none}
 }
+
+/* Final operational polish: shared action density and inspector hierarchy. */
+:global(.admin-overview-quick-actions){display:grid;grid-template-columns:minmax(210px,.65fr) minmax(0,1.35fr);gap:18px;align-items:start;margin-top:14px;padding:18px 20px;border:1px solid #e4dfef;border-radius:10px;background:linear-gradient(115deg,#fff,#faf8ff);box-shadow:0 8px 22px rgba(42,28,74,.05)}
+:global(.admin-overview-quick-actions h2){margin:4px 0 6px;color:#21183b;font-size:17px;letter-spacing:-.03em}
+:global(.admin-overview-quick-actions p:last-child){margin:0;color:#6d6480;font-size:12px;line-height:1.5}
+:global(.admin-overview-quick-action-grid){display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+:global(.admin-overview-quick-action-grid a){position:relative;display:grid;gap:3px;min-width:0;min-height:72px;padding:11px 30px 11px 12px;border:1px solid #e4dfef;border-radius:8px;background:#fff;color:#21183b;text-decoration:none;transition:border-color .16s ease,background .16s ease,transform .16s ease}
+:global(.admin-overview-quick-action-grid a:hover){transform:translateY(-1px);border-color:#bca7ee;background:#f8f5ff;color:#5133a0}
+:global(.admin-overview-quick-action-grid a:focus-visible){outline:3px solid #7b4ee3;outline-offset:2px}
+:global(.admin-overview-quick-action-grid strong){font-size:12px;line-height:1.3}
+:global(.admin-overview-quick-action-grid span){color:#6d6480;font-size:10px;line-height:1.4}
+:global(.admin-overview-quick-action-grid b){position:absolute;right:11px;top:50%;color:#6c43c6;font-size:14px;transform:translateY(-50%)}
+:global(.admin-taxonomy-create-page){min-width:0}
+:global(.admin-taxonomy-create-page) :global(.admin-panel-head){align-items:flex-start}
+:global(.admin-taxonomy-create-header-actions){display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+:global(.admin-taxonomy-create-page) :global(.admin-context-link){display:inline-flex;align-items:center;min-height:40px;box-sizing:border-box}
+:global(.admin-taxonomy-create-page) :global(.admin-taxonomy-focused-form){grid-template-columns:minmax(0,1fr) minmax(250px,.42fr);gap:18px;padding:22px;background:linear-gradient(140deg,#fff,#fbfaff)}
+:global(.admin-taxonomy-create-page) :global(.admin-inspector-form){gap:16px;padding:20px;border:1px solid #e4dfef;border-radius:10px;box-shadow:none}
+:global(.admin-taxonomy-create-page) :global(.admin-taxonomy-fields){gap:13px}
+:global(.admin-taxonomy-create-page) :global(.admin-taxonomy-fields label){font-size:12px}
+:global(.admin-taxonomy-create-page) :global(.admin-taxonomy-row-actions){padding-top:2px}
+:global(.admin-taxonomy-create-page) :global(.admin-taxonomy-create-context){display:grid;gap:8px;align-content:start;min-height:100%;box-sizing:border-box;padding:18px;border:1px solid #ddd2f7;border-left:3px solid #7b4ee3;border-radius:9px;background:#f5f1ff;color:#62557a}
+:global(.admin-taxonomy-create-page) :global(.admin-taxonomy-create-context strong){color:#2b1a51;font-size:13px}
+:global(.admin-taxonomy-create-page) :global(.admin-taxonomy-create-context p){margin:0;font-size:12px;line-height:1.55}
+:global(.admin-workspace) :global(.admin-panel-head > div > p:last-child){max-width:760px;line-height:1.5}
+:global(.admin-workspace) :global(.admin-operations-workspace),:global(.admin-workspace) :global(.admin-catalog-governance){padding-bottom:2px}
+
+@media(max-width:900px){
+  :global(.admin-overview-quick-actions){grid-template-columns:1fr}
+  :global(.admin-taxonomy-create-page) :global(.admin-taxonomy-focused-form){grid-template-columns:1fr}
+}
+@media(max-width:700px){
+  :global(.admin-overview-quick-actions){gap:14px;padding:16px 14px}
+  :global(.admin-overview-quick-action-grid){grid-template-columns:repeat(2,minmax(0,1fr))}
+  :global(.admin-taxonomy-create-page) :global(.admin-panel-head){padding:16px 14px}
+  :global(.admin-taxonomy-create-header-actions){justify-content:flex-start}
+  :global(.admin-taxonomy-create-page) :global(.admin-taxonomy-focused-form){gap:14px;padding:14px}
+}
+@media(max-width:420px){
+  :global(.admin-overview-quick-actions){padding:14px 12px}
+  :global(.admin-overview-quick-action-grid){grid-template-columns:1fr}
+  :global(.admin-overview-quick-action-grid a){min-height:64px}
+  :global(.admin-taxonomy-create-header-actions){display:grid;grid-template-columns:1fr;width:100%}
+  :global(.admin-taxonomy-create-page) :global(.admin-context-link){width:100%;justify-content:space-between}
+  :global(.admin-taxonomy-create-page) :global(.admin-inspector-form),:global(.admin-taxonomy-create-page) :global(.admin-taxonomy-create-context){padding:14px}
+}

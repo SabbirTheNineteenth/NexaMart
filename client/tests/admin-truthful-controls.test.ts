@@ -12,5 +12,6 @@ test("ADMIN-TRUTH-01 keeps administration status and product guidance truthful",
   assert.match(dashboard, /href="\/admin\/products\/add"><strong>Seller catalog guidance<\/strong><span>Open guidance for the seller-owned catalog workflow\.<\/span><\/Link>/);
   assert.match(dashboard, /<h2 id="product-intake-heading">Seller catalog guidance<\/h2>/);
   assert.match(dashboard, /Products remain seller-owned\. This administration workspace governs taxonomy, moderation, and publication rather than creating inventory under an administrator account\./);
-  assert.doesNotMatch(dashboard, /label: "Add product"/);
+  assert.match(dashboard, /label: "Add product", href: "\/admin\/products\/add"/);
+  assert.match(dashboard, /description: "Open seller catalog guidance"/);
 });

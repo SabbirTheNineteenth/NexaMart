@@ -12,5 +12,6 @@ test("products workspace exposes dedicated canonical creation destinations", () 
   assert.match(dashboard, /section: "products"/);
   assert.match(dashboard, /label: "Product Moderation"/);
   assert.match(taxonomy, /createKind\?: AdminTaxonomyKind/);
-  assert.match(taxonomy, /Create canonical \{createKind\}/);
+  assert.match(taxonomy, /const taxonomyCreateDetails/);
+  assert.match(taxonomy, /heading: "Create a category"/);
 });

@@ -15,6 +15,32 @@ type ProposalReviewConfirmation = { proposal: AdminTaxonomyProposal; decision: "
 
 type TaxonomyPlural = "categories" | "subcategories" | "brands";
 const pluralFor = (kind: AdminTaxonomyKind): TaxonomyPlural => kind === "category" ? "categories" : kind === "subcategory" ? "subcategories" : "brands";
+const taxonomyCreateDetails: Record<AdminTaxonomyKind, { title: string; eyebrow: string; heading: string; description: string; formTitle: string; guidance: string }> = {
+  category: {
+    title: "Category identity",
+    eyebrow: "Catalog / Categories",
+    heading: "Create a category",
+    description: "Add a canonical category using the supported catalog vocabulary fields.",
+    formTitle: "Category details",
+    guidance: "Use a concise customer-facing name and a stable lowercase slug.",
+  },
+  subcategory: {
+    title: "Subcategory hierarchy",
+    eyebrow: "Catalog / Subcategories",
+    heading: "Create a subcategory",
+    description: "Add a canonical subcategory and place it under its existing parent category.",
+    formTitle: "Subcategory details",
+    guidance: "Choose the parent category first, then use a concise name and stable lowercase slug.",
+  },
+  brand: {
+    title: "Brand identity",
+    eyebrow: "Catalog / Brands",
+    heading: "Create a brand",
+    description: "Add a canonical brand using the supported catalog vocabulary fields.",
+    formTitle: "Brand details",
+    guidance: "Use the real brand name and a stable lowercase slug for catalog classification.",
+  },
+};
 const errorMessage = (reason: unknown, fallback: string) => {
   if (reason instanceof ApiError && reason.status === 409) return "That canonical slug already exists. Choose a different slug.";
   return reason instanceof Error ? reason.message : fallback;
@@ -173,10 +199,11 @@ export function AdminTaxonomyManagement({ createKind }: { createKind?: AdminTaxo
 
   const nodesFor = (kind: AdminTaxonomyKind) => taxonomy[pluralFor(kind)];
   const canonicalOptions = (proposal: AdminTaxonomyProposal) => proposal.kind === "subcategory" ? taxonomy.subcategories.filter((node) => node.categoryId === proposal.categoryId) : nodesFor(proposal.kind);
-  const createForm = (kind: AdminTaxonomyKind) => {
+  const createForm = (kind: AdminTaxonomyKind, focused = false) => {
     const id = `create-${kind}`; const isPending = pendingIds.has(id); const itemFeedback = feedback[id];
+    const detail = taxonomyCreateDetails[kind];
     return <form className="admin-category-create admin-inspector-form" aria-label={`Create canonical ${kind}`} onSubmit={(event) => void createNode(kind, event)}>
-      <div className="admin-taxonomy-form-heading"><h3>Create {kind}</h3><p>Add one controlled term at a time.</p></div>
+      <div className="admin-taxonomy-form-heading"><h3>{focused ? detail.formTitle : `Create ${kind}`}</h3><p>{focused ? "Complete the supported fields below." : "Add one controlled term at a time."}</p></div>
       <fieldset className="admin-taxonomy-fields">
         <label>Name<input required name="name" minLength={1} maxLength={120} autoComplete="off" /></label><label>Slug<input required name="slug" minLength={1} maxLength={100} autoComplete="off" pattern="[a-z0-9]+(-[a-z0-9]+)*" title="Use lowercase letters, numbers, and hyphens." /></label>
         {kind === "subcategory" && <label>Parent category<select required name="categoryId" defaultValue=""><option value="" disabled>Select a category</option>{taxonomy.categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>}
@@ -185,10 +212,11 @@ export function AdminTaxonomyManagement({ createKind }: { createKind?: AdminTaxo
     </form>;
   };
 
-  if (createKind) return <section className="admin-panel admin-taxonomy admin-taxonomy-create-page" aria-labelledby="taxonomy-create-heading">
-    <div className="admin-panel-head"><div><p className="eyebrow">Products / Catalog vocabulary</p><h2 id="taxonomy-create-heading">Create canonical {createKind}</h2><p>Add a controlled catalog term. It is immediately available to approved seller workflows.</p></div><Link className="admin-context-link" href="/admin/products">Back to products</Link></div>
-    {taxonomyState === "loading" ? <p className="admin-state">Loading catalog vocabulary…</p> : taxonomyState === "error" ? <div className="admin-empty" role="alert"><strong>Unable to prepare this create form.</strong><p>{taxonomyError}</p><button type="button" onClick={loadTaxonomy}>Try again</button></div> : <div className="admin-taxonomy-focused-form">{createForm(createKind)}<aside><strong>Canonical terms only</strong><p>Use a concise name and a stable lowercase slug. Subcategories require their parent category.</p></aside></div>}
+  if (createKind) { const detail = taxonomyCreateDetails[createKind]; return <section className="admin-panel admin-taxonomy admin-taxonomy-create-page" data-admin-taxonomy-kind={createKind} aria-labelledby="taxonomy-create-heading">
+    <div className="admin-panel-head"><div><p className="eyebrow">{detail.eyebrow}</p><h2 id="taxonomy-create-heading">{detail.heading}</h2><p>{detail.description}</p></div><div className="admin-taxonomy-create-header-actions"><Link className="admin-context-link" href="/admin/taxonomy">Manage taxonomy</Link><Link className="admin-context-link" href="/admin/products">Back to products</Link></div></div>
+    {taxonomyState === "loading" ? <p className="admin-state">Loading catalog vocabulary…</p> : taxonomyState === "error" ? <div className="admin-empty" role="alert"><strong>Unable to prepare this create form.</strong><p>{taxonomyError}</p><button type="button" onClick={loadTaxonomy}>Try again</button></div> : <div className="admin-taxonomy-focused-form">{createForm(createKind, true)}<aside className="admin-taxonomy-create-context"><strong>{detail.title}</strong><p>{detail.guidance}</p>{createKind === "subcategory" && <p>Parent category choices come from the current canonical taxonomy.</p>}</aside></div>}
       </section>;
+  }
 
   return <section className="admin-panel admin-taxonomy" aria-labelledby="taxonomy-heading">
     <div className="admin-panel-head"><div><p className="eyebrow">Catalog governance</p><h2 id="taxonomy-heading">Canonical taxonomy governance</h2><p>Maintain active and archived catalog vocabulary, then review pending seller proposals.</p></div><span>{taxonomyState === "loading" ? "Loading" : `${taxonomy.categories.length + taxonomy.subcategories.length + taxonomy.brands.length} nodes`}</span></div>

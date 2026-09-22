@@ -86,6 +86,15 @@ const adminNavigationGroups: AdminNavigationGroup[] = [
 
 const adminSections = adminNavigationGroups.flatMap((group) => group.items);
 
+const adminOverviewQuickActions = [
+  { label: "Add product", href: "/admin/products/add", description: "Open seller catalog guidance" },
+  { label: "Create category", href: "/admin/products/categories/create", description: "Add a canonical category" },
+  { label: "Create subcategory", href: "/admin/products/subcategories/create", description: "Add a category child" },
+  { label: "Create brand", href: "/admin/products/brands/create", description: "Add a canonical brand" },
+  { label: "Review seller applications", href: "/admin/applications", description: "Open the review queue" },
+  { label: "Manage taxonomy", href: "/admin/taxonomy", description: "Maintain catalog vocabulary" },
+] as const;
+
 const isAdminSection = (value: string | undefined): value is AdminSection => adminSections.some((item) => item.section === value);
 
 const adminProductLinks = [
@@ -625,11 +634,15 @@ export function AdminDashboard() {
           <article><span>Payout Review</span><strong>{financeLoading ? "—" : financeError ? "!" : finance ? finance.payouts.filter((payout) => payout.status === "pending").length : 0}</strong><small>{financeLoading ? "Loading review requests" : financeError ? "Review requests unavailable" : "requests awaiting review"}</small><Link className="admin-queue-action" href="/admin/finance">Open review queue <span aria-hidden="true">→</span></Link></article>
           <article><span>Admin Audit</span><strong>{auditLoading ? "—" : auditError ? "!" : data.auditRecords.length}</strong><small>{auditLoading ? "Loading audit activity" : auditError ? "Audit activity unavailable" : "recent records"}</small><Link className="admin-queue-action" href="/admin/audit">View audit trail <span aria-hidden="true">→</span></Link></article>
         </div>
+        <section className="admin-overview-quick-actions" aria-labelledby="admin-quick-actions-heading">
+          <div><p className="eyebrow">Next actions</p><h2 id="admin-quick-actions-heading">Move governance work forward.</h2><p>Open an existing workflow without leaving the administration workspace.</p></div>
+          <div className="admin-overview-quick-action-grid">{adminOverviewQuickActions.map((action) => <Link className="admin-action-control" key={action.href} href={action.href}><strong>{action.label}</strong><span>{action.description}</span><b aria-hidden="true">→</b></Link>)}</div>
+        </section>
       </section>
     <section className="admin-grid">
       <section className="admin-panel admin-moderation" aria-labelledby="moderation-heading">
         <div className="admin-panel-head"><div><p className="eyebrow">Moderation queue</p><h2 id="moderation-heading">Products needing attention</h2></div><span>{productLoading ? "Loading" : `${attentionProducts.length} queued`}</span></div>
-        {productLoading ? <p className="admin-state">Loading catalog moderation…</p> : productError ? <div className="admin-empty" role="alert"><strong>Unable to load product records.</strong><p>Try loading the product records again.</p><button type="button" onClick={loadProducts} disabled={productLoading} aria-label="Retry product records">Try again</button></div> : attentionProducts.length ? <div className="admin-list">{attentionProducts.map((product) => <article className="admin-row" key={product.id}><div><strong>{product.name}</strong><small>Seller: {product.seller?.name ?? "Unassigned"}</small></div><span className={product.stock === 0 ? "admin-stock empty-stock" : "admin-stock"}>{product.stock === 0 ? "Out of stock" : `${product.stock} in stock`}</span><span className={`admin-status ${product.isPublished ? "published" : "draft"}`}>{product.isPublished ? "Published" : "Draft"}</span></article>)}</div> : <div className="admin-empty"><strong>Nothing needs review.</strong><p>Unpublished and out-of-stock products appear here.</p></div>}
+      {productLoading ? <p className="admin-state">Loading catalog moderation…</p> : productError ? <div className="admin-empty" role="alert"><strong>Unable to load product records.</strong><p>Try loading the product records again.</p><button type="button" onClick={loadProducts} disabled={productLoading} aria-label="Retry product records">Try again</button></div> : attentionProducts.length ? <div className="admin-list">{attentionProducts.map((product) => <article className="admin-row" key={product.id}><div><strong>{product.name}</strong><small>Seller: {product.seller?.name ?? "Unassigned"}</small></div><span className={product.stock === 0 ? "admin-stock empty-stock" : "admin-stock"}>{product.stock === 0 ? "Out of stock" : `${product.stock} in stock`}</span><span className={`admin-status ${product.isPublished ? "published" : "draft"}`}>{product.isPublished ? "Published" : "Draft"}</span></article>)}</div> : <div className="admin-empty"><strong>No items require review.</strong><p>Unpublished and out-of-stock products appear here.</p></div>}
       </section>
       <aside className="admin-panel admin-health" aria-labelledby="health-heading"><p className="eyebrow">Attention queue</p><h2 id="health-heading">A clear next action.</h2><p>{productLoading || orderLoading ? "Loading current signals…" : productError || orderError ? "Awaiting real API data." : overview.unpublishedProducts ? `${overview.unpublishedProducts} product${overview.unpublishedProducts === 1 ? " is" : "s are"} awaiting publication review.` : overview.outOfStockProducts ? `${overview.outOfStockProducts} live product${overview.outOfStockProducts === 1 ? " is" : "s are"} unavailable.` : "No live activity available."}</p><Link className="admin-action-control" href="/admin/products">Open product oversight <span aria-hidden="true">→</span></Link></aside>
     </section>
