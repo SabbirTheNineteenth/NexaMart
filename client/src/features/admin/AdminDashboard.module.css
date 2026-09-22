@@ -260,3 +260,53 @@
   :global(.admin-taxonomy-section-head){padding:14px 12px}
   :global(.admin-taxonomy-proposal-actions) :global(button),:global(.admin-taxonomy-row-actions) :global(button){width:100%}
 }
+
+/* Sidebar-only refinement: a compact identity, legible rail, and stable footer
+   keep navigation useful without turning narrow screens into a second page. */
+:global(.admin-sidebar-premium){gap:0;padding:14px 12px 12px}
+:global(.admin-sidebar-premium) :global(.admin-workspace-brand){height:40px;padding:0 7px}
+:global(.admin-sidebar-premium) :global(.admin-brand-logo){width:34px;height:34px}
+:global(.admin-sidebar-premium) :global(.admin-sidebar-context){display:grid;gap:3px;margin:10px 7px 10px;padding:0;border:0;border-radius:0;background:transparent}
+:global(.admin-sidebar-premium) :global(.admin-sidebar-context strong){color:#fff;font-size:13px;line-height:1.25}
+:global(.admin-sidebar-premium) :global(.admin-sidebar-context small){overflow:hidden;color:#c9bedc;font-size:10px;line-height:1.35;text-overflow:ellipsis;white-space:nowrap}
+:global(.admin-sidebar-premium) :global(.admin-workspace-nav){display:grid;flex:1 1 auto;min-height:0;gap:2px;overscroll-behavior:contain;padding:0 2px 8px;scrollbar-width:none}
+:global(.admin-workspace-nav::-webkit-scrollbar){width:0;height:0}
+:global(.admin-sidebar-premium) :global(.admin-nav-item){gap:0}
+:global(.admin-sidebar-premium) :global(.admin-workspace-nav > div > .admin-nav-item > a){min-height:44px;padding:0 9px;border:0;border-left:3px solid transparent;border-radius:7px;color:#e7dff3;font-size:12px;line-height:1.25;transition:background .16s ease,color .16s ease,border-color .16s ease}
+:global(.admin-sidebar-premium) :global(.admin-workspace-nav > div > .admin-nav-item > a:hover){transform:none;border-left-color:#a878f4;background:rgba(168,120,244,.13);color:#fff}
+:global(.admin-sidebar-premium) :global(.admin-workspace-nav > div > .admin-nav-item > a.is-active){border-left-color:#c18bff;background:rgba(144,91,224,.35);color:#fff;box-shadow:inset 0 0 0 1px rgba(214,187,255,.13)}
+:global(.admin-sidebar-premium) :global(.admin-nav-icon){width:18px;height:18px;flex-basis:18px;border:1px solid rgba(224,208,246,.2);border-radius:5px;background:transparent;color:#d9c5fa;font-size:10px}
+:global(.admin-sidebar-premium) :global(a.is-active) :global(.admin-nav-icon){border-color:rgba(235,222,255,.45);background:rgba(235,222,255,.14);color:#fff}
+:global(.admin-sidebar-premium) :global(.admin-products-subnav){gap:1px;margin:0 0 3px 19px;padding:3px 0 3px 8px;border-left-color:rgba(218,195,251,.35)}
+:global(.admin-sidebar-premium) :global(.admin-products-subnav a){display:flex;align-items:center;min-height:32px;padding:0 7px;color:#cabde0!important;line-height:1.25}
+:global(.admin-sidebar-premium) :global(.admin-sidebar-session){flex:0 0 auto;gap:7px;padding-top:9px;border-top:1px solid rgba(225,209,248,.14)}
+:global(.admin-sidebar-premium) :global(.admin-sidebar-profile){grid-template-columns:28px minmax(0,1fr);gap:8px;margin:0;padding:0;border:0}
+:global(.admin-sidebar-premium) :global(.admin-sidebar-profile strong){color:#fff;font-size:11px;line-height:1.25}
+:global(.admin-sidebar-premium) :global(.admin-sidebar-profile small){overflow:hidden;color:#c9bedc;font-size:10px;line-height:1.3;text-overflow:ellipsis;white-space:nowrap}
+:global(.admin-sidebar-premium) :global(.admin-sidebar-avatar){border-radius:7px;background:#653cc6;color:#fff}
+:global(.admin-sidebar-premium) :global(.admin-sidebar-logout){min-height:40px;padding:0 10px;border-color:rgba(225,209,248,.38);border-radius:7px;background:rgba(255,255,255,.05);color:#f7f2ff;text-align:left}
+:global(.admin-sidebar-premium) :global(.admin-sidebar-logout:hover:not(:disabled)){border-color:#c18bff;background:rgba(193,139,255,.16);color:#fff}
+:global(.admin-sidebar-premium) :global(.admin-sidebar-return){display:flex;flex:0 0 auto;align-items:center;min-height:40px;margin-top:7px;padding:0 9px;border-top:1px solid rgba(225,209,248,.14);color:#d9c9ee;font-size:11px;font-weight:800;text-decoration:none}
+:global(.admin-sidebar-premium) :global(.admin-sidebar-return:hover){color:#fff}
+:global(.admin-sidebar-premium) :global(:focus-visible){outline-color:#e0c6ff;outline-offset:2px}
+@media(max-width:900px){
+  :global(.admin-sidebar-premium){display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:8px;padding:10px 15px}
+  :global(.admin-sidebar-premium) :global(.admin-workspace-brand){grid-column:1;grid-row:1;padding:0}
+  :global(.admin-sidebar-premium) :global(.admin-sidebar-context){display:none}
+  :global(.admin-sidebar-premium) :global(.admin-sidebar-return){grid-column:2;grid-row:1;justify-self:start;min-height:36px;margin:0;padding:0;border:0}
+  :global(.admin-sidebar-premium) :global(.admin-sidebar-session){grid-column:3;grid-row:1;display:block;padding:0;border:0}
+  :global(.admin-sidebar-premium) :global(.admin-sidebar-profile){display:none}
+  :global(.admin-sidebar-premium) :global(.admin-sidebar-logout){min-height:36px;padding:0 9px;white-space:nowrap}
+  :global(.admin-sidebar-premium) :global(.admin-workspace-nav){grid-column:1 / -1;grid-row:2;display:flex;min-height:44px;max-width:100%;gap:4px;margin:0 -15px;padding:4px 15px 0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:inline proximity}
+  :global(.admin-sidebar-premium) :global(.admin-workspace-nav > div){display:flex;flex:0 0 auto}
+  :global(.admin-sidebar-premium) :global(.admin-workspace-nav > div > .admin-nav-item > a){min-height:40px;padding:0 10px;border-left:0;border-bottom:2px solid transparent;white-space:nowrap}
+  :global(.admin-sidebar-premium) :global(.admin-workspace-nav > div > .admin-nav-item > a.is-active){border-bottom-color:#c18bff;box-shadow:none}
+  :global(.admin-sidebar-premium) :global(.admin-products-subnav){display:none}
+}
+@media(max-width:420px){
+  :global(.admin-sidebar-premium){grid-template-columns:36px minmax(0,1fr) auto;gap:6px;padding:8px 12px}
+  :global(.admin-sidebar-premium) :global(.admin-workspace-brand),:global(.admin-sidebar-premium) :global(.admin-brand-logo){width:32px;height:32px}
+  :global(.admin-sidebar-premium) :global(.admin-sidebar-return){min-height:34px;padding:0;font-size:10px}
+  :global(.admin-sidebar-premium) :global(.admin-sidebar-logout){min-height:34px;padding:0 7px;font-size:10px}
+  :global(.admin-sidebar-premium) :global(.admin-workspace-nav){margin:0 -12px;padding-right:12px;padding-left:12px}
+}

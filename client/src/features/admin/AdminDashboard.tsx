@@ -583,9 +583,9 @@ export function AdminDashboard() {
 
   return <main className="admin-workspace" data-admin-section={activeSection} data-admin-product-create={productCreateKind ?? undefined} data-admin-product-operation={productOperation ?? undefined}>
     <a className="admin-skip-link" href="#admin-workspace-content" onClick={focusWorkspace}>Skip to workspace content</a>
-    <aside className="admin-sidebar" aria-label="Administration workspace">
+    <aside className="admin-sidebar admin-sidebar-premium" aria-label="Administration workspace">
       <Link className="admin-workspace-brand" href="/" aria-label="NexaMart storefront"><BrandLogo monogram className="admin-brand-logo" /></Link>
-      <div className="admin-sidebar-context"><span>Control room</span><strong>Administration</strong><small>Marketplace governance</small></div>
+      <div className="admin-sidebar-context"><strong>NexaMart Admin</strong><small>Marketplace administration</small></div>
       <nav className="admin-workspace-nav" aria-label="Administration sections">
         {adminControlRoomOrder.map((section) => {
           const item = adminSections.find((candidate) => candidate.section === section)!;
@@ -597,7 +597,7 @@ export function AdminDashboard() {
         })}
       </nav>
       <div className="admin-sidebar-session" aria-live="polite">
-        <div className="admin-sidebar-profile"><span className="admin-sidebar-avatar" aria-hidden="true">A</span><div><strong>Admin workspace</strong><small>Protected administration workspace</small></div></div>
+        <div className="admin-sidebar-profile"><span className="admin-sidebar-avatar" aria-hidden="true">A</span><div><strong>Administrator</strong><small>Protected workspace</small></div></div>
         <button className="admin-sidebar-logout" type="button" onClick={() => void logout()} disabled={logoutState.state === "pending"}>{logoutState.state === "pending" ? "Signing out…" : "Sign out"}</button>
         {logoutState.state === "error" && <div className="admin-sidebar-logout-error" role="alert"><span>{logoutState.message}</span><button className="admin-sidebar-logout-retry" type="button" onClick={() => void logout()}>Try signing out again</button></div>}
       </div>
