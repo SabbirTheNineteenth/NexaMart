@@ -19,6 +19,11 @@ test("Seller workspaces use one readable typography hierarchy and a scoped pale 
   assert.match(formStyles, /font-size:\s*var\(--seller-label,\s*13px\)/);
 });
 
+test("Seller workspace resets the legacy centered shell dimensions so the sidebar begins flush", () => {
+  assert.match(dashboard, /seller-shell seller-workspace orchid-shell orchid-shell--operate/);
+  assert.match(dashboardStyles, /\.workspace\s*\{[\s\S]*?width:\s*100%;[\s\S]*?max-width:\s*none;[\s\S]*?margin:\s*0;[\s\S]*?padding:\s*0;/);
+});
+
 test("Seller action hierarchy retains real workflow labels with primary, secondary, and destructive contracts", () => {
   for (const label of ["Add a product", "Create product draft", "Save stock", "Request review", "Save profile", "Withdraw proposal", "Delete promotion"]) {
     assert.match(dashboard + productForm + taxonomy + promotionEditor, new RegExp(label));

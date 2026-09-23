@@ -15,6 +15,10 @@
   --seller-label: 13px;
   --seller-table-heading: 11px;
   display: grid;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
   grid-template-columns: 264px minmax(0, 1fr);
   min-height: 100dvh;
   background: var(--seller-canvas);
