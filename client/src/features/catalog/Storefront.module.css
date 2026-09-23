@@ -1838,3 +1838,459 @@
     transition: none;
   }
 }
+
+/* Scoped discovery repair: the desktop filter surface owns its overflow, never the page. */
+@media (min-width: 901px) {
+  :global(.storefront .reference-facet-rail) {
+    position: sticky;
+    top: 4.5rem;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    max-height: calc(100dvh - 5.5rem);
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+
+  .sidebarDiscovery {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.35rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(181, 124, 255, 0.42) transparent;
+  }
+
+  .sidebarDiscovery::-webkit-scrollbar {
+    width: 0.42rem;
+  }
+
+  .sidebarDiscovery::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(181, 124, 255, 0.42);
+  }
+}
+
+@media (max-width: 900px) {
+  :global(.storefront .reference-facet-rail) {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .sidebarDiscovery {
+    overflow: visible;
+    padding-right: 0;
+  }
+}
+
+.heroDiscoveryCanvas {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.heroDiscoveryCard {
+  position: absolute;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  width: min(64%, 17rem);
+  min-width: 9.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(244, 237, 255, 0.28);
+  border-radius: 0.9rem;
+  background: rgba(29, 17, 43, 0.82);
+  box-shadow: 0 1rem 2.5rem rgba(7, 3, 13, 0.32);
+  color: #fff;
+  animation: hero-product-drift 8s ease-in-out infinite alternate;
+}
+
+.heroDiscoveryCard:nth-child(1) {
+  z-index: 3;
+  top: 9%;
+  left: 7%;
+  width: min(53%, 16rem);
+  height: 76%;
+}
+
+.heroDiscoveryCard:nth-child(2) {
+  z-index: 2;
+  top: 20%;
+  right: 7%;
+  width: min(50%, 15rem);
+  height: 61%;
+  opacity: 0.92;
+  animation-delay: -2.5s;
+}
+
+.heroDiscoveryCard:nth-child(3) {
+  display: none;
+}
+
+.heroDiscoveryImage {
+  min-height: 0;
+  height: 100%;
+}
+
+.heroDiscoveryImage :global(img) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.heroDiscoveryDetails {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.65rem 0.75rem 0.75rem;
+  background: rgba(25, 14, 38, 0.92);
+}
+
+.heroDiscoveryDetails > span,
+.heroDiscoveryDetails small {
+  color: #d5c4ef;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.heroDiscoveryDetails strong {
+  overflow: hidden;
+  color: #fff;
+  font-size: 0.82rem;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.heroDiscoveryDetails :global(.server-price) strong {
+  color: #fff;
+  font-size: 0.82rem;
+}
+
+@keyframes hero-product-drift {
+  from { transform: translate3d(0, 0, 0) rotate(0.001deg); }
+  to { transform: translate3d(0, -0.55rem, 0) rotate(0.001deg); }
+}
+
+.discoverySectionCopy {
+  max-width: 38rem;
+  margin: 0.35rem 0 0;
+  color: var(--nx-text-muted, #b9aecb);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.flashDeals {
+  padding-bottom: 0;
+}
+
+.discoveryProductGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.discoveryProductCard {
+  display: flex;
+  min-width: 0;
+  min-height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(205, 181, 238, 0.2);
+  border-radius: 0.9rem;
+  background: rgba(38, 24, 58, 0.82);
+  box-shadow: 0 0.75rem 1.8rem rgba(7, 3, 13, 0.16);
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.discoveryProductCard:hover,
+.discoveryProductCard:focus-within {
+  border-color: rgba(187, 134, 255, 0.55);
+  box-shadow: 0 1rem 2.3rem rgba(7, 3, 13, 0.24);
+  transform: translateY(-0.2rem);
+}
+
+.discoveryProductLink {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+}
+
+.discoveryProductLink:focus-visible,
+.discoverySaveButton:focus-visible,
+.discoveryAddButton:focus-visible,
+.storefrontFooter a:focus-visible,
+.storefrontFooter button:focus-visible {
+  outline: 3px solid #c69aff;
+  outline-offset: 3px;
+}
+
+.discoveryProductMedia {
+  aspect-ratio: 4 / 3;
+  min-height: 0;
+}
+
+.discoveryProductMedia :global(img) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 180ms ease;
+}
+
+.discoveryProductCard:hover .discoveryProductMedia :global(img),
+.discoveryProductCard:focus-within .discoveryProductMedia :global(img) {
+  transform: scale(1.025);
+}
+
+.discoveryProductContent {
+  display: grid;
+  gap: 0.42rem;
+  padding: 0.9rem;
+}
+
+.discoveryProductContent > p {
+  margin: 0;
+  color: #cdbbe9;
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.discoveryProductContent h3 {
+  display: -webkit-box;
+  min-height: 2.55em;
+  margin: 0;
+  overflow: hidden;
+  color: #fff;
+  font-size: 0.98rem;
+  line-height: 1.28;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.discoveryPrice {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.discoveryPrice strong {
+  color: #fff;
+  font-size: 0.96rem;
+}
+
+.discoveryPrice > span {
+  color: #cdbbe9;
+  font-size: 0.73rem;
+  text-decoration: line-through;
+}
+
+.discoveryAvailability {
+  color: #d8fae1;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.discoveryProductActions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.55rem;
+  padding: 0 0.9rem 0.9rem;
+}
+
+.discoveryStoreAttribution {
+  display: block;
+  margin: -0.2rem 0.9rem 0.75rem;
+  color: #d9c5ff;
+  font-size: 0.73rem;
+  font-weight: 750;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.discoveryStoreAttribution:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+.discoverySaveButton,
+.discoveryAddButton {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 0.6rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.discoverySaveButton {
+  border: 1px solid rgba(222, 208, 244, 0.28);
+  background: transparent;
+  color: #f3edff;
+}
+
+.discoverySaveButton:hover:not(:disabled) {
+  border-color: rgba(198, 154, 255, 0.78);
+  background: rgba(198, 154, 255, 0.12);
+}
+
+.discoveryAddButton {
+  padding-inline: 0.85rem;
+  border: 1px solid #a66dff;
+  background: #9a63f1;
+  color: #fff;
+}
+
+.discoveryAddButton:hover:not(:disabled) {
+  background: #b47bff;
+}
+
+.discoverySaveButton:disabled,
+.discoveryAddButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.discoveryFeedback {
+  margin: -0.35rem 0.9rem 0.85rem;
+  color: #f4eefe;
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+
+.storefrontFooter {
+  display: grid;
+  grid-template-columns: minmax(11rem, 1.25fr) repeat(2, minmax(8rem, 0.7fr)) minmax(11rem, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+  padding-block: 2.25rem;
+  border-top: 1px solid rgba(205, 181, 238, 0.22);
+}
+
+.footerIdentity > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.footerIdentity :global(.nexamart-monogram) {
+  width: 1.8rem;
+  height: 1.8rem;
+}
+
+.footerIdentity p,
+.footerCatalogNote p {
+  margin: 0.7rem 0 0;
+  color: var(--nx-text-muted, #b9aecb);
+  font-size: 0.83rem;
+  line-height: 1.5;
+}
+
+.footerNav {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.footerNav h2,
+.footerCatalogNote h2 {
+  margin: 0 0 0.15rem;
+  color: #fff;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.footerNav a,
+.footerNav button {
+  width: max-content;
+  max-width: 100%;
+  border: 0;
+  background: transparent;
+  color: #d9cbea;
+  font: inherit;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.footerNav a:hover,
+.footerNav button:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+@media (max-width: 900px) {
+  .discoveryProductGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .storefrontFooter {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 540px) {
+  .heroDiscoveryCard {
+    width: min(72%, 15rem);
+  }
+
+  .heroDiscoveryCard:nth-child(1) {
+    left: 5%;
+  }
+
+  .heroDiscoveryCard:nth-child(2) {
+    right: 5%;
+  }
+
+  .discoveryProductGrid,
+  .storefrontFooter {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .discoveryProductActions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .discoverySaveButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 700px) {
+  :global(.storefront.reference-explore-layout .reference-explore-content > .reference-collection-hero .reference-hero-context) {
+    position: static;
+    grid-area: context;
+    align-self: stretch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroDiscoveryCard,
+  .discoveryProductCard,
+  .discoveryProductCard:hover,
+  .discoveryProductMedia :global(img),
+  .discoveryProductCard:hover .discoveryProductMedia :global(img) {
+    animation: none;
+    transform: none;
+    transition: none;
+  }
+}

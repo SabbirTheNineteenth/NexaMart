@@ -8,7 +8,7 @@ const styles = readFileSync(new URL("../src/app/globals.css", import.meta.url), 
 test("marketplace header provides compact account, search, bag, and a secondary category navigation", () => {
   assert.match(storefront, /className="shell marketplace-topbar"/);
   assert.match(storefront, /aria-label="Search the marketplace"/);
-  assert.match(storefront, /<a className="marketplace-action-icon" href="\/account" aria-label="Open account">/);
+  assert.match(storefront, /href=\{accountDestination\(cart\.accountRole\)\} aria-label=\{accountDestinationLabel\(cart\.accountRole\)\}/);
   assert.match(storefront, /aria-label="Marketplace categories"/);
   assert.match(storefront, /aria-label="Browse all departments"/);
 });
