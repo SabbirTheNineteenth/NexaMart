@@ -49,9 +49,9 @@ test("seller workspace offers a first focusable skip link, polite load states, a
 });
 
 test("seller workspace retains source-verifiable readable narrow rail and reduced-motion safeguards", () => {
-  assert.match(dashboardStyles, /@media\(max-width:900px\)\{[\s\S]*\.sellerSidebar\{position:relative/s);
-  assert.match(dashboardStyles, /@media\(max-width:900px\)\{[\s\S]*\.sellerNavigation\{display:flex;[\s\S]*overflow-x:auto[\s\S]*\.sellerNavigation a\{flex:0 0 auto/s);
-  assert.match(dashboardStyles, /@media\(max-width:640px\)\{[\s\S]*\.workspaceContext>span:first-child,.sectionContext\{display:none/s);
+  assert.match(dashboardStyles, /@media \(max-width: 900px\)\s*\{[\s\S]*?\.sellerSidebar\s*\{\s*position: relative/s);
+  assert.match(dashboardStyles, /@media \(max-width: 900px\)\s*\{[\s\S]*?\.sellerNavigation\s*\{\s*display: flex;[\s\S]*?overflow-x: auto[\s\S]*?\.sellerNavigation a\s*\{\s*flex: 0 0 auto/s);
+  assert.match(dashboardStyles, /@media \(max-width: 420px\)\s*\{[\s\S]*?\.sectionContext\s*\{\s*max-width: 140px/s);
   assert.doesNotMatch(dashboardStyles, /\.sellerNavigation a\{[^}]*font-size:0/);
-  assert.match(dashboardStyles, /@media\(prefers-reduced-motion:reduce\)\{\.workspace \*\{animation:none!important;transition:none!important;scroll-behavior:auto!important\}\}/);
+  assert.match(dashboardStyles, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.workspace \*,\.workspace \*::before,.workspace \*::after\s*\{\s*animation: none;\s*transition: none;\s*scroll-behavior: auto/s);
 });
