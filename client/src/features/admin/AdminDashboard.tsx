@@ -15,6 +15,7 @@ import { applyReviewVisibility, reviewModerationError } from "@/features/admin/r
 import { replaceModeratedSeller, sellerModerationActions, sellerModerationError } from "@/features/admin/seller-moderation";
 import { AdminTaxonomyManagement } from "@/features/admin/AdminTaxonomyManagement";
 import { BrandLogo } from "@/components/BrandLogo";
+import { SkeletonTableRow } from "@/components/ui/Skeleton";
 import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 import "./AdminDashboard.module.css";
 import type { AdminAccount, AdminAnalytics, AdminAuditRecord, AdminDashboardData, AdminFinanceOverview, AdminOrder, AdminProduct, AdminPromotion, AdminReview, AdminSearchResult, AdminSeller, AdminSellerAction, AdminTaxonomyKind, AdminFinancePayout } from "@/types/admin";
@@ -658,7 +659,7 @@ export function AdminDashboard() {
   return <main className="admin-workspace" data-admin-section={activeSection} data-admin-product-create={productCreateKind ?? undefined} data-admin-product-operation={productOperation ?? undefined}>
     <a className="admin-skip-link" href="#admin-workspace-content" onClick={focusWorkspace}>Skip to workspace content</a>
     <aside className="admin-sidebar admin-sidebar-premium" aria-label="Administration workspace">
-      <Link className="admin-workspace-brand" href="/" aria-label="NexaMart storefront"><BrandLogo monogram className="admin-brand-logo" /></Link>
+      <Link className="admin-workspace-brand" href="/" aria-label="NexaMart storefront"><BrandLogo monogram className="admin-brand-logo" /><span>NexaMart</span></Link>
       <div className="admin-sidebar-context"><strong>NexaMart Admin</strong><small>Marketplace administration</small></div>
       <nav className="admin-workspace-nav" aria-label="Administration sections">
         {adminNavigationGroups.map((group) => <div className="admin-nav-group" key={group.label} aria-label={group.label}>
@@ -755,7 +756,7 @@ export function AdminDashboard() {
       <section className="admin-panel admin-product-oversight" aria-labelledby="product-records-heading">
         <div className="admin-panel-head"><div><p className="eyebrow">Review queue</p><h2 id="product-records-heading">Product records</h2><p className="admin-product-oversight-note">Review catalog context first, then use publication and moderation controls when they are needed.</p></div></div>
       {(publicationError || publicationSuccess) && <p className={publicationError ? "admin-publication-feedback error" : "admin-publication-feedback success"} role={publicationError ? "alert" : "status"}>{publicationError || publicationSuccess}</p>}
-      {productLoading ? <p className="admin-state">Loading product records…</p> : productError ? <div className="admin-empty" role="alert"><strong>Unable to load product records.</strong><p>Try loading the product records again.</p><button type="button" onClick={loadProducts} disabled={productLoading} aria-label="Retry product records">Try again</button></div> : data.products.length ? <div className="admin-list admin-governance-table">{data.products.map((product) => {
+      {productLoading ? <div className="admin-state" role="status" aria-label="Loading product records"><SkeletonTableRow /><SkeletonTableRow /><span className="sr-only">Loading product records…</span></div> : productError ? <div className="admin-empty" role="alert"><strong>Unable to load product records.</strong><p>Try loading the product records again.</p><button type="button" onClick={loadProducts} disabled={productLoading} aria-label="Retry product records">Try again</button></div> : data.products.length ? <div className="admin-list admin-governance-table">{data.products.map((product) => {
         const isPublished = product.isPublished;
         const isUpdating = updatingProductIds.has(product.id);
         const primaryImageUrl = safeReviewImageUrl(product.primaryImageUrl);

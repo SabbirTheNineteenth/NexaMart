@@ -67,7 +67,7 @@ function AuthContext({ role }: Pick<RoleAuthProps, "role">) {
     </div>
     <div className="role-auth-context-content">
       <Link className="role-auth-wordmark" href="/" aria-label="NexaMart home">
-        <BrandLogo monogram className="role-auth-monogram" priority />
+        <BrandLogo monogram className="role-auth-monogram" priority /><span>NexaMart</span>
       </Link>
       <div className="role-auth-editorial">
         <div className="role-auth-context-copy">
@@ -160,7 +160,7 @@ function RoleAuthSurface({ mode, role }: RoleAuthProps) {
       <AuthContext role={role} />
       <section className="role-auth-panel" aria-labelledby="admin-provisioning-heading">
         <div className="role-auth-panel-content">
-          <Link className="role-auth-mobile-brand" href="/" aria-label="NexaMart home"><BrandLogo monogram className="role-auth-monogram" priority /></Link>
+          <Link className="role-auth-mobile-brand" href="/" aria-label="NexaMart home"><BrandLogo monogram className="role-auth-monogram" priority /><span>NexaMart</span></Link>
           <RoleTabs mode={mode} role={role} />
           <p className="eyebrow">Admin access</p>
           <h1 id="admin-provisioning-heading">Admin accounts are not self-registered.</h1>
@@ -177,7 +177,7 @@ function RoleAuthSurface({ mode, role }: RoleAuthProps) {
       <AuthContext role={role} />
       <section className="role-auth-panel" aria-labelledby="role-auth-heading">
         <div className="role-auth-panel-content">
-          <Link className="role-auth-mobile-brand" href="/" aria-label="NexaMart home"><BrandLogo monogram className="role-auth-monogram" priority /></Link>
+          <Link className="role-auth-mobile-brand" href="/" aria-label="NexaMart home"><BrandLogo monogram className="role-auth-monogram" priority /><span>NexaMart</span></Link>
           <RoleTabs mode={mode} role={role} />
           <p className="eyebrow">{roleNames[role]} {mode}</p>
           <h1 id="role-auth-heading">{title}</h1>

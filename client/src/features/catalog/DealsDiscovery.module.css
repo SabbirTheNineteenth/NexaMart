@@ -20,6 +20,7 @@
 .sectionHead { align-items: center; margin-bottom: 12px; }
 .collectionSection { padding-top: clamp(32px, 5vw, 56px); }
 .collection { min-width: 0; }
+.dealsSkeletons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; }
 .stateFrame { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-width: 0; min-height: 74px; margin: 0; padding: 16px 18px; }
 .stateFrame p { margin: 0; }
 .retryButton,.catalogLink { flex: 0 0 auto; border: 1px solid var(--nx-border); border-radius: 7px; background: var(--nx-surface-control); color: var(--nx-text); padding: 10px 13px; font-size: 11px; font-weight: 800; }

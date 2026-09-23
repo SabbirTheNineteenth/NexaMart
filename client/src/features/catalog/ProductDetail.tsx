@@ -13,6 +13,7 @@ import { useCart } from "@/hooks/useCart";
 import { getJSON, postJSON } from "@/lib/api";
 import { wishlistSaveError } from "@/features/catalog/wishlist-save";
 import { BrandLogo } from "@/components/BrandLogo";
+import { SkeletonCard } from "@/components/ui/Skeleton";
 import type { Product } from "@/types/catalog";
 import styles from "./ProductDetail.module.css";
 
@@ -139,7 +140,7 @@ export function ProductDetail({ slug }: { slug: string }) {
   const currentProduct = product?.slug === slug ? product : null;
   const activeError = errorSlug === slug ? error : "";
   if (activeError) return <main className="product-detail-shell orchid-explore"><DetailHeader authenticated={cart.authenticated} totalItems={cart.totalItems} /><section className={`product-detail-state ${styles.state} ${styles.errorState}`} aria-label="Product loading error"><div className="message" role="alert"><p>{activeError}</p><button className={styles.retryButton} type="button" disabled={detailRetryPending} aria-busy={detailRetryPending} onClick={() => { setDetailRetryPending(true); setDetailReloadNonce((value) => value + 1); }}>{detailRetryPending ? "Retrying product\u2026" : "Try again"}</button></div></section></main>;
-  if (!currentProduct) return <main className="product-detail-shell orchid-explore"><DetailHeader authenticated={cart.authenticated} totalItems={cart.totalItems} /><section className={`product-detail-state ${styles.state} ${styles.loadingState}`} aria-label="Product loading"><p className="seller-state" role="status">Loading product\u2026</p></section></main>;
+  if (!currentProduct) return <main className="product-detail-shell orchid-explore"><DetailHeader authenticated={cart.authenticated} totalItems={cart.totalItems} /><section className={`product-detail-state ${styles.state} ${styles.loadingState}`} aria-label="Product loading" role="status"><SkeletonCard /><span className="sr-only">Loading product details…</span></section></main>;
   product = currentProduct;
 
   const galleryImages = product.galleryImages.length ? product.galleryImages : [{ imageUrl: product.image, altText: product.name, sortOrder: 0 }];

@@ -8,7 +8,7 @@
 /* Persistent navigation */
 :global(.admin-workspace) :global(.admin-sidebar){position:sticky;top:0;display:flex;flex-direction:column;min-width:0;height:100vh;padding:16px 12px 12px;background:var(--admin-obsidian);color:#f9f6ff;border-right:1px solid rgba(222,205,249,.16)}
 :global(.admin-sidebar-premium){background:var(--admin-plum)}
-:global(.admin-workspace-brand){display:flex;align-items:center;min-height:42px;padding:0 8px;text-decoration:none}
+:global(.admin-workspace-brand){display:flex;align-items:center;gap:8px;min-height:42px;padding:0 8px;color:#fff;font-size:15px;font-weight:800;text-decoration:none}
 :global(.admin-brand-logo){width:36px;height:36px;object-fit:contain}
 :global(.admin-sidebar-context){display:grid;gap:3px;margin:12px 8px 12px}
 :global(.admin-sidebar-context strong){color:#fff;font-size:14px;line-height:1.2}

@@ -6,6 +6,7 @@ import { deleteJSON, getJSON, postJSON } from "@/lib/api";
 import { ApiError, patchJSON } from "@/lib/api";
 import { productImageSource } from "@/features/catalog/product-presentation";
 import { BrandLogo } from "@/components/BrandLogo";
+import { SkeletonCard } from "@/components/ui/Skeleton";
 import styles from "./AccountWorkspace.module.css";
 import { customerOrderItemSummary, customerTrackingEmptyMessage, customerTrackingErrorMessage, customerTrackingTimelineEvents } from "./customer-order.utils";
 import { buildAddressUpdate, validateAddressUpdate, type AddressEditFields } from "./address-editing";
@@ -273,7 +274,7 @@ export function AccountWorkspace() {
     }
   };
 
-  if (accountResolution.state === "loading") return <main className={`account-shell customer-account-workspace ${styles.shell}`}><section className={`${styles.statePanel} ${styles.sectionPanel} ${styles.authState}`} aria-live="polite" aria-busy="true" aria-labelledby="account-loading-heading"><p className="eyebrow">Account</p><h1 id="account-loading-heading">Checking your account</h1><p>We’re confirming whether this browser has an active session.</p></section></main>;
+  if (accountResolution.state === "loading") return <main className={`account-shell customer-account-workspace ${styles.shell}`}><section className={`${styles.statePanel} ${styles.sectionPanel} ${styles.authState}`} aria-live="polite" aria-busy="true" aria-labelledby="account-loading-heading"><p className="eyebrow">Account</p><h1 id="account-loading-heading">Checking your account</h1><SkeletonCard /><span className="sr-only">Loading account</span></section></main>;
   if (accountResolution.state === "error") return <main className={`account-shell customer-account-workspace ${styles.shell}`}><section className={`${styles.statePanel} ${styles.sectionPanel} ${styles.feedback} ${styles.authState}`} role="alert" aria-labelledby="account-load-error-heading"><p className="eyebrow">Account unavailable</p><h1 id="account-load-error-heading">We couldn’t confirm your account.</h1><p>{accountResolution.message}</p><div className={styles.authStateActions}><button className="primary-button" type="button" onClick={() => setAccountRefreshNonce((current) => current + 1)}>Retry loading your account</button><Link className="account-switch" href="/">Continue browsing</Link></div></section></main>;
   if (accountResolution.state === "signed-out") return <main className={"account-shell customer-account-workspace " + styles.shell}>
     <header className={styles.signedOutHeader}>

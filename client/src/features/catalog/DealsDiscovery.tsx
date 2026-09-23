@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ExploreHeader } from "@/components/ExploreHeader";
+import { SkeletonCard } from "@/components/ui/Skeleton";
 import { millisecondsUntilNextDealRefresh } from "@/features/catalog/deals-refresh";
 import { productImageSource } from "@/features/catalog/product-presentation";
 import { getJSON } from "@/lib/api";
@@ -75,7 +76,7 @@ export function DealsDiscovery() {
     <section id="deals-collection" className={`collection shell customer-collection ${styles.collectionSection}`} aria-labelledby="deals-collection-heading">
       <div className={`marketplace-section-head ${styles.sectionHead}`}><div><p className="eyebrow">Live catalog state</p><h2 id="deals-collection-heading">Available now</h2></div><Link className="text-link" href="/">Browse all products</Link></div>
       <div className={`deals-collection-state ${styles.collection}`} aria-busy={state === "loading"}>
-        {state === "loading" ? <p className={`marketplace-load-state deals-state-frame ${styles.stateFrame}`} role="status" aria-live="polite">Loading active deals...</p> : null}
+        {state === "loading" ? <div className={`${styles.dealsSkeletons} deals-state-frame`} role="status" aria-live="polite" aria-label="Loading active deals"><SkeletonCard /><SkeletonCard /><span className="sr-only">Loading active deals...</span></div> : null}
         {state === "error" ? <p className={`marketplace-load-state deals-state-frame ${styles.stateFrame}`} role="alert">Active deals are temporarily unavailable. <button className={styles.retryButton} type="button" onClick={() => { setState("loading"); setReloadNonce((value) => value + 1); }}>Retry active deals</button></p> : null}
         {state === "loaded" && products.length === 0 ? <div className={`marketplace-load-state deals-state-frame ${styles.stateFrame}`} role="status" aria-live="polite"><p>No active deals are available right now.</p><Link className={styles.catalogLink} href="/">Browse the catalog</Link></div> : null}
         {state === "loaded" && products.length > 0 ? <div className={`deals-results-frame marketplace-rail product-spotlight-rail ${styles.results}`}>{products.map((product) => <article className={`spotlight-card deals-card ${styles.card}`} key={product.id}>
