@@ -48,3 +48,31 @@
 @media (prefers-reduced-motion: reduce) {
   .roleTransition { animation: none; }
 }
+
+/* Customer workspace foundation: scoped so account data and mutations retain their existing contracts. */
+.shell {
+  --account-canvas: #f7f4fa;
+  --account-surface: #fff;
+  --account-ink: #2a2033;
+  --account-muted: #6b6075;
+  --account-line: #ded6e8;
+  --account-accent: #7040c7;
+  width: min(100% - 40px, 1160px);
+  padding-bottom: 64px;
+  background: var(--account-canvas);
+  color: var(--account-ink);
+}
+.accountHeader { min-height: 68px; border-color: var(--account-line); }
+.headerActions { display: flex; align-items: center; gap: 10px; }
+.workspaceHero { padding: 42px 0 28px; border-color: var(--account-line); }
+.overview { gap: 8px; }.overview h1 { color: var(--account-ink); font-size: clamp(32px, 4vw, 48px); line-height: 1.1; }.overview p { color: var(--account-muted); }.purpose { max-width: 56ch; margin: 4px 0 0 !important; font-size: 15px !important; line-height: 1.55; }
+.accountNavigation { gap: 8px; padding: 14px 0; border-bottom: 1px solid var(--account-line); background: var(--account-canvas) !important; }.accountNavigation :global(a) { border-radius: 8px !important; color: #4c4057; }.accountNavigation :global(a:hover),.accountNavigation :global(a:focus-visible) { border-color: var(--account-accent) !important; background: #f0eaff !important; color: #482481 !important; }
+.content { gap: 22px; padding-top: 0; }.content :global(.account-data-summary),.content :global(.account-orders),.content :global(.customer-reviews),.content :global(.account-addresses),.content :global(.account-wishlist) { border: 1px solid var(--account-line); border-radius: 12px; background: var(--account-surface); box-shadow: 0 8px 24px rgb(43 27 61 / .05); }.content :global(.account-data-summary) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }.content :global(.account-data-summary span) { padding: 15px 18px; color: var(--account-muted); font-size: 13px; }.content :global(.account-data-summary strong) { color: var(--account-ink); font-size: 22px; }
+.content :global(.account-orders),.content :global(.customer-reviews),.content :global(.account-addresses),.content :global(.account-wishlist) { padding: clamp(20px, 3vw, 30px); }.content :global(h2) { color: var(--account-ink); font-size: clamp(22px, 3vw, 28px); line-height: 1.2; }.sectionDescription { max-width: 62ch; margin: 7px 0 20px; color: var(--account-muted); font-size: 14px; line-height: 1.55; }
+.emptyState { display: grid; gap: 5px; padding: 18px; border: 1px dashed #cfc1df; border-radius: 10px; background: #faf8fd; color: var(--account-ink); }.emptyState p { margin: 0; color: var(--account-muted); font-size: 14px; line-height: 1.5; }
+.content :global(.seller-state) { border: 1px solid #e3dbea; background: #faf8fd; color: var(--account-muted); }.content :global([role="alert"]) { border-left-color: #9a3151; background: #fff7fa; color: #6f2943; }.content :global(.seller-error) { color: #8d2948; }.content :global(.seller-profile-success),.content :global(.customer-review-success) { color: #28633e; }
+.content :global(.customer-order),.content :global(.account-address-editor),.content :global(.customer-review),.content :global(.wishlist-list article) { border-color: var(--account-line); background: #fff; }.content :global(.customer-order:hover),.content :global(.account-address-editor:hover),.content :global(.customer-review:hover),.content :global(.wishlist-list article:hover) { background: #fcfaff; }
+.content :global(.account-address-editor form),.addressCreateForm { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; margin-top: 18px; padding: 18px; border: 1px solid #e4ddeb; border-radius: 10px; background: #fbf9fe; }.content :global(.account-address-editor form label),.addressCreateForm label { display: grid; gap: 7px; color: #463a50; font-size: 13px; font-weight: 750; }.content :global(.account-address-editor form .wide),.addressCreateForm .wide { grid-column: 1 / -1; }.content :global(.account-address-editor form :is(input,select,textarea)),.addressCreateForm :global(input) { width: 100%; min-height: 44px; border: 1px solid #cfc3dd; border-radius: 8px; background: #fff; color: var(--account-ink); padding: 10px 12px; }.addressCreateForm > :global(.primary-button),.content :global(.account-address-editor form > .account-switch) { width: auto; justify-self: start; }
+.shell :global(.primary-button) { width: auto; border-radius: 8px; background: var(--account-accent); color: #fff; }.shell :global(.account-switch) { border: 1px solid #cbbfda; border-radius: 8px; background: #fff; color: #4c287b; padding: 9px 13px; font-weight: 750; }.shell :global(.account-address-remove),.shell :global(.wishlist-remove) { border-color: #ddb8c5; background: #fff7fa; color: #8d2948; }
+@media (max-width: 700px) { .shell { width: min(100% - 28px, 1160px); }.content :global(.account-data-summary) { grid-template-columns: 1fr; }.content :global(.account-data-summary span + span) { border-top: 1px solid var(--account-line); border-left: 0; }.content :global(.account-address-editor form),.addressCreateForm { grid-template-columns: 1fr; }.content :global(.account-address-editor form .wide),.addressCreateForm .wide { grid-column: auto; } }
+@media (max-width: 420px) { .shell { width: 100%; padding-right: 14px; padding-left: 14px; }.accountHeader { align-items: flex-start; min-height: auto; padding: 14px 0; }.headerActions { width: 100%; flex-wrap: wrap; }.headerActions :global(.account-switch) { flex: 1 1 auto; }.content :global(.account-orders),.content :global(.customer-reviews),.content :global(.account-addresses),.content :global(.account-wishlist) { padding: 18px 16px; }.accountNavigation { overflow-x: auto; }.accountNavigation :global(a) { flex: 0 0 auto; } }
