@@ -12,6 +12,15 @@ export class PostgresSellerCatalogRepository implements SellerCatalogRepository 
     return this.database.select({ id: products.id, sellerId: products.sellerId, name: products.name, brand: products.brand, stock: products.stock, isPublished: products.isPublished, moderationStatus: products.moderationStatus, moderationReason: products.moderationReason }).from(products).where(eq(products.sellerId, sellerId)).then((rows) => rows.map((row) => ({ id: row.id, sellerId: row.sellerId!, name: row.name, ...(row.brand ? { brand: row.brand } : {}), stock: row.stock, isPublished: row.isPublished, moderationStatus: row.moderationStatus, moderationReason: row.moderationReason })));
   }
 
+  async listPublishedPrimaryImageReferences() {
+    return this.database.select({ id: products.id, primaryImageUrl: products.primaryImageUrl }).from(products).where(eq(products.isPublished, true));
+  }
+
+  async ownedPrimaryImage(input: { sellerId: string; productId: string }) {
+    const [product] = await this.database.select({ primaryImageUrl: products.primaryImageUrl }).from(products).where(and(eq(products.id, input.productId), eq(products.sellerId, input.sellerId))).limit(1);
+    return product?.primaryImageUrl ?? null;
+  }
+
   async updateStock(input: { sellerId: string; productId: string; stock: number }) { const updated = await this.database.update(products).set({ stock: input.stock, updatedAt: new Date() }).where(and(eq(products.id, input.productId), eq(products.sellerId, input.sellerId))).returning({ id: products.id }); return updated.length === 1; }
   async updateProduct(input: SellerProductUpdateInput) {
     const { sellerId, productId, price, ...editable } = input;

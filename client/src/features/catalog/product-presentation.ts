@@ -51,15 +51,56 @@ export function normalizedProductImageUrl(image: string | undefined): string | u
   }
 }
 
+/**
+ * Only Unsplash has a known stable source identifier in the public URL path. For
+ * every other provider we retain the full normalized URL, including query values.
+ */
+export function productImageIdentity(image: string | undefined): string | undefined {
+  const normalized = normalizedProductImageUrl(image);
+  if (!normalized) return undefined;
+  const url = new URL(normalized);
+  if ((url.hostname === "images.unsplash.com" || url.hostname === "plus.unsplash.com") && /^\/(?:photo|premium_photo)-[^/]+$/.test(url.pathname)) return `unsplash:${url.pathname}`;
+  return `url:${normalized}`;
+}
+
+type ProductImageLike = { id: string; image: string };
+
+export function selectUniqueProductsByImage<T extends ProductImageLike>(products: readonly T[], maximum = Number.POSITIVE_INFINITY): T[] {
+  const selected: T[] = [];
+  const seen = new Set<string>();
+  for (const product of products) {
+    const identity = productImageIdentity(product.image);
+    if (!identity || seen.has(identity)) continue;
+    seen.add(identity);
+    selected.push(product);
+    if (selected.length === maximum) break;
+  }
+  return selected;
+}
+
+export function selectDepartmentProductsByImage<T extends ProductImageLike & { category: string }, D extends { name: string }>(departments: readonly D[], products: readonly T[], maximum = 8): Array<{ department: D; product?: T }> {
+  const usedImages = new Set<string>();
+  return departments.slice(0, maximum).map((department) => {
+    const product = products.find((candidate) => {
+      if (candidate.category !== department.name) return false;
+      const identity = productImageIdentity(candidate.image);
+      return Boolean(identity && !usedImages.has(identity));
+    });
+    const identity = product ? productImageIdentity(product.image) : undefined;
+    if (identity) usedImages.add(identity);
+    return { department, ...(product ? { product } : {}) };
+  });
+}
+
 type GalleryImageLike = { imageUrl: string; altText?: string | null; sortOrder: number };
 
 export function uniqueProductGalleryImages<T extends GalleryImageLike>(primaryImage: string | undefined, galleryImages: readonly T[], fallbackAltText: string): Array<GalleryImageLike> {
   const entries: GalleryImageLike[] = [{ imageUrl: primaryImage ?? "", altText: fallbackAltText, sortOrder: -1 }, ...galleryImages];
   const seen = new Set<string>();
   return entries.filter((image) => {
-    const normalized = normalizedProductImageUrl(image.imageUrl);
-    if (!normalized || seen.has(normalized)) return false;
-    seen.add(normalized);
+    const identity = productImageIdentity(image.imageUrl);
+    if (!identity || seen.has(identity)) return false;
+    seen.add(identity);
     return true;
   });
 }

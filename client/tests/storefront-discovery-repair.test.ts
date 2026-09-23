@@ -20,7 +20,7 @@ test("Storefront discovery uses real products for a motion-safe hero and real-pr
   assert.doesNotMatch(storefront, /heroDiscoveryCard|heroDiscoveryDetails|marketplace-hero-note reference-hero-context/);
   assert.match(styles, /\.heroGalleryStage\s*\{[\s\S]*?overflow: hidden;/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\.heroGalleryMedia[\s\S]*?animation: none;/);
-  assert.match(storefront, /const flashDeals = useMemo\(\(\) => catalog\.products\.filter\(\(product\) => product\.effectivePrice !== undefined && product\.effectivePrice < product\.price\)/);
+  assert.match(storefront, /const flashDeals = useMemo\(\(\) => selectUniqueProductsByImage\(catalog\.products\.filter\(\(product\) => product\.effectivePrice !== undefined && product\.effectivePrice < product\.price\), 4\)/);
   assert.match(storefront, /\{flashDeals\.length > 0 && <section/);
   assert.doesNotMatch(storefront, /Hot Picks|Trending/);
 });

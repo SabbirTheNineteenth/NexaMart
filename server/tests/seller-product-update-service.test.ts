@@ -15,6 +15,8 @@ const update = {
 test("seller catalog service delegates an owned product detail update", async () => {
   let saved: typeof update | undefined;
   const catalog = new SellerCatalogService({
+    async ownedPrimaryImage() { return update.primaryImageUrl; },
+    async listPublishedPrimaryImageReferences() { return []; },
     async updateProduct(input: typeof update) {
       saved = input;
       return { id: input.productId, ...input };

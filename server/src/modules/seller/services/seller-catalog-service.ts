@@ -1,11 +1,15 @@
 import type { SellerCatalogRepository, SellerGalleryImageDeleteInput, SellerGalleryImageInput, SellerGalleryImageUpdateInput, SellerProductArchiveInput, SellerProductInput, SellerProductVariantDeleteInput, SellerProductVariantInput, SellerProductVariantUpdateInput } from "../seller-catalog.repository.js";
 import { TaxonomyValidationError, type ActiveTaxonomy } from "../../taxonomy/taxonomy.repository.js";
-import { isDuplicateGalleryImage } from "../../catalog/product-image-duplicates.js";
+import { isDuplicateGalleryImage, isDuplicatePrimaryProductImage, productImageIdentity } from "../../catalog/product-image-duplicates.js";
 
 type ProductTaxonomy = { activeOptions(): Promise<ActiveTaxonomy> };
 
 export class DuplicateGalleryImageError extends Error {
   constructor() { super("This image is already in this product gallery. Choose a different image."); }
+}
+
+export class DuplicatePrimaryProductImageError extends Error {
+  constructor() { super("This product image is already used by another catalog product. Choose a different image."); }
 }
 
 export class SellerCatalogService {
@@ -22,6 +26,7 @@ export class SellerCatalogService {
 
   async createProduct(input: SellerProductInput) {
     await this.validateProductClassification(input);
+    await this.validatePrimaryProductImage(input.primaryImageUrl);
     return this.repository.createProduct(input);
   }
 
@@ -42,9 +47,22 @@ export class SellerCatalogService {
   async updateProduct(input: import("../seller-catalog.repository.js").SellerProductUpdateInput) {
     const { sellerId: _sellerId, productId: _productId, ...editable } = input;
     if (Object.keys(editable).length === 0) throw new Error("Invalid product update");
+    if (input.primaryImageUrl) {
+      const currentImage = await this.repository.ownedPrimaryImage({ sellerId: input.sellerId, productId: input.productId });
+      if (!currentImage) throw new Error("Product not found");
+      if (productImageIdentity(currentImage) !== productImageIdentity(input.primaryImageUrl)) await this.validatePrimaryProductImage(input.primaryImageUrl, input.productId);
+    }
     const product = await this.repository.updateProduct(input);
     if (!product) throw new Error("Product not found");
     return product;
+  }
+
+  private async validatePrimaryProductImage(imageUrl: string, excludedProductId?: string) {
+    // The schema stores only source URLs, not a durable normalized media identity.
+    // Keep this at the service boundary instead of adding an unsafe URL-derived index;
+    // concurrent writes can still race until such an identity is modeled persistently.
+    const products = await this.repository.listPublishedPrimaryImageReferences();
+    if (isDuplicatePrimaryProductImage(products, imageUrl, excludedProductId)) throw new DuplicatePrimaryProductImageError();
   }
 
   async archiveProduct(input: SellerProductArchiveInput) {

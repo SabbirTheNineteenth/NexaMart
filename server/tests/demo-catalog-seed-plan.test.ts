@@ -6,8 +6,8 @@ test("demo catalog seed plan parses every image URL as an Unsplash source URL", 
   for (const product of DEMO_CATALOG_SEED_PLAN) {
     const imageUrl = new URL(product.imageUrl);
     assert.equal(imageUrl.protocol, "https:");
-    assert.equal(imageUrl.hostname, "images.unsplash.com");
-    assert.match(imageUrl.pathname, /^\/photo-/);
+    assert.ok(["images.unsplash.com", "plus.unsplash.com"].includes(imageUrl.hostname));
+    assert.match(imageUrl.pathname, /^\/(?:photo|premium_photo)-/);
   }
 });
 

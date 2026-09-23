@@ -26,6 +26,8 @@ export type SellerGalleryImage = { id: string; imageUrl: string; altText?: strin
 
 export type SellerCatalogRepository = {
   listProducts(sellerId: string): Promise<SellerProductSummary[]>;
+  listPublishedPrimaryImageReferences(): Promise<Array<{ id: string; primaryImageUrl: string }>>;
+  ownedPrimaryImage(input: { sellerId: string; productId: string }): Promise<string | null>;
   createProduct(input: SellerProductInput): Promise<{ id: string } & SellerProductInput>;
   updateProduct(input: SellerProductUpdateInput): Promise<SellerProductDetail | null>;
   archiveProduct(input: SellerProductArchiveInput): Promise<boolean>;

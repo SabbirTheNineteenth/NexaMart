@@ -27,6 +27,7 @@ test("seller product creation stores only active matching taxonomy and rejects m
   const brandId = "33333333-3333-4333-8333-333333333333";
   const stored: Array<Record<string, unknown>> = [];
   const catalog = new SellerCatalogService({
+    listPublishedPrimaryImageReferences: async () => [],
     createProduct: async (input) => {
       stored.push(input);
       return { id: "44444444-4444-4444-8444-444444444444", ...input };
@@ -50,7 +51,7 @@ test("seller product creation stores only active matching taxonomy and rejects m
   );
   assert.equal(stored.length, 1);
 
-  const mismatchedCatalog = new SellerCatalogService({ createProduct: async (value) => ({ id: "77777777-7777-4777-8777-777777777777", ...value }) } as never, {
+  const mismatchedCatalog = new SellerCatalogService({ listPublishedPrimaryImageReferences: async () => [], createProduct: async (value) => ({ id: "77777777-7777-4777-8777-777777777777", ...value }) } as never, {
     activeOptions: async () => ({
       categories: [{ id: categoryId, name: "Lighting", slug: "lighting" }, { id: "88888888-8888-4888-8888-888888888888", name: "Furniture", slug: "furniture" }],
       subcategories: [{ id: subcategoryId, categoryId: "88888888-8888-4888-8888-888888888888", name: "Desk lamps", slug: "desk-lamps" }],
