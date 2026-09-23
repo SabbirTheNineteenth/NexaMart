@@ -1,9 +1,29 @@
-client/node_modules/
-client/.next/
+# Dependencies and generated builds
+node_modules/
+.next/
+coverage/
+dist/
+build/
 client/tsconfig.tsbuildinfo
-server/node_modules/
-server/dist/
-.env*
+
+# Local environment configuration
+.env
+.env.*
+!.env.example
 !client/.env.example
 !server/.env.example
+
+# Logs and local QA artifacts
+*.log
+artifacts/
+.agent-*.txt
+.integrator-*.txt
+.repair-*.txt
+.visual-*.txt
+.wave-*.txt
+NUL
+client/AGENTS.md
+client/CLAUDE.md
+
+# Platform deployment output
 .vercel/
