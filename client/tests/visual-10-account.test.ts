@@ -5,7 +5,7 @@ import test from "node:test";
 const account = readFileSync(new URL("../src/features/account/AccountWorkspace.tsx", import.meta.url), "utf8");
 
 test("VISUAL-10 account keeps a responsive, keyboard-navigable customer workspace composition", () => {
-  assert.match(account, /<nav className="orchid-navigation account-section-navigation" aria-label="Account sections">/);
+  assert.match(account, /<nav className=\{`\$\{styles\.accountNavigation\} orchid-navigation account-section-navigation`\} aria-label="Account sections">/);
   assert.match(account, /href="#orders"/);
   assert.match(account, /href="#reviews"/);
   assert.match(account, /href="#addresses"/);
@@ -29,8 +29,8 @@ test("VISUAL-10 wishlist uses a real image when safe source data exists and name
 });
 
 test("VISUAL-10 retains independent pending, error, and empty recovery states for account data", () => {
-  assert.match(account, /Loading orders…[\s\S]*Retry loading orders[\s\S]*Your order history is clear/);
+  assert.match(account, /Loading orders…[\s\S]*Retry loading orders[\s\S]*No orders have been placed from this account yet/);
   assert.match(account, /Loading shipping addresses…[\s\S]*Retry loading addresses[\s\S]*Add a shipping address/);
-  assert.match(account, /Loading saved pieces…[\s\S]*Try again[\s\S]*Save pieces from the collection/);
+  assert.match(account, /Loading saved pieces…[\s\S]*Try again[\s\S]*No saved pieces are available for this account yet[\s\S]*Save products from the catalog/);
   assert.match(account, /disabled=\{logoutState\.state === "pending"\}/);
 });

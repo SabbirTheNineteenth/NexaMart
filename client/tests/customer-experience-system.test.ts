@@ -17,7 +17,7 @@ test("customer Explore and account surfaces retain their named responsive landma
   assert.match(storefront, /<h2 id="collection-heading" ref=\{collectionHeadingRef\} tabIndex=\{-1\}>Browse catalog products\.<\/h2>/);
   assert.match(account, /<main className=\{`account-shell customer-account-workspace \$\{styles\.shell\}`\}>/);
   assert.match(account, /<header className="seller-topbar customer-account-topbar">/);
-  assert.match(account, /<nav className="orchid-navigation account-section-navigation" aria-label="Account sections">/);
+  assert.match(account, /<nav className=\{`\$\{styles\.accountNavigation\} orchid-navigation account-section-navigation`\} aria-label="Account sections">/);
   assert.match(account, /account\.role === "customer" && <a href="#reviews">Reviews<\/a>/);
   assert.match(account, /<section className="trust account-data-summary" aria-label="Account overview">/);
   assert.match(styles, /\.customer-experience\{/);

@@ -10,7 +10,9 @@ test("VISUAL-CX-01 keeps Explore's dark browse hierarchy data-bound and landmark
   assert.match(storefront, /aria-label="Marketplace categories"/);
   assert.match(storefront, /<section className="marketplace-hero reference-collection-hero" aria-labelledby="explore-heading">/);
   assert.match(storefront, /<h1 id="explore-heading">Browse <em>catalog products\.<\/em><\/h1>/);
-  assert.match(storefront, /<aside className="marketplace-hero-note reference-hero-context" aria-label="Current catalog context" aria-live="polite">/);
+  assert.match(storefront, /<HeroDiscoveryCanvas products=\{heroProducts\}\/>/);
+  assert.match(storefront, /href=\{"\/products\/" \+ activeProduct\.slug\} aria-label=\{"View " \+ activeProduct\.name\}/);
+  assert.match(storefront, /<span className=\{styles\.heroGalleryCaption\}>[\s\S]*<strong>\{activeProduct\.name\}<\/strong>/);
   assert.match(storefront, /<div className="catalog-tools taxonomy-discovery reference-facet-rail" role="region" aria-label="Product search and filters">/);
   assert.match(storefront, /aria-label="Browse departments"/);
   assert.match(storefront, /aria-label="Discover brands"/);

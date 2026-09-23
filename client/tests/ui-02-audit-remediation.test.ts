@@ -8,7 +8,7 @@ const styles = readFileSync(new URL("../src/app/globals.css", import.meta.url), 
 
 test("UI-02 mobile navigation retains Account and Wishlist destinations", () => {
   assert.match(storefront, /<nav[\s\S]*className="mobile-marketplace-account" href=\{headerWishlistPath\(cart\.authenticated\)\}/);
-  assert.match(storefront, /className="mobile-marketplace-account" href="\/account"/);
+  assert.match(storefront, /className="mobile-marketplace-account" href=\{accountDestination\(cart\.accountRole\)\} aria-label=\{accountDestinationLabel\(cart\.accountRole\)\}/);
 });
 
 test("UI-02 collection scrolling respects reduced-motion preferences", () => {

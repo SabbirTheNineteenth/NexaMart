@@ -46,7 +46,7 @@ test("PARITY-C01 uses the compact Explore app-bar hierarchy instead of a utility
   assert.match(storefront, />New Arrivals</);
   assert.match(storefront, />For You</);
   assert.match(storefront, /aria-label="Open saved pieces"/);
-  assert.match(storefront, /aria-label="Open account"/);
+  assert.match(storefront, /href=\{accountDestination\(cart\.accountRole\)\} aria-label=\{accountDestinationLabel\(cart\.accountRole\)\}/);
 });
 
 test("PARITY-C01 aligns the dense product grid with the top of the facet rail", () => {
@@ -54,9 +54,12 @@ test("PARITY-C01 aligns the dense product grid with the top of the facet rail", 
   assert.match(styles, /\.reference-explore-content \.product-grid\{grid-column:2;grid-row:2/);
 });
 
-test("PARITY-C03 keeps hero context as a dedicated third desktop column", () => {
-  assert.match(storefront, /reference-hero-context/);
-  assert.match(styles, /\.reference-explore-layout \.marketplace-hero\{grid-template-columns:minmax\(220px,.65fr\) minmax\(0,1.35fr\) 150px/);
+test("PARITY-C03 keeps live product context in the two-column editorial hero", () => {
+  assert.match(storefront, /<HeroDiscoveryCanvas products=\{heroProducts\}\/>/);
+  assert.match(storefront, /href=\{"\/products\/" \+ activeProduct\.slug\} aria-label=\{"View " \+ activeProduct\.name\}/);
+  assert.match(storefront, /presentation\.brand \?\? activeProduct\.category/);
+  assert.match(storefront, /<strong>\{activeProduct\.name\}<\/strong>/);
+  assert.match(styles, /\.reference-explore-layout \.marketplace-hero\{order:1;grid-template-columns:minmax\(220px,.65fr\) minmax\(0,1.35fr\);/);
 });
 
 test("PARITY-C03 places the live editorial hero beside the desktop facet rail before the product grid", () => {

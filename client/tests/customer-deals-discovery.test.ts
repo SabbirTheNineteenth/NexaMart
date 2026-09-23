@@ -41,7 +41,7 @@ test("deal refresh timing uses the earliest valid server-provided promotion expi
 
 test("deals gives every authoritative outcome an accessible existing recovery or navigation path", () => {
   const deals = source(dealsPath);
-  assert.match(deals, /role="status" aria-live="polite">Loading active deals\.\.\./);
+  assert.match(deals, /role="status" aria-live="polite" aria-label="Loading active deals"><SkeletonCard \/><SkeletonCard \/><span className="sr-only">Loading active deals\.\.\.<\/span>/);
   assert.match(deals, /role="alert">Active deals are temporarily unavailable\./);
   assert.match(deals, /className=\{styles\.retryButton\}/);
   assert.match(deals, /setState\("loading"\); setReloadNonce\(\(value\) => value \+ 1\)/);

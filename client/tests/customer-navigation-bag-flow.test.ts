@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { accountDestination, accountDestinationLabel } from "../src/features/account/account-destination";
 
 const storefront = readFileSync(new URL("../src/features/catalog/Storefront.tsx", import.meta.url), "utf8");
 const styles = readFileSync(new URL("../src/app/globals.css", import.meta.url), "utf8");
@@ -14,7 +15,11 @@ test("mobile marketplace navigation keeps categories, Account, and an announced 
   assert.match(storefront, /aria-label="Marketplace categories"/);
   assert.match(storefront, /aria-label="Browse all departments"/);
   assert.match(storefront, /href="#catalog-information"/); assert.match(storefront, />Catalog information<\/a>/);
-  assert.match(storefront, /href="\/account"/); assert.match(storefront, />Account<\/a>/);
+  assert.match(storefront, /href=\{accountDestination\(cart\.accountRole\)\} aria-label=\{accountDestinationLabel\(cart\.accountRole\)\} onClick=\{\(\) => setMobileNavOpen\(false\)\}>Account<\/Link>/);
+  assert.equal(accountDestination("seller"), "/seller");
+  assert.equal(accountDestination("admin"), "/admin");
+  assert.equal(accountDestination("customer"), "/account");
+  assert.equal(accountDestinationLabel("seller"), "Open seller workspace");
   assert.match(storefront, /if \(event\.key === "Escape"\) \{\r?\n      closeMobileNav\(\);/);
   assert.match(storefront, /mobileNavToggleRef\.current\?\.focus\(\)/);
   assert.match(styles, /\.marketplace-category-nav\{display:none/);
@@ -45,7 +50,8 @@ test("product detail failure has a disabled pending retry that refetches without
 
 test("product gallery validates remote media and retains an identified fallback after load failure", () => {
   const detail = readFileSync(new URL("../src/features/catalog/ProductDetail.tsx", import.meta.url), "utf8");
-  assert.match(detail, /import \{ (?:flashOfferPresentation, )?productImageSource \} from "@\/features\/catalog\/product-presentation"/);
+  assert.match(detail, /import \{ productImageSource, uniqueProductGalleryImages \} from "@\/features\/catalog\/product-presentation"/);
+  assert.match(detail, /uniqueProductGalleryImages\(product\.image, product\.galleryImages, product\.name\)/);
   assert.match(detail, /const \[galleryImageFailed, setGalleryImageFailed\] = useState\(false\);/);
   assert.match(detail, /productImageSource\(currentImage\?\.imageUrl, product\.id\)/);
   assert.match(detail, /onError=\{\(\) => setGalleryImageFailed\(true\)\}/);

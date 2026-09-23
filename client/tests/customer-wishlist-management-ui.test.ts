@@ -11,7 +11,8 @@ test("customer wishlist loads independently with pending, empty, error, and retr
   assert.match(workspace, /Loading saved pieces…/);
   assert.match(workspace, /Unable to load saved pieces/);
   assert.match(workspace, /Try again/);
-  assert.match(workspace, /Save pieces from the collection to revisit them here\./);
+  assert.match(workspace, /No saved pieces are available for this account yet\./);
+  assert.match(workspace, /Save products from the catalog to revisit them here\./);
   assert.match(workspace, /aria-live="polite"/);
   assert.match(workspace, /role="alert"/);
 });

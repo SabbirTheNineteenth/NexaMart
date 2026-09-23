@@ -19,6 +19,8 @@ test("C10 gives signed-out, loading, and empty account states the route-local Or
   assert.match(account, /className=\{`account-shell customer-account-workspace \$\{styles\.shell\}`\}/);
   assert.match(account, /Checking your account/);
   assert.match(account, /Sign in to your account/);
-  assert.match(account, /Your order history is clear\. The collection is waiting\./);
-  assert.match(account, /Save pieces from the collection to revisit them here\./);
+  assert.match(account, /No orders have been placed from this account yet\./);
+  assert.match(account, /Your order history will appear here after your first purchase\./);
+  assert.match(account, /No saved pieces are available for this account yet\./);
+  assert.match(account, /Save products from the catalog to revisit them here\./);
 });

@@ -54,7 +54,7 @@ test("C06 keeps the existing customer destinations reachable as compact controls
 
   assert.match(source, /className="marketplace-action-icon" href="\/stores" aria-label="Browse stores"/);
   assert.match(source, /className="marketplace-action-icon" href=\{headerWishlistPath\(authenticated\)\} aria-label="View saved pieces"/);
-  assert.match(source, /className="marketplace-action-icon" href="\/account" aria-label="Open account"/);
+  assert.match(source, /className="marketplace-action-icon" href=\{accountDestination\(cart\.accountRole\)\} aria-label=\{accountDestinationLabel\(cart\.accountRole\)\}/);
   assert.match(styles, /\.product-detail-header \.marketplace-action-icon\{display:inline-grid/);
   assert.match(styles, /@media\(max-width:760px\)\{\.product-detail-header \.marketplace-actions\{display:flex/);
 });
