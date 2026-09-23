@@ -36,6 +36,9 @@ jobs:
   server:
     name: Server (${{ matrix.check }})
     runs-on: ubuntu-24.04
+    env:
+      # Required for configuration parsing in tests; CI never connects to this host.
+      DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/nexamart
     strategy:
       fail-fast: false
       matrix:
