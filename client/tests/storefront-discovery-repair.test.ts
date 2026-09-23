@@ -11,7 +11,7 @@ test("Storefront gives desktop filters a bounded sticky rail and restores normal
   assert.match(styles, /@media \(max-width: 900px\)[\s\S]*?\.reference-facet-rail[\s\S]*?position: static;/);
 });
 test("Storefront discovery uses real products for a motion-safe hero and real-price collections", () => {
-  assert.match(storefront, /const heroProducts = useMemo\(\(\) => catalog\.products\.filter\(\(product\) => Boolean\(productImageSource\(product\.image, product\.id\)\)\)\.slice\(0, 4\), \[catalog\.products\]\);/);
+  assert.match(storefront, /const heroProducts = useMemo\(\(\) => uniqueProductsByImage\(catalog\.products\)\.slice\(0, 4\), \[catalog\.products\]\);/);
   assert.match(storefront, /HeroDiscoveryCanvas products=\{heroProducts\}/);
   assert.match(storefront, /window\.matchMedia\("\(prefers-reduced-motion: reduce\)"\)/);
   assert.match(storefront, /const activeProduct = products\[activeIndex % products\.length\];/);

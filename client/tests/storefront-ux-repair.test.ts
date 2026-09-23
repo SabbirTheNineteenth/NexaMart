@@ -31,7 +31,7 @@ test("Storefront gives API-backed discovery products a readable rail, real actio
 });
 
 test("Storefront gives the catalog hero one truthful, motion-safe real-product gallery", () => {
-  assert.match(storefront, /const heroProducts = useMemo\(\(\) => catalog\.products\.filter\(\(product\) => Boolean\(productImageSource\(product\.image, product\.id\)\)\)\.slice\(0, 4\), \[catalog\.products\]\);/);
+  assert.match(storefront, /const heroProducts = useMemo\(\(\) => uniqueProductsByImage\(catalog\.products\)\.slice\(0, 4\), \[catalog\.products\]\);/);
   assert.match(storefront, /className="marketplace-hero reference-collection-hero" aria-labelledby="explore-heading"/);
   assert.match(storefront, /function HeroDiscoveryCanvas\(\{ products \}/);
   assert.match(storefront, /const activeProduct = products\[activeIndex % products\.length\];/);

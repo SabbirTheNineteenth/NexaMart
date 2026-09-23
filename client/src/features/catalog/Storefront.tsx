@@ -13,7 +13,7 @@ import { catalogLoadFailure, catalogLoadSuccess } from "@/features/catalog/catal
 import { buildCatalogDiscoveryPath, catalogDiscoveryFacets, catalogFiltersFromSearchParams, catalogFiltersToSearchParams, type CatalogTaxonomy } from "@/features/catalog/catalog-discovery";
 import { headerWishlistPath } from "@/features/catalog/header-wishlist";
 import { accountDestination, accountDestinationLabel } from "@/features/account/account-destination";
-import { buildProductPresentation, productImageSource } from "@/features/catalog/product-presentation";
+import { buildProductPresentation, normalizedProductImageUrl, productImageSource } from "@/features/catalog/product-presentation";
 import { wishlistSaveError } from "@/features/catalog/wishlist-save";
 import { referenceFacetProducts, type AvailabilityFacet, type ProductTypeFacet } from "@/features/catalog/reference-facets";
 import { useCart } from "@/hooks/useCart";
@@ -28,6 +28,16 @@ type CatalogPayload = { products: Product[]; categories: { name: string; count: 
 type ProductVisualProps = { product: Pick<Product, "id" | "name" | "image">; className?: string; priority?: boolean };
 type WishlistSaveState = { state: "saving" } | { state: "success" } | { state: "error"; message: string };
 type CartAddState = { state: "pending" } | { state: "success" } | { state: "error"; message: string };
+
+function uniqueProductsByImage(products: readonly Product[]): Product[] {
+  const seen = new Set<string>();
+  return products.filter((product) => {
+    const image = normalizedProductImageUrl(productImageSource(product.image, product.id));
+    if (!image || seen.has(image)) return false;
+    seen.add(image);
+    return true;
+  });
+}
 
 function ServerPrice({ product }: { product: Pick<Product, "price" | "effectivePrice"> }) {
   const { effectivePrice, price } = product;
@@ -253,7 +263,7 @@ export function Storefront() {
   const visibleProducts = useMemo(() => referenceFacetProducts(catalog.products, availability, productType), [availability, catalog.products, productType]);
   const productCountLabel = catalogLoaded ? `${visibleProducts.length} ${visibleProducts.length === 1 ? "product" : "products"}` : "Loading products";
   const featuredProducts = useMemo(() => catalog.products.filter((product) => product.inStock).slice(0, 6), [catalog.products]);
-  const heroProducts = useMemo(() => catalog.products.filter((product) => Boolean(productImageSource(product.image, product.id))).slice(0, 4), [catalog.products]);
+  const heroProducts = useMemo(() => uniqueProductsByImage(catalog.products).slice(0, 4), [catalog.products]);
   const flashDeals = useMemo(() => catalog.products.filter((product) => product.effectivePrice !== undefined && product.effectivePrice < product.price).slice(0, 4), [catalog.products]);
 
   useEffect(() => {

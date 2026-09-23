@@ -1,7 +1,12 @@
 import type { SellerCatalogRepository, SellerGalleryImageDeleteInput, SellerGalleryImageInput, SellerGalleryImageUpdateInput, SellerProductArchiveInput, SellerProductInput, SellerProductVariantDeleteInput, SellerProductVariantInput, SellerProductVariantUpdateInput } from "../seller-catalog.repository.js";
 import { TaxonomyValidationError, type ActiveTaxonomy } from "../../taxonomy/taxonomy.repository.js";
+import { isDuplicateGalleryImage } from "../../catalog/product-image-duplicates.js";
 
 type ProductTaxonomy = { activeOptions(): Promise<ActiveTaxonomy> };
+
+export class DuplicateGalleryImageError extends Error {
+  constructor() { super("This image is already in this product gallery. Choose a different image."); }
+}
 
 export class SellerCatalogService {
   constructor(private readonly repository: SellerCatalogRepository, private readonly taxonomy?: ProductTaxonomy) {}
@@ -78,6 +83,9 @@ export class SellerCatalogService {
   }
 
   async createGalleryImage(input: SellerGalleryImageInput) {
+    const images = await this.repository.listGalleryImages({ sellerId: input.sellerId, productId: input.productId });
+    if (!images) throw new Error("Product not found");
+    if (isDuplicateGalleryImage(images, input.imageUrl)) throw new DuplicateGalleryImageError();
     const image = await this.repository.createGalleryImage(input);
     if (!image) throw new Error("Product not found");
     return image;
@@ -92,6 +100,11 @@ export class SellerCatalogService {
   async updateGalleryImage(input: SellerGalleryImageUpdateInput) {
     const { sellerId: _sellerId, productId: _productId, imageId: _imageId, ...editable } = input;
     if (Object.keys(editable).length === 0) throw new Error("Invalid gallery image update");
+    if (input.imageUrl) {
+      const images = await this.repository.listGalleryImages({ sellerId: input.sellerId, productId: input.productId });
+      if (!images) throw new Error("Product not found");
+      if (isDuplicateGalleryImage(images, input.imageUrl, input.imageId)) throw new DuplicateGalleryImageError();
+    }
     const image = await this.repository.updateGalleryImage(input);
     if (!image) throw new Error("Gallery image not found");
     return image;

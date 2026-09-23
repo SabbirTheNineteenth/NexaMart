@@ -3,6 +3,7 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { ApiError, getJSON, patchJSON, postJSON } from "@/lib/api";
+import { normalizedProductImageUrl } from "@/features/catalog/product-presentation";
 import type { SellerGalleryImage, SellerProduct, SellerProductVariant } from "@/types/seller";
 
 export function parseVariantOptions(input: string): Record<string, string> {
@@ -21,6 +22,11 @@ export function nextGalleryImageSortOrder(images: SellerGalleryImage[]) {
 
 function variantOptionsInput(options: Record<string, string>) {
   return Object.entries(options).map(([name, value]) => `${name}: ${value}`).join(", ");
+}
+
+function galleryContainsImage(images: SellerGalleryImage[], imageUrl: string, excludedId?: string) {
+  const normalized = normalizedProductImageUrl(imageUrl);
+  return Boolean(normalized && images.some((image) => image.id !== excludedId && normalizedProductImageUrl(image.imageUrl) === normalized));
 }
 
 export function SellerProductAssets({ product }: { product: SellerProduct }) {
@@ -103,12 +109,18 @@ export function SellerProductAssets({ product }: { product: SellerProduct }) {
   const addImage = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    const imageUrl = String(form.get("imageUrl") ?? "").trim();
     setSavingImage(true);
     setError("");
     setImageSuccess("");
+    if (galleryContainsImage(images, imageUrl)) {
+      setSavingImage(false);
+      setError("This image is already in this product gallery. Choose a different image.");
+      return;
+    }
     try {
       const response = await postJSON<{ image: SellerGalleryImage }>(`/seller/products/${product.id}/gallery-images`, {
-        imageUrl: String(form.get("imageUrl") ?? "").trim(),
+        imageUrl,
         altText: String(form.get("altText") ?? "").trim() || undefined,
         sortOrder: Number(form.get("sortOrder")),
       });
@@ -126,11 +138,17 @@ export function SellerProductAssets({ product }: { product: SellerProduct }) {
   const saveImage = async (event: FormEvent<HTMLFormElement>, image: SellerGalleryImage) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    const imageUrl = String(form.get("imageUrl") ?? "").trim();
     setSavingImageId(image.id);
     setError("");
+    if (galleryContainsImage(images, imageUrl, image.id)) {
+      setSavingImageId(null);
+      setError("This image is already in this product gallery. Choose a different image.");
+      return;
+    }
     try {
       const response = await patchJSON<{ image: SellerGalleryImage }>(`/seller/products/${product.id}/gallery-images/${image.id}`, {
-        imageUrl: String(form.get("imageUrl") ?? "").trim(),
+        imageUrl,
         altText: String(form.get("altText") ?? "").trim() || undefined,
         sortOrder: Number(form.get("sortOrder")),
       });

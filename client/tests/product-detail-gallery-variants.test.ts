@@ -11,7 +11,7 @@ test("product detail presents an accessible selectable gallery from catalog gall
   const types = readFileSync(catalogTypes, "utf8");
 
   assert.match(types, /galleryImages:\s*ProductGalleryImage\[\]/);
-  assert.match(source, /const galleryImages = product\.galleryImages\.length \? product\.galleryImages : \[\{ imageUrl: product\.image, altText: product\.name, sortOrder: 0 \}\]/);
+  assert.match(source, /const galleryImages = uniqueProductGalleryImages\(product\.image, product\.galleryImages, product\.name\);/);
   assert.match(source, /const \[selectedImage, setSelectedImage\] = useState\(0\)/);
   assert.match(source, /<div className="product-gallery" aria-label="Product images">/);
   assert.match(source, /<button[^>]*aria-label=\{`View image \$\{index \+ 1\}: \$\{image\.altText \?\? product\.name\}`\}[^>]*aria-pressed=\{selectedImage === index\}/);

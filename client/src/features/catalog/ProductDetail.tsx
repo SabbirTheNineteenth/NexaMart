@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Heart, LoaderCircle, Search, ShoppingBag, Store, UserRound } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cartAddError } from "@/features/cart/cart-add-feedback";
-import { productImageSource } from "@/features/catalog/product-presentation";
+import { productImageSource, uniqueProductGalleryImages } from "@/features/catalog/product-presentation";
 import { recordRecentlyViewedProduct } from "@/features/catalog/recently-viewed";
 import { headerWishlistPath } from "@/features/catalog/header-wishlist";
 import { accountDestination, accountDestinationLabel } from "@/features/account/account-destination";
@@ -143,7 +143,7 @@ export function ProductDetail({ slug }: { slug: string }) {
   if (!currentProduct) return <main className="product-detail-shell orchid-explore"><DetailHeader authenticated={cart.authenticated} totalItems={cart.totalItems} /><section className={`product-detail-state ${styles.state} ${styles.loadingState}`} aria-label="Product loading" role="status"><SkeletonCard /><span className="sr-only">Loading product details…</span></section></main>;
   product = currentProduct;
 
-  const galleryImages = product.galleryImages.length ? product.galleryImages : [{ imageUrl: product.image, altText: product.name, sortOrder: 0 }];
+  const galleryImages = uniqueProductGalleryImages(product.image, product.galleryImages, product.name);
   const currentImage = galleryImages[selectedImage] ?? galleryImages[0];
   const currentImageSource = productImageSource(currentImage?.imageUrl, product.id);
   const selectedVariant = product.variants.find((variant) => variant.id === selectedVariantId) ?? null;

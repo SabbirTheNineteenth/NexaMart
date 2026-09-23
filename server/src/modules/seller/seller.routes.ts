@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createAuthGuard, getAuthenticatedAccount } from "../auth/auth.guard.js";
 import type { PublicAccount } from "../auth/auth.types.js";
 import { TaxonomyValidationError } from "../taxonomy/taxonomy.repository.js";
+import { DuplicateGalleryImageError } from "./services/seller-catalog-service.js";
 
 const productSchema = z.object({ name: z.string().min(2).max(180), brand: z.string().trim().min(1).max(120).optional(), slug: z.string().min(2).max(220).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/), description: z.string().min(10), primaryImageUrl: z.string().min(1), price: z.number().positive(), stock: z.number().int().nonnegative(), colors: z.array(z.string().min(1)).max(12), categoryId: z.string().uuid().optional(), subcategoryId: z.string().uuid().optional(), brandId: z.string().uuid().optional() });
 const productUpdateSchema = z.object({ name: z.string().trim().min(2).max(180).optional(), brand: z.string().trim().min(1).max(120).optional(), slug: z.string().trim().min(2).max(220).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).optional(), description: z.string().trim().min(10).max(10_000).optional(), price: z.number().finite().positive().max(9_999_999_999.99).optional(), primaryImageUrl: z.string().url().max(2_000).optional(), colors: z.array(z.string().trim().min(1).max(80)).min(1).max(12).refine((colors) => new Set(colors).size === colors.length).optional() }).strict().refine((input) => Object.keys(input).length > 0);
@@ -69,13 +70,13 @@ export const createSellerRoutes = ({ sessions, sellerCatalog, orders }: { sessio
     const parsed = galleryImageSchema.safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) return c.json({ error: "Invalid gallery image" }, 400);
     try { const image = await sellerCatalog.createGalleryImage({ sellerId: getAuthenticatedAccount(c)!.id, productId: c.req.param("productId"), ...parsed.data }); return c.json({ image }, 201); }
-    catch (error) { if (isUniqueViolation(error)) return c.json({ error: "Gallery image position already exists" }, 409); return respondCatalogError(c, error, "Unable to create gallery image"); }
+    catch (error) { if (error instanceof DuplicateGalleryImageError) return c.json({ error: error.message }, 409); if (isUniqueViolation(error)) return c.json({ error: "Gallery image position already exists" }, 409); return respondCatalogError(c, error, "Unable to create gallery image"); }
   });
   routes.patch("/products/:productId/gallery-images/:imageId", guard.requireAccount, guard.requireRole("seller"), async (c) => {
     const parsed = galleryImageUpdateSchema.safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) return c.json({ error: "Invalid gallery image update" }, 400);
     try { const image = await sellerCatalog.updateGalleryImage({ sellerId: getAuthenticatedAccount(c)!.id, productId: c.req.param("productId"), imageId: c.req.param("imageId"), ...parsed.data }); return c.json({ image }); }
-    catch (error) { if (isUniqueViolation(error)) return c.json({ error: "Gallery image position already exists" }, 409); return respondCatalogError(c, error, "Unable to update gallery image"); }
+    catch (error) { if (error instanceof DuplicateGalleryImageError) return c.json({ error: error.message }, 409); if (isUniqueViolation(error)) return c.json({ error: "Gallery image position already exists" }, 409); return respondCatalogError(c, error, "Unable to update gallery image"); }
   });
   routes.delete("/products/:productId/gallery-images/:imageId", guard.requireAccount, guard.requireRole("seller"), async (c) => {
     try { await sellerCatalog.deleteGalleryImage({ sellerId: getAuthenticatedAccount(c)!.id, productId: c.req.param("productId"), imageId: c.req.param("imageId") }); return c.body(null, 204); }
