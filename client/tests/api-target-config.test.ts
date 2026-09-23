@@ -48,10 +48,11 @@ test("uses an exact HTTPS API target in production", () => {
   assert.equal(resolveApiTarget({ NODE_ENV: "production", NEXAMART_API_URL: "https://api.example.com" }), "https://api.example.com");
 });
 
-test("permits the loopback API only for explicitly marked local production screenshot QA", () => {
+test("permits explicitly marked local production screenshot QA only for approved loopback origins", () => {
   assert.equal(resolveApiTarget({ NODE_ENV: "production", NEXAMART_LOCAL_QA: "1", NEXAMART_API_URL: "http://localhost:3000" }), "http://localhost:3000");
+  assert.equal(resolveApiTarget({ NODE_ENV: "production", NEXAMART_LOCAL_QA: "1", NEXAMART_API_URL: "http://localhost:3004" }), "http://localhost:3004");
   assert.throws(
-    () => resolveApiTarget({ NODE_ENV: "production", NEXAMART_LOCAL_QA: "1", NEXAMART_API_URL: "http://127.0.0.1:3000" }),
+    () => resolveApiTarget({ NODE_ENV: "production", NEXAMART_LOCAL_QA: "1", NEXAMART_API_URL: "http://127.0.0.1:3004" }),
     /NEXAMART_API_URL must be an exact HTTPS origin/,
   );
 });
