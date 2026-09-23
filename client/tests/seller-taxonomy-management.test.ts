@@ -11,7 +11,9 @@ const sellerTypes = readFileSync(new URL("../src/types/seller.ts", import.meta.u
 test("seller taxonomy workspace uses only the verified approved-options and proposal contracts", () => {
   assert.match(dashboard, /<SellerTaxonomyManagement products={products} onClassified=/);
   assert.match(taxonomy, /getJSON<SellerTaxonomyOptions>\("\/seller\/taxonomy\/options", controller\.signal\)/);
-  assert.match(taxonomy, /getJSON<\{ proposals: SellerTaxonomyProposal\[\] \}>\("\/seller\/taxonomy\/proposals", controller\.signal\)/);
+  assert.match(taxonomy, /getJSON<SellerTaxonomyProposal\[\]>\("\/seller\/taxonomy\/proposals", controller\.signal\)/);
+  assert.match(taxonomy, /\.then\(\(loaded\) => \{[\s\S]*?setProposals\(loaded\);[\s\S]*?setProposalState\("ready"\);/);
+  assert.doesNotMatch(taxonomy, /\{ proposals: loaded \}/);
   assert.match(taxonomy, /patchJSON<\{ product: SellerProduct \}>\(`\/seller\/taxonomy\/products\/\$\{product\.id\}\/classification`, payload\)/);
   assert.match(taxonomy, /postJSON<\{ proposal: SellerTaxonomyProposal \}>\("\/seller\/taxonomy\/proposals", payload\)/);
   assert.match(taxonomy, /deleteJSON<void>\(`\/seller\/taxonomy\/proposals\/\$\{proposal\.id\}`\)/);

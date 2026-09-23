@@ -48,8 +48,11 @@ export function SellerTaxonomyManagement({ products, onClassified }: { products:
     const controller = new AbortController();
     proposalRequestController.current = controller;
     setProposalState("loading"); setProposalError("");
-    getJSON<{ proposals: SellerTaxonomyProposal[] }>("/seller/taxonomy/proposals", controller.signal)
-      .then(({ proposals: loaded }) => { if (!controller.signal.aborted) { setProposals(loaded); setProposalState("ready"); } })
+    getJSON<SellerTaxonomyProposal[]>("/seller/taxonomy/proposals", controller.signal)
+      .then((loaded) => {
+        if (!Array.isArray(loaded)) throw new Error("Unexpected taxonomy proposal response.");
+        if (!controller.signal.aborted) { setProposals(loaded); setProposalState("ready"); }
+      })
       .catch((reason: unknown) => { if (!controller.signal.aborted) { setProposalError(errorMessage(reason, "Unable to load your taxonomy proposals.")); setProposalState("error"); } });
   }, []);
   useEffect(() => {
