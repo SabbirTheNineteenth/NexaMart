@@ -12,19 +12,21 @@ test("Storefront keeps catalog actions in a card footer and only renders returne
   const productImage = storefront.match(/<div className="product-image">[\s\S]*?<\/div>\s*<div className="product-copy">/)?.[0] ?? "";
   assert.doesNotMatch(productImage, /className="quick-add"/);
 });
-test("Storefront gives API-backed discovery products a readable rail, real actions, and reduced-motion safeguards", () => {
-  assert.match(storefront, /const \[spotlightRailVisible, setSpotlightRailVisible\] = useState\(false\);/);
-  assert.match(storefront, /const spotlightRailRef = useRef<HTMLDivElement>\(null\);/);
-  assert.match(storefront, /ref=\{spotlightRailRef\}/);
-  assert.match(storefront, /className=\{styles\.spotlightRail\}[^>]*tabIndex=\{0\}/);
+test("Catalog picks renders every featured product in a responsive, fully reachable grid", () => {
+  assert.match(storefront, /const \[spotlightGridVisible, setSpotlightGridVisible\] = useState\(false\);/);
+  assert.match(storefront, /const spotlightGridRef = useRef<HTMLDivElement>\(null\);/);
+  assert.match(storefront, /ref=\{spotlightGridRef\} className=\{styles\.spotlightGrid\} aria-label="Available catalog products"/);
+  assert.doesNotMatch(storefront, /spotlightRail/);
   assert.match(storefront, /const presentation = buildProductPresentation\(product\);/);
   assert.match(storefront, /presentation\.brand \?\? product\.category/);
   assert.match(storefront, /product\.inStock && <p className=\{styles\.spotlightAvailability\}>In stock<\/p>/);
   assert.match(storefront, /href=\{`\/products\/\$\{product\.slug\}`\}>View product<\/a>/);
   assert.match(storefront, /disabled=\{!product\.inStock \|\| cartAdd\?\.state === "pending"\}/);
   assert.match(storefront, /product\.inStock \? "Add to bag" : "Out of stock"/);
-  assert.match(styles, /\.spotlightRail\s*\{[\s\S]*?scroll-snap-type: x mandatory;[\s\S]*?scrollbar-width: none;/);
-  assert.match(styles, /\.spotlightCard\s*\{[\s\S]*?flex: 0 0 clamp\(14\.5rem, 20vw, 17\.5rem\);/);
+  assert.match(styles, /\.spotlightGrid\s*\{[\s\S]*?display: grid;[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);[\s\S]*?overflow: visible;/);
+  assert.match(styles, /@media \(max-width: 700px\)\s*\{[\s\S]*?\.spotlightGrid\s*\{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
+  assert.match(styles, /@media \(max-width: 420px\)\s*\{[\s\S]*?\.spotlightGrid\s*\{[\s\S]*?grid-template-columns: minmax\(0, 1fr\);/);
+  assert.doesNotMatch(styles, /\.spotlightRail\s*\{|\.spotlightRail::\-webkit-scrollbar/);
   assert.match(styles, /\.spotlightAddButton\s*\{[\s\S]*?min-height: 44px;[\s\S]*?background: var\(--orchid-violet/);
   assert.match(styles, /\.spotlightCardVisible\s*\{[\s\S]*?animation: spotlight-card-in 280ms/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.spotlightCardVisible[\s\S]*?animation: none;/);

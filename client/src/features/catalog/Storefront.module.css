@@ -484,39 +484,26 @@
   align-items: center;
 }
 
-.spotlightRail {
-  display: flex;
+.spotlightGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
   max-width: 100%;
   min-width: 0;
-  padding: 0.15rem 0.15rem 0.65rem;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-}
-
-.spotlightRail::-webkit-scrollbar {
-  display: none;
-}
-
-.spotlightRail:focus-visible {
-  outline: 3px solid var(--orchid-violet, #9360ef);
-  outline-offset: 4px;
+  overflow: visible;
+  padding: 0.15rem;
 }
 
 .spotlightCard {
   display: flex;
+  height: 100%;
   min-width: 0;
-  flex: 0 0 clamp(14.5rem, 20vw, 17.5rem);
   flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--orchid-border, #4e3d5e);
   border-radius: 0.8rem;
   background: var(--orchid-surface, #241630);
   box-shadow: 0 0.7rem 1.5rem rgb(0 0 0 / 16%);
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
@@ -1340,6 +1327,10 @@
   :global(.storefront .reference-explore-content .product-grid) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .spotlightGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 420px) {
@@ -1567,12 +1558,9 @@
     min-height: 12rem;
   }
 
-  .spotlightRail {
+  .spotlightGrid {
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.75rem;
-  }
-
-  .spotlightCard {
-    flex-basis: min(82vw, 17.5rem);
   }
 
   .spotlightActions {
