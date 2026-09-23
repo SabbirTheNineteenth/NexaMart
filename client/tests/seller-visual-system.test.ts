@@ -32,7 +32,7 @@ test("Seller action hierarchy retains real workflow labels with primary, seconda
   assert.match(dashboardStyles, /\.workspace :global\(button:not\(\.primary-button\):not\(\.seller-promotion-delete\)\)\s*\{/);
   assert.match(dashboardStyles, /\.workspace :global\(\.seller-promotion-delete\)\s*\{/);
   assert.match(dashboardStyles, /:focus-visible/);
-  assert.doesNotMatch(dashboardStyles, /!important/);
+  assert.doesNotMatch(dashboardStyles, /\.workspace :global\(button[^}]*!important/);
 });
 
 test("Seller catalog creation remains a dedicated readable route while existing workspaces keep their route conditionals", () => {

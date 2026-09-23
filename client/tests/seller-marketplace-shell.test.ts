@@ -15,10 +15,10 @@ test("seller workspace uses a dedicated compact marketplace operations shell", (
 });
 
 test("seller operations shell has Obsidian Orchid emphasis, compact readable rails, and mobile-safe styling", () => {
-  assert.match(styles, /--seller-panel:var\(--orchid-surface\);--seller-muted:var\(--orchid-muted\)/);
-  assert.match(styles, /\.operationsHeader\{/);
-  assert.match(styles, /@media\(max-width:900px\)\{[\s\S]*\.sellerNavigation\{display:flex;[\s\S]*overflow-x:auto/);
-  assert.match(styles, /\.inventorySignal\{/);
-  assert.match(styles, /@media\(max-width:640px\)\{/);
-  assert.match(styles, /@media\(max-width:420px\)\{/);
+  assert.match(styles, /--seller-canvas:\s*#f7f4fb;[\s\S]*?--seller-muted:\s*#665b70/);
+  assert.match(styles, /\.operationsHeader\s*\{[^}]*min-height:\s*64px/);
+  assert.match(styles, /@media\s*\(max-width:\s*900px\)[\s\S]*?\.sellerSidebar\s*\{[^}]*position:\s*relative[\s\S]*?\.sellerNavigation\s*\{[^}]*display:\s*flex;[^}]*overflow-x:\s*auto/);
+  assert.match(styles, /\.inventorySignal\s*\{[^}]*background:/);
+  assert.match(styles, /@media\s*\(max-width:\s*700px\)\s*\{/);
+  assert.match(styles, /@media\s*\(max-width:\s*420px\)\s*\{/);
 });

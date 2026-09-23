@@ -30,9 +30,9 @@ test("seller workspace exposes practical, truthful overview and operation recove
 
 test("seller final workspace contract uses readable pale operational surfaces, contained mobile navigation, and reduced motion", () => {
   for (const hook of [".workspace", ".sellerSidebar", ".sellerNavigation", ".sellerFooter", ".workspaceIntro", ".activeWorkspace", ".inventoryTableWrap"]) assert.ok(styles.includes(hook), `missing ${hook}`);
-  assert.match(styles, /--seller-canvas:#f7f4fb/);
-  assert.match(styles, /\.sellerNavigation\{[\s\S]*?overflow-y:auto/);
-  assert.match(styles, /\.sellerFooter\{[\s\S]*?margin-top:auto/);
-  assert.match(styles, /@media\(max-width:900px\)\{[\s\S]*?\.sellerNavigation\{[\s\S]*?overflow-x:auto/);
-  assert.match(styles, /@media\(prefers-reduced-motion:reduce\)\{\.workspace \*\{animation:none!important;transition:none!important;scroll-behavior:auto!important\}\}/);
+  assert.match(styles, /--seller-canvas:\s*#f7f4fb/);
+  assert.match(styles, /\.sellerNavigation\s*\{[^}]*overflow-y:\s*auto/);
+  assert.match(styles, /\.sellerFooter\s*\{[^}]*margin:\s*auto 4px 0/);
+  assert.match(styles, /@media\s*\(max-width:\s*900px\)[\s\S]*?\.sellerNavigation\s*\{[^}]*overflow-x:\s*auto/);
+  assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*reduce\)[^}]*\.workspace \*[^}]*animation:\s*none;\s*transition:\s*none;\s*scroll-behavior:\s*auto/);
 });

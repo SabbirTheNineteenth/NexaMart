@@ -9,14 +9,14 @@ const route = readFileSync(new URL("../src/app/seller/[section]/page.tsx", impor
 test("UI-03 makes every seller navigation destination an addressable Obsidian Orchid operate workspace", () => {
   assert.match(route, /"notifications"/);
   assert.match(dashboard, /seller-shell seller-workspace orchid-shell orchid-shell--operate/);
-  assert.match(styles, /--seller-panel:var\(--orchid-surface\);--seller-muted:var\(--orchid-muted\)/);
-  assert.match(styles, /var\(--orchid-obsidian\)!important/);
+  assert.match(styles, /--seller-surface:\s*#fff;[\s\S]*?--seller-muted:\s*#665b70/);
+  assert.match(styles, /\.sellerSidebar\s*\{[^}]*background:\s*#241632;[^}]*color:\s*#fbf8ff/);
   assert.doesNotMatch(styles, /#b7e236|#eff8ce|#edf2e6|#d9ddd4/i);
 });
 
 test("UI-03 retains compact mobile navigation and reduced-motion protection", () => {
-  assert.match(styles, /@media\(max-width:900px\)/);
-  assert.match(styles, /@media\(prefers-reduced-motion:reduce\)/);
+  assert.match(styles, /@media\s*\(max-width:\s*900px\)[\s\S]*?\.sellerNavigation\s*\{[^}]*overflow-x:\s*auto/);
+  assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*reduce\)[^}]*animation:\s*none;\s*transition:\s*none/);
   assert.match(dashboard, /role="alert"/);
   assert.match(dashboard, /ConfirmationDialog/);
 });

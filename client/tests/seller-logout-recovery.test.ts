@@ -11,8 +11,8 @@ test("seller logout uses the shared authenticated contract with pending and reco
   assert.match(dashboard, /const logout = async \(\) => \{[\s\S]*?setLogoutState\(\{ state: "pending" \}\);[\s\S]*?await postJSON<void>\("\/auth\/logout", \{\}\);[\s\S]*?window\.location\.assign\("\/"\);[\s\S]*?catch \(reason\) \{[\s\S]*?setLogoutState\(\{ state: "error", message:/);
   assert.match(dashboard, /disabled=\{logoutState\.state === "pending"\}[\s\S]*?logoutState\.state === "pending" \? "Signing out…" : "Sign out"/);
   assert.match(dashboard, /logoutState\.state === "error" && <div className=\{styles\.logoutRecovery\} role="alert">[\s\S]*?logoutState\.message[\s\S]*?Try signing out again/);
-  assert.match(styles, /\.logoutRecovery\{[\s\S]*?border:1px solid #854a68/);
-  assert.match(styles, /\.topbarAction:focus-visible\{/);
+  assert.match(styles, /\.logoutRecovery\s*\{[^}]*border:\s*1px solid #dcb5c3;[^}]*background:\s*#fff5f7/);
+  assert.match(styles, /\.topbarAction:focus-visible\s*\{[^}]*outline:\s*3px solid var\(--seller-accent\)/);
 });
 
 test("seller logout delegates session invalidation to the API client", () => {

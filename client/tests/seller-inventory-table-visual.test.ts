@@ -21,6 +21,7 @@ test("S03 inventory frames loaded products in a dense, filterable stock table wi
   assert.match(inventoryWorkspace, /<SellerProductEditor product=\{product\}/);
   assert.match(inventoryWorkspace, /<SellerProductAssets product=\{product\} \/>/);
   assert.match(inventoryWorkspace, /aria-label=\{`Update stock for \$\{product\.name\}`\}/);
-  assert.match(styles, /\.inventoryTable\{/);
-  assert.match(styles, /\.inventoryFilters\{/);
+  assert.match(inventoryWorkspace, /<form className="seller-stock-form"[^>]*aria-busy=/);
+  assert.match(styles, /\.inventoryTable\s*\{[^}]*min-width:\s*820px/);
+  assert.match(styles, /\.catalogFilters,\.inventoryFilters\s*\{/);
 });

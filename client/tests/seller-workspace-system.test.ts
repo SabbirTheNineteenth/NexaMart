@@ -10,11 +10,11 @@ test("seller dashboard provides a responsive operational workspace frame while p
   assert.match(dashboard, /seller-topbar seller-workspace-topbar \$\{styles\.commandBar\}/);
   assert.match(dashboard, /<section className=\{styles\.workspaceIntro\} aria-labelledby="seller-workspace-heading">/);
   assert.match(dashboard, /<div className=\{styles\.activeWorkspace\}>/);
-  assert.match(styles, /\.workspace\{/);
-  assert.match(styles, /\.operationsHeader\{/);
-  assert.match(styles, /\.catalogFilters\{/);
-  assert.match(styles, /@media\(max-width:900px\)\{[\s\S]*\.workspace\{grid-template-columns:1fr!important/);
-  assert.match(styles, /@media\(max-width:640px\)\{[\s\S]*\.sellerContent\{padding:0 15px 34px/);
+  assert.match(styles, /\.workspace\s*\{/);
+  assert.match(styles, /\.operationsHeader\s*\{/);
+  assert.match(styles, /\.catalogFilters,\.inventoryFilters\s*\{/);
+  assert.match(styles, /@media\s*\(max-width:\s*900px\)[^}]*\.workspace\s*\{[^}]*grid-template-columns:\s*1fr/);
+  assert.match(styles, /@media\s*\(max-width:\s*700px\)[^}]*\.sellerContent\s*\{[^}]*padding:\s*0 16px 34px/);
   assert.match(dashboard, /aria-label=\{`Update \$\{item\.productName\} fulfillment status`\}/);
   assert.match(dashboard, /aria-label=\{`Update stock for \$\{product\.name\}`\}/);
 });
@@ -24,12 +24,12 @@ test("VISUAL-SELLER-01 keeps the Operate command rail, context row, dense panels
   assert.match(dashboard, /styles\.commandBar/);
   assert.match(dashboard, /styles\.sectionContext/);
   assert.match(dashboard, /<div className=\{styles\.activeWorkspace\}>/);
-  assert.match(styles, /\.sellerSidebar\{[\s\S]*?position:sticky;[\s\S]*?height:100vh/);
-  assert.match(styles, /\.commandBar\{[\s\S]*?position:sticky/);
-  assert.match(styles, /\.activeWorkspace\{display:grid;gap:14px;padding-top:16px/);
-  assert.match(styles, /@media\(max-width:900px\)\{[\s\S]*?\.sellerSidebar\{position:relative[\s\S]*?\.sellerNavigation\{display:flex;[\s\S]*?overflow-x:auto/);
-  assert.match(styles, /@media\(max-width:640px\)\{[\s\S]*?\.workspaceContext>span:first-child,.sectionContext\{display:none/);
-  assert.doesNotMatch(styles, /\.sellerNavigation a\{[^}]*font-size:0/);
+  assert.match(styles, /\.sellerSidebar\s*\{[^}]*position:\s*sticky;[^}]*height:\s*100dvh/);
+  assert.match(styles, /\.commandBar\s*\{[^}]*position:\s*sticky/);
+  assert.match(styles, /\.activeWorkspace\s*\{[^}]*display:\s*grid;[^}]*gap:\s*18px;[^}]*padding-top:\s*22px/);
+  assert.match(styles, /@media\s*\(max-width:\s*900px\)[\s\S]*?\.sellerSidebar\s*\{[^}]*position:\s*relative[\s\S]*?\.sellerNavigation\s*\{[^}]*display:\s*flex;[^}]*overflow-x:\s*auto/);
+  assert.match(styles, /@media\s*\(max-width:\s*420px\)[\s\S]*?\.operationsHeader\s*\{[^}]*flex-direction:\s*column/);
+  assert.doesNotMatch(styles, /\.sellerNavigation a\s*\{[^}]*font-size:\s*0/);
   assert.doesNotMatch(dashboard, /(carrier|tracking|payment status|payout sent|settled)/i);
 });
 

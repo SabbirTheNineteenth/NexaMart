@@ -35,8 +35,8 @@ test("seller operate shell keeps the reference command hierarchy and an accessib
   assert.match(dashboard, /<nav className=\{styles\.sellerNavigation\}/);
 
   const css = readFileSync(new URL("../src/features/seller/SellerDashboard.module.css", import.meta.url), "utf8");
-  assert.match(css, /grid-template-columns:220px minmax\(0,1fr\)/);
-  assert.match(css, /@media\(max-width:900px\).*?\.sellerNavigation\{display:flex;gap:8px;overflow-x:auto/s);
+  assert.match(css, /grid-template-columns:\s*264px minmax\(0,\s*1fr\)/);
+  assert.match(css, /@media\s*\(max-width:\s*900px\)[\s\S]*?\.sellerNavigation\s*\{[^}]*display:\s*flex;[^}]*overflow-x:\s*auto/);
   assert.match(css, /\.sellerNavigation a:focus-visible/);
 });
 
