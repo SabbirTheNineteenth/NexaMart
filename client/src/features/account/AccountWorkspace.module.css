@@ -62,8 +62,9 @@
   background: var(--account-canvas);
   color: var(--account-ink);
 }
-.accountHeader { min-height: 68px; border-color: var(--account-line); }
-.headerActions { display: flex; align-items: center; gap: 10px; }
+.accountHeader { width: 100%; max-width: 1160px; min-height: 64px; height: 64px; margin: 0 auto; padding: 0 18px; border: 1px solid var(--account-line); border-radius: 12px; background: var(--account-surface); box-shadow: 0 6px 18px rgb(43 27 61 / .045); }
+.accountHeader :global(.marketplace-brand) { color: var(--account-ink); font-size: 15px; font-weight: 800; }.accountHeader :global(.marketplace-brand-mark) { width: 28px; height: 28px; }
+.headerActions { display: flex; align-items: center; gap: 8px; }.headerActions :global(.account-switch) { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 8px 11px; border: 1px solid #d4c8e1; border-radius: 8px; background: #fff; color: #4c287b; font-size: 12px; font-weight: 750; }.headerActions :global(.account-switch:last-of-type) { border-color: #dac1cb; background: #fffafb; color: #7e304a; }.headerActions :global(.account-switch:hover:not(:disabled)) { border-color: var(--account-accent); background: #f3edff; color: #482481; transform: none; }.headerActions :global(.account-switch:last-of-type:hover:not(:disabled)) { border-color: #af5a75; background: #fff2f6; color: #75233e; }.accountHeader :global(.marketplace-brand:focus-visible),.headerActions :global(.account-switch:focus-visible) { outline: 3px solid #8e61dc; outline-offset: 3px; }
 .workspaceHero { padding: 42px 0 28px; border-color: var(--account-line); }
 .overview { gap: 8px; }.overview h1 { color: var(--account-ink); font-size: clamp(32px, 4vw, 48px); line-height: 1.1; }.overview p { color: var(--account-muted); }.purpose { max-width: 56ch; margin: 4px 0 0 !important; font-size: 15px !important; line-height: 1.55; }
 .accountNavigation { gap: 8px; padding: 14px 0; border-bottom: 1px solid var(--account-line); background: var(--account-canvas) !important; }.accountNavigation :global(a) { border-radius: 8px !important; color: #4c4057; }.accountNavigation :global(a:hover),.accountNavigation :global(a:focus-visible) { border-color: var(--account-accent) !important; background: #f0eaff !important; color: #482481 !important; }
