@@ -12,7 +12,6 @@ test("Storefront keeps catalog actions in a card footer and only renders returne
   const productImage = storefront.match(/<div className="product-image">[\s\S]*?<\/div>\s*<div className="product-copy">/)?.[0] ?? "";
   assert.doesNotMatch(productImage, /className="quick-add"/);
 });
-
 test("Storefront gives API-backed discovery products a readable rail, real actions, and reduced-motion safeguards", () => {
   assert.match(storefront, /const \[spotlightRailVisible, setSpotlightRailVisible\] = useState\(false\);/);
   assert.match(storefront, /const spotlightRailRef = useRef<HTMLDivElement>\(null\);/);
@@ -31,21 +30,23 @@ test("Storefront gives API-backed discovery products a readable rail, real actio
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.spotlightCardVisible[\s\S]*?animation: none;/);
 });
 
-test("Storefront gives the catalog hero one truthful, motion-safe featured-product composition", () => {
-  assert.match(storefront, /const featuredProduct = catalog\.products\[0\];/);
+test("Storefront gives the catalog hero one truthful, motion-safe real-product gallery", () => {
+  assert.match(storefront, /const heroProducts = useMemo\(\(\) => catalog\.products\.filter\(\(product\) => Boolean\(productImageSource\(product\.image, product\.id\)\)\)\.slice\(0, 4\), \[catalog\.products\]\);/);
   assert.match(storefront, /className="marketplace-hero reference-collection-hero" aria-labelledby="explore-heading"/);
-  assert.match(storefront, /styles\.heroMediaFrame/);
-  assert.match(storefront, /className="marketplace-hero-note reference-hero-context" aria-label="Current catalog context" aria-live="polite"/);
-  assert.match(storefront, /const featuredPresentation = featuredProduct \? buildProductPresentation\(featuredProduct\) : null;/);
-  assert.match(storefront, /href=\{`\/products\/\$\{featuredProduct\.slug\}`\}>View product<\/a>/);
-  assert.match(storefront, /featuredProduct\.inStock && <span className=\{styles\.heroAvailability\}>In stock<\/span>/);
+  assert.match(storefront, /function HeroDiscoveryCanvas\(\{ products \}/);
+  assert.match(storefront, /const activeProduct = products\[activeIndex % products\.length\];/);
+  assert.match(storefront, /window\.setInterval\(\(\) => setActiveIndex\(\(index\) => \(index \+ 1\) % products\.length\), 5000\)/);
+  assert.match(storefront, /activeProduct\.slug/);
+  assert.match(storefront, /No catalog product image is available right now\./);
+  assert.doesNotMatch(storefront, /heroDiscoveryCard|heroDiscoveryDetails|className="marketplace-hero-note reference-hero-context"|From the catalog/);
   assert.match(storefront, /Browse products <ArrowUpRight size=\{18\}\/>/);
   assert.match(storefront, /Browse departments/);
-  assert.match(styles, /\.heroSurface\s*\{[\s\S]*?grid-template-columns: minmax\(12rem, 0\.78fr\) minmax\(18rem, 1\.32fr\) minmax\(13rem, 0\.6fr\);/);
+  assert.match(styles, /\.heroGalleryStage\s*\{[\s\S]*?overflow: hidden;/);
+  assert.match(styles, /@keyframes hero-gallery-enter/);
   assert.match(styles, /\.heroMediaFrame\s*\{[\s\S]*?aspect-ratio: 16 \/ 10;/);
   assert.match(styles, /\.heroCopyEnter\s*\{[\s\S]*?animation: hero-copy-in 420ms/);
   assert.match(styles, /\.heroMediaEnter\s*\{[\s\S]*?animation: hero-media-in 520ms/);
-  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.heroCopyEnter[\s\S]*?animation: none;/);
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.heroGalleryMedia[\s\S]*?animation: none;/);
   assert.doesNotMatch(storefront, /rating|delivery|discount|seller claim/i);
 });
 

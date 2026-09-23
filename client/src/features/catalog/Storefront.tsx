@@ -61,14 +61,30 @@ type DiscoveryProductCardProps = {
 };
 
 function HeroDiscoveryCanvas({ products }: { products: Product[] }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updateMotionPreference = () => setReducedMotion(mediaQuery.matches);
+    updateMotionPreference();
+    mediaQuery.addEventListener("change", updateMotionPreference);
+    return () => mediaQuery.removeEventListener("change", updateMotionPreference);
+  }, []);
+
+  useEffect(() => {
+    if (reducedMotion || products.length < 2) return;
+    const timer = window.setInterval(() => setActiveIndex((index) => (index + 1) % products.length), 5000);
+    return () => window.clearInterval(timer);
+  }, [products.length, reducedMotion]);
+
   if (products.length === 0) {
-    return <div className={styles.heroEmptyMedia} role="status">No catalog product is available right now.</div>;
+    return <div className={styles.heroEmptyMedia} role="status">No catalog product image is available right now.</div>;
   }
 
-  return <div className={styles.heroDiscoveryCanvas} aria-hidden="true">{products.map((product) => {
-    const presentation = buildProductPresentation(product);
-    return <article className={styles.heroDiscoveryCard} key={product.id}><ProductVisual product={product} className={styles.heroDiscoveryImage} priority/><div className={styles.heroDiscoveryDetails}><span>{presentation.brand ?? product.category}</span><strong>{product.name}</strong><ServerPrice product={product}/>{product.inStock && <small>In stock</small>}</div></article>;
-  })}</div>;
+  const activeProduct = products[activeIndex % products.length];
+  const presentation = buildProductPresentation(activeProduct);
+  return <a className={styles.heroGalleryStage} href={"/products/" + activeProduct.slug} aria-label={"View " + activeProduct.name}><span className={styles.heroGalleryBloom} aria-hidden="true"/><ProductVisual key={activeProduct.id} product={activeProduct} className={styles.heroGalleryMedia} priority/><span className={styles.heroGalleryCaption}><span>{presentation.brand ?? activeProduct.category}</span><strong>{activeProduct.name}</strong></span></a>;
 }
 
 function DiscoveryProductCard({ product, cartAdd, wishlistSave, onAdd, onSave, showRegularPrice = false }: DiscoveryProductCardProps) {
@@ -229,8 +245,6 @@ export function Storefront() {
   const checkoutAvailable = cart.authenticated && addressLoadState === "loaded" && savedAddresses.length > 0 && Boolean(selectedShippingAddressId);
   const { subcategories, applied } = useMemo(() => catalogDiscoveryFacets(taxonomy, { query, categoryName: category, subcategorySlug: subcategory, brandSlug: brand }), [taxonomy, query, category, subcategory, brand]);
   const hasActiveCatalogFilter = Boolean(query.trim() || category || subcategory || brand);
-  const featuredProduct = catalog.products[0];
-  const featuredPresentation = featuredProduct ? buildProductPresentation(featuredProduct) : null;
   const departmentTiles = useMemo(() => taxonomy.categories.slice(0, 8).map((department, index) => ({
     department,
     product: catalog.products.find((product) => product.category === department.name) ?? catalog.products[index],
@@ -238,7 +252,7 @@ export function Storefront() {
   const visibleProducts = useMemo(() => referenceFacetProducts(catalog.products, availability, productType), [availability, catalog.products, productType]);
   const productCountLabel = catalogLoaded ? `${visibleProducts.length} ${visibleProducts.length === 1 ? "product" : "products"}` : "Loading products";
   const featuredProducts = useMemo(() => catalog.products.filter((product) => product.inStock).slice(0, 6), [catalog.products]);
-  const heroProducts = useMemo(() => catalog.products.slice(0, 3), [catalog.products]);
+  const heroProducts = useMemo(() => catalog.products.filter((product) => Boolean(productImageSource(product.image, product.id))).slice(0, 4), [catalog.products]);
   const flashDeals = useMemo(() => catalog.products.filter((product) => product.effectivePrice !== undefined && product.effectivePrice < product.price).slice(0, 4), [catalog.products]);
 
   useEffect(() => {
@@ -452,8 +466,7 @@ export function Storefront() {
       </div>
       <section className="marketplace-hero reference-collection-hero" aria-labelledby="explore-heading">
         <div className={`${styles.heroCopy} ${styles.heroCopyEnter}`}><p className="eyebrow">NexaMart catalog</p><h1 id="explore-heading">Browse <em>catalog products.</em></h1><p>Search products by department, brand, or keyword.</p><div className={styles.heroActions}><a className="primary-button" href="#collection" onClick={browseCatalog}>Browse products <ArrowUpRight size={18}/></a><a className="text-link" href="#departments">Browse departments</a></div></div>
-        <div className={[styles.heroMediaFrame, styles.heroMediaEnter].join(" ")}><span className={styles.heroGlow} aria-hidden="true"/><HeroDiscoveryCanvas products={heroProducts}/></div>
-        <aside className="marketplace-hero-note reference-hero-context" aria-label="Current catalog context" aria-live="polite"><div className={styles.heroContextEnter}>{featuredProduct ? <><span>From the catalog</span><strong>{featuredProduct.name}</strong><p>{featuredPresentation?.brand ?? featuredProduct.category}</p><ServerPrice product={featuredProduct}/>{featuredProduct.inStock && <span className={styles.heroAvailability}>In stock</span>}<a href={`/products/${featuredProduct.slug}`}>View product</a></> : <><span>From the catalog</span><p>No featured product is available right now.</p></>}</div></aside>
+        <div className={[styles.heroMediaFrame, styles.heroMediaEnter].join(" ")}><HeroDiscoveryCanvas products={heroProducts}/></div>
       </section>
       <div className={styles.catalogWorkspace}>
         <div className="reference-product-toolbar"><div><h2>Products</h2><p className="product-count" aria-live="polite">{productCountLabel}</p></div><div className="reference-product-toolbar-actions" role="group" aria-label="Catalog display controls" aria-controls="catalog-product-grid"><label className="catalog-sort">Sort<select aria-label="Sort catalog" value={sort} onChange={(event) => { setCatalogLoaded(false); setSort(event.target.value === "newest" ? "newest" : ""); }}><option value="">Catalog order</option><option value="newest">Newest arrivals</option></select></label><span className="reference-grid-view" role="img" aria-label="Catalog grid view"><LayoutGrid size={16} aria-hidden="true"/></span></div></div>

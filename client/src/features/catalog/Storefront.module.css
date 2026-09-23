@@ -230,8 +230,8 @@
 :global(.storefront .reference-explore-content > .reference-collection-hero) {
   grid-column: 2;
   grid-row: 1;
-  grid-template-columns: minmax(12rem, 0.78fr) minmax(18rem, 1.32fr) minmax(13rem, 0.6fr);
-  grid-template-areas: "copy media context";
+  grid-template-columns: minmax(12rem, 0.72fr) minmax(18rem, 1.48fr);
+  grid-template-areas: "copy media";
   min-height: 0;
   width: auto;
 }
@@ -241,7 +241,7 @@
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: minmax(12rem, 0.78fr) minmax(18rem, 1.32fr) minmax(13rem, 0.6fr);
+  grid-template-columns: minmax(12rem, 0.72fr) minmax(18rem, 1.48fr);
   gap: clamp(0.9rem, 1.7vw, 1.5rem);
   align-items: stretch;
   min-width: 0;
@@ -299,9 +299,7 @@
 }
 
 .heroActions :global(.primary-button):focus-visible,
-.heroActions :global(.text-link):focus-visible,
-.heroProductContext a:focus-visible,
-.heroContextEnter a:focus-visible {
+.heroActions :global(.text-link):focus-visible {
   outline: 3px solid var(--orchid-orchid, #d3a5ff);
   outline-offset: 3px;
 }
@@ -328,36 +326,6 @@
   background: linear-gradient(120deg, rgb(17 9 28 / 18%), transparent 48%, rgb(17 9 28 / 28%));
 }
 
-.heroGlow {
-  position: absolute;
-  z-index: -1;
-  width: 10rem;
-  height: 10rem;
-  right: -3rem;
-  bottom: -3rem;
-  border-radius: 50%;
-  background: rgb(147 96 239 / 35%);
-  filter: blur(12px);
-  animation: hero-glow-float 7s ease-in-out infinite;
-}
-
-.heroImage {
-  width: 100%;
-  height: 100%;
-}
-
-.heroImage :global(img) {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  transition: transform 220ms ease;
-}
-
-.heroMediaFrame:hover .heroImage :global(img) {
-  transform: scale(1.025);
-}
-
 .heroEmptyMedia {
   display: grid;
   height: 100%;
@@ -367,113 +335,6 @@
   text-align: center;
 }
 
-.heroProductContext {
-  display: grid;
-  align-content: center;
-  justify-items: start;
-  gap: 0.5rem;
-  min-width: 0;
-  padding: clamp(0.9rem, 1.4vw, 1.25rem);
-  border: 1px solid var(--orchid-border, #4e3d5e);
-  border-radius: 0.8rem;
-  background: rgb(36 22 48 / 86%);
-}
-
-:global(.storefront .reference-collection-hero .reference-hero-context) {
-  grid-area: context;
-  display: block;
-  width: 100%;
-  max-width: none;
-  min-width: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0.8rem;
-  background: rgb(36 22 48 / 86%);
-}
-
-.heroContextEnter {
-  display: grid;
-  height: 100%;
-  align-content: center;
-  justify-items: start;
-  gap: 0.5rem;
-  min-width: 0;
-  padding: clamp(0.9rem, 1.4vw, 1.25rem);
-  border: 1px solid var(--orchid-border, #4e3d5e);
-  border-radius: 0.8rem;
-}
-
-.heroProductContext > span,
-.heroProductContext > p,
-.heroProductContext strong,
-.heroContextEnter > span,
-.heroContextEnter > p,
-.heroContextEnter strong {
-  margin: 0;
-}
-
-.heroProductContext > span,
-.heroProductContext > p,
-.heroAvailability,
-.heroContextEnter > span,
-.heroContextEnter > p {
-  color: var(--orchid-muted, #c5b7ce);
-  font-size: 0.76rem;
-  font-weight: 700;
-}
-
-.heroProductContext strong {
-  overflow-wrap: anywhere;
-  color: var(--orchid-text, #f8f2ff);
-  font-size: 1rem;
-  line-height: 1.3;
-}
-
-.heroContextEnter strong {
-  overflow-wrap: anywhere;
-  color: var(--orchid-text, #f8f2ff);
-  font-size: 1rem;
-  line-height: 1.3;
-}
-
-.heroProductContext :global(.server-price) {
-  color: var(--orchid-text, #f8f2ff);
-  font-size: 1.05rem;
-}
-
-.heroContextEnter :global(.server-price) {
-  color: var(--orchid-text, #f8f2ff);
-  font-size: 1.05rem;
-}
-
-.heroAvailability {
-  color: var(--orchid-orchid, #d3a5ff);
-}
-
-.heroProductContext a {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  color: var(--orchid-text, #f8f2ff);
-  font-size: 0.85rem;
-  font-weight: 800;
-  text-decoration: underline;
-  text-decoration-color: var(--orchid-orchid, #d3a5ff);
-  text-underline-offset: 0.25rem;
-}
-
-.heroContextEnter a {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  color: var(--orchid-text, #f8f2ff);
-  font-size: 0.85rem;
-  font-weight: 800;
-  text-decoration: underline;
-  text-decoration-color: var(--orchid-orchid, #d3a5ff);
-  text-underline-offset: 0.25rem;
-}
-
 .heroCopyEnter {
   animation: hero-copy-in 420ms ease-out both;
 }
@@ -481,8 +342,6 @@
 .heroMediaEnter {
   animation: hero-media-in 520ms 70ms ease-out both;
 }
-
-.heroContextEnter { animation: hero-context-in 420ms 150ms ease-out both; }
 
 @keyframes hero-copy-in {
   from { opacity: 0; transform: translateY(8px); }
@@ -1428,8 +1287,8 @@
   :global(.storefront .reference-explore-content > .reference-collection-hero) {
     grid-column: 1 / -1;
     grid-row: 1;
-    grid-template-columns: minmax(14rem, 0.72fr) minmax(24rem, 1.5fr) minmax(13rem, 0.55fr);
-    grid-template-areas: "copy media context";
+    grid-template-columns: minmax(14rem, 0.72fr) minmax(24rem, 1.5fr);
+    grid-template-areas: "copy media";
   }
 
   :global(.storefront.reference-explore-layout .reference-explore-content > .marketplace-hero.reference-collection-hero) {
@@ -1439,10 +1298,6 @@
     padding: clamp(1rem, 2vw, 1.6rem);
   }
 
-  :global(.storefront.reference-explore-layout .reference-explore-content > .reference-collection-hero .reference-hero-context) {
-    position: static;
-    align-self: stretch;
-  }
 }
 
 :global(.storefront .new-arrivals-rail) {
@@ -1536,19 +1391,19 @@
   }
 
   :global(.storefront .reference-collection-hero) {
-    grid-template-columns: minmax(0, 1fr) minmax(12rem, 0.62fr);
+    grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
-      "copy copy"
-      "media context";
+      "copy"
+      "media";
   }
 
   :global(.storefront .reference-explore-content > .reference-collection-hero) {
     grid-column: auto;
     grid-row: auto;
-    grid-template-columns: minmax(0, 1fr) minmax(12rem, 0.62fr);
+    grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
-      "copy copy"
-      "media context";
+      "copy"
+      "media";
   }
 
   .heroCopy {
@@ -1558,10 +1413,6 @@
   .heroMediaFrame {
     grid-area: media;
     min-height: 13rem;
-  }
-
-  .heroProductContext {
-    grid-area: context;
   }
 
   .brandShowcaseInner {
@@ -1661,14 +1512,6 @@
     min-height: 11rem;
   }
 
-  .catalogHero :global(.reference-hero-context) {
-    min-width: 0;
-  }
-
-  :global(.storefront .reference-collection-hero .reference-hero-context) {
-    min-width: 0;
-  }
-
   .heroHeading {
     max-width: 15ch;
   }
@@ -1707,26 +1550,20 @@
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "copy"
-      "media"
-      "context";
+      "media";
   }
 
   :global(.storefront .reference-collection-hero) {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "copy"
-      "media"
-      "context";
+      "media";
     gap: 0.9rem;
     padding: 1rem;
   }
 
   .heroMediaFrame {
     min-height: 12rem;
-  }
-
-  .heroProductContext {
-    gap: 0.4rem;
   }
 
   .spotlightRail {
@@ -1829,10 +1666,7 @@
   }
 
   .heroCopyEnter,
-  .heroMediaEnter,
-  .heroContextEnter,
-  .heroGlow,
-  .heroMediaFrame:hover .heroImage :global(img) {
+  .heroMediaEnter {
     animation: none;
     transform: none;
     transition: none;
@@ -1883,96 +1717,97 @@
   }
 }
 
-.heroDiscoveryCanvas {
+.heroGalleryStage {
   position: relative;
   z-index: 2;
-  display: block;
+  display: grid;
   width: 100%;
   height: 100%;
+  min-height: inherit;
   overflow: hidden;
-}
-
-.heroDiscoveryCard {
-  position: absolute;
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
-  width: min(64%, 17rem);
-  min-width: 9.5rem;
-  overflow: hidden;
-  border: 1px solid rgba(244, 237, 255, 0.28);
-  border-radius: 0.9rem;
-  background: rgba(29, 17, 43, 0.82);
-  box-shadow: 0 1rem 2.5rem rgba(7, 3, 13, 0.32);
+  place-items: center;
+  isolation: isolate;
   color: #fff;
-  animation: hero-product-drift 8s ease-in-out infinite alternate;
+  text-decoration: none;
 }
 
-.heroDiscoveryCard:nth-child(1) {
-  z-index: 3;
-  top: 9%;
-  left: 7%;
-  width: min(53%, 16rem);
-  height: 76%;
+.heroGalleryStage:focus-visible {
+  outline: 3px solid var(--orchid-orchid, #d3a5ff);
+  outline-offset: -0.35rem;
 }
 
-.heroDiscoveryCard:nth-child(2) {
-  z-index: 2;
-  top: 20%;
-  right: 7%;
-  width: min(50%, 15rem);
-  height: 61%;
-  opacity: 0.92;
-  animation-delay: -2.5s;
+.heroGalleryStage::before {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  content: "";
+  background: radial-gradient(circle at 78% 18%, rgb(176 113 255 / 30%), transparent 36%), linear-gradient(135deg, #160c22, #2e1745);
 }
 
-.heroDiscoveryCard:nth-child(3) {
-  display: none;
+.heroGalleryBloom {
+  position: absolute;
+  z-index: -1;
+  width: 50%;
+  aspect-ratio: 1;
+  right: -9%;
+  bottom: -26%;
+  border-radius: 50%;
+  background: rgb(170 104 255 / 36%);
+  filter: blur(1.8rem);
+  animation: hero-gallery-bloom 6s ease-in-out infinite alternate;
 }
 
-.heroDiscoveryImage {
-  min-height: 0;
-  height: 100%;
+.heroGalleryMedia {
+  width: min(88%, 30rem);
+  height: min(84%, 21rem);
+  overflow: hidden;
+  border-radius: 0.85rem;
+  box-shadow: 0 1.25rem 3rem rgb(7 3 13 / 34%);
+  animation: hero-gallery-enter 5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.heroDiscoveryImage :global(img) {
+.heroGalleryMedia :global(img) {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
 }
 
-.heroDiscoveryDetails {
+.heroGalleryCaption {
+  position: absolute;
+  left: clamp(1rem, 4%, 1.5rem);
+  bottom: clamp(0.9rem, 4%, 1.35rem);
   display: grid;
-  gap: 0.2rem;
-  padding: 0.65rem 0.75rem 0.75rem;
-  background: rgba(25, 14, 38, 0.92);
+  gap: 0.15rem;
+  max-width: min(75%, 25rem);
+  text-shadow: 0 0.15rem 1rem rgb(7 3 13 / 70%);
 }
 
-.heroDiscoveryDetails > span,
-.heroDiscoveryDetails small {
-  color: #d5c4ef;
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+.heroGalleryCaption > span {
+  color: #d9c5ff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.heroDiscoveryDetails strong {
+.heroGalleryCaption strong {
   overflow: hidden;
-  color: #fff;
-  font-size: 0.82rem;
-  line-height: 1.25;
+  font-size: clamp(0.86rem, 1.3vw, 1rem);
+  line-height: 1.3;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.heroDiscoveryDetails :global(.server-price) strong {
-  color: #fff;
-  font-size: 0.82rem;
+@keyframes hero-gallery-enter {
+  0% { opacity: 0; transform: translate3d(0, 0.7rem, 0) scale(0.975); }
+  13%, 80% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  100% { opacity: 0; transform: translate3d(0, -0.45rem, 0) scale(1.015); }
 }
 
-@keyframes hero-product-drift {
-  from { transform: translate3d(0, 0, 0) rotate(0.001deg); }
-  to { transform: translate3d(0, -0.55rem, 0) rotate(0.001deg); }
+@keyframes hero-gallery-bloom {
+  from { transform: translate3d(0, 0, 0) scale(0.96); }
+  to { transform: translate3d(-0.5rem, -0.3rem, 0) scale(1.04); }
 }
 
 .discoverySectionCopy {
@@ -2249,16 +2084,9 @@
 }
 
 @media (max-width: 540px) {
-  .heroDiscoveryCard {
-    width: min(72%, 15rem);
-  }
-
-  .heroDiscoveryCard:nth-child(1) {
-    left: 5%;
-  }
-
-  .heroDiscoveryCard:nth-child(2) {
-    right: 5%;
+  .heroGalleryMedia {
+    width: 88%;
+    height: 78%;
   }
 
   .discoveryProductGrid,
@@ -2275,16 +2103,9 @@
   }
 }
 
-@media (max-width: 700px) {
-  :global(.storefront.reference-explore-layout .reference-explore-content > .reference-collection-hero .reference-hero-context) {
-    position: static;
-    grid-area: context;
-    align-self: stretch;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .heroDiscoveryCard,
+  .heroGalleryMedia,
+  .heroGalleryBloom,
   .discoveryProductCard,
   .discoveryProductCard:hover,
   .discoveryProductMedia :global(img),
