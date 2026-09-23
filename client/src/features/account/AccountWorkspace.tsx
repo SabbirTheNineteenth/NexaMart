@@ -31,7 +31,6 @@ function WishlistMedia({ item }: { item: WishlistItem }) {
   if (!source || failed) return <div className="wishlist-image-fallback" role="img" aria-label={`${item.name} product image unavailable`}>NM</div>;
   return <img className="wishlist-image" src={source} alt={item.name} loading="lazy" onError={() => setFailed(true)} />;
 }
-
 export function AccountWorkspace() {
   const [account, setAccount] = useState<Account | null>(null);
   const [accountResolution, setAccountResolution] = useState<AccountResolutionState>({ state: "loading" });
@@ -276,7 +275,24 @@ export function AccountWorkspace() {
 
   if (accountResolution.state === "loading") return <main className={`account-shell customer-account-workspace ${styles.shell}`}><section className={`${styles.statePanel} ${styles.sectionPanel} ${styles.authState}`} aria-live="polite" aria-busy="true" aria-labelledby="account-loading-heading"><p className="eyebrow">Account</p><h1 id="account-loading-heading">Checking your account</h1><p>We’re confirming whether this browser has an active session.</p></section></main>;
   if (accountResolution.state === "error") return <main className={`account-shell customer-account-workspace ${styles.shell}`}><section className={`${styles.statePanel} ${styles.sectionPanel} ${styles.feedback} ${styles.authState}`} role="alert" aria-labelledby="account-load-error-heading"><p className="eyebrow">Account unavailable</p><h1 id="account-load-error-heading">We couldn’t confirm your account.</h1><p>{accountResolution.message}</p><div className={styles.authStateActions}><button className="primary-button" type="button" onClick={() => setAccountRefreshNonce((current) => current + 1)}>Retry loading your account</button><Link className="account-switch" href="/">Continue browsing</Link></div></section></main>;
-  if (accountResolution.state === "signed-out") return <main className={`account-shell customer-account-workspace ${styles.shell}`}><header className="seller-topbar customer-account-topbar"><Link className="marketplace-brand" href="/"><BrandLogo monogram className="marketplace-brand-mark" priority /><span>NexaMart</span></Link><Link className="account-switch" href="/">Continue browsing</Link></header><section className={`${styles.statePanel} ${styles.sectionPanel} ${styles.authState} account-auth`} aria-labelledby="account-entry-heading"><p className="eyebrow">Your NexaMart account</p><h1 id="account-entry-heading">Sign in to your account</h1><p>Sign in to access orders, saved pieces, and shipping addresses for this session.</p><div className={styles.authStateActions}><Link className="primary-button" href="/login">Sign in</Link><Link className="account-switch" href="/register">Create an account</Link></div></section></main>;
+  if (accountResolution.state === "signed-out") return <main className={"account-shell customer-account-workspace " + styles.shell}>
+    <header className={styles.signedOutHeader}>
+      <Link className="marketplace-brand" href="/"><BrandLogo monogram className="marketplace-brand-mark" priority /><span>NexaMart</span></Link>
+      <nav className={styles.signedOutHeaderActions} aria-label="Account navigation"><Link className="account-switch" href="/">Continue browsing</Link></nav>
+    </header>
+    <section className={styles.signedOutEntry} aria-labelledby="account-entry-heading">
+      <div className={styles.entryCopy}>
+        <p className="eyebrow">Your NexaMart account</p>
+        <h1 id="account-entry-heading">Sign in to your account</h1>
+        <p>Access your orders, saved items, shipping addresses, and eligible purchase reviews.</p>
+      </div>
+      <nav className={styles.signedOutActions} aria-label="Account entry actions">
+        <Link className="primary-button" href="/login">Sign in</Link>
+        <Link className="account-switch" href="/register">Create an account</Link>
+      </nav>
+      <p className={styles.entryHelper}>New to NexaMart? Create an account to keep your purchases and delivery details in one place.</p>
+    </section>
+  </main>;
   if (!account) return null;
   if (account.role === "seller") return <main className={`account-shell customer-account-workspace ${styles.shell}`}><header className="seller-topbar customer-account-topbar"><Link className="marketplace-brand" href="/"><BrandLogo monogram className="marketplace-brand-mark" priority /><span>NexaMart</span></Link></header><section className={`${styles.statePanel} ${styles.roleTransition}`} aria-labelledby="seller-transition-heading"><p className="eyebrow">Role-aware account</p><h1 id="seller-transition-heading">You&apos;re signed in as a Seller</h1><p>Your account has seller access. Customer orders and shipping addresses are available only to customer sessions.</p><div className={styles.authStateActions}><Link className="primary-button" href="/seller">Open Seller workspace</Link><button className="account-switch" type="button" onClick={() => void logout()} disabled={logoutState.state === "pending"}>{logoutState.state === "pending" ? "Signing out…" : "Sign out"}</button></div></section></main>;
   if (account.role === "admin") return <main className={`account-shell customer-account-workspace ${styles.shell}`}><header className="seller-topbar customer-account-topbar"><Link className="marketplace-brand" href="/"><BrandLogo monogram className="marketplace-brand-mark" priority /><span>NexaMart</span></Link></header><section className={`${styles.statePanel} ${styles.roleTransition}`} aria-labelledby="admin-transition-heading"><p className="eyebrow">Role-aware account</p><h1 id="admin-transition-heading">You&apos;re signed in as an Admin</h1><p>Your account has administration access. Customer orders and shipping addresses are available only to customer sessions.</p><div className={styles.authStateActions}><Link className="primary-button" href="/admin">Open Admin workspace</Link><button className="account-switch" type="button" onClick={() => void logout()} disabled={logoutState.state === "pending"}>{logoutState.state === "pending" ? "Signing out…" : "Sign out"}</button></div></section></main>;

@@ -34,7 +34,7 @@ test("account authentication states have clear, responsive actions without inven
   assert.match(workspace, /aria-busy="true"/);
   assert.match(workspace, /Retry loading your account/);
   assert.match(workspace, /Continue browsing/);
-  assert.match(workspace, /Sign in to access orders, saved pieces, and shipping addresses for this session\./);
+  assert.match(workspace, /Access your orders, saved items, shipping addresses, and eligible purchase reviews\./);
   assert.doesNotMatch(workspace, /Welcome back,?\s+(?:Alex|Jamie|Customer)/i);
   assert.match(styles, /\.authState\{/);
   assert.match(styles, /\.authStateActions\{/);
