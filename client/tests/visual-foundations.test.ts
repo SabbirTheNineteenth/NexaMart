@@ -20,6 +20,7 @@ test("VISUAL-7/01 keeps global focus, motion, and narrow-screen foundations acce
   assert.match(styles, /:where\(a,button,input,select,textarea,\[tabindex\]\):focus-visible\{outline:3px solid var\(--orchid-focus\);outline-offset:3px/);
   assert.match(styles, /:is\(a,button,input,select,textarea,\[tabindex\]\):focus-visible\{outline:3px solid var\(--orchid-focus\);outline-offset:3px/);
   assert.match(styles, /@media\(prefers-reduced-motion:reduce\)\{html\{scroll-behavior:auto\}[^}]*\}/);
-  assert.match(styles, /@media\(max-width:480px\)\{html\{font-size:15px\}body\{min-width:320px\}\}/);
+  assert.match(styles, /@media\(max-width:480px\)\{html\{font-size:15px\}\}/);
+  assert.doesNotMatch(styles, /body\{min-width:320px/);
   assert.match(styles, /:where\(button,input,select,textarea\)\{font:inherit\}/);
 });

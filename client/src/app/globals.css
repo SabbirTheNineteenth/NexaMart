@@ -129,11 +129,11 @@ body{background:var(--brand-paper);color:var(--brand-ink)}button:focus-visible,a
 /* VISUAL-7/01 global foundations */
 :root{color-scheme:dark;--brand-primary:var(--orchid-violet);--brand-primary-hover:#6941ca;--brand-accent:var(--orchid-orchid);--brand-ink:var(--orchid-text);--brand-paper:var(--orchid-obsidian);--brand-surface:var(--orchid-plum);--brand-muted:var(--orchid-muted);--brand-line:var(--orchid-border);--brand-soft:var(--orchid-surface);--brand-focus:var(--orchid-focus);--brand-radius:var(--orchid-radius);--brand-motion-fast:var(--orchid-motion-fast);--brand-motion:var(--orchid-motion);--ink:var(--brand-ink);--paper:var(--brand-paper);--blue:var(--brand-primary);--muted:var(--brand-muted);--line:var(--brand-line);--mist:var(--brand-soft);--soft:var(--brand-soft)}
 html{background:var(--brand-paper);font-size:16px;text-size-adjust:100%}
-body{min-width:320px;min-height:100dvh;background:var(--brand-paper);color:var(--brand-ink);font-family:Manrope,Arial,sans-serif;font-feature-settings:"kern" 1,"liga" 1;line-height:1.5}
+body{min-width:0;min-height:100dvh;background:var(--brand-paper);color:var(--brand-ink);font-family:Manrope,Arial,sans-serif;font-feature-settings:"kern" 1,"liga" 1;line-height:1.5}
 :where(button,input,select,textarea){font:inherit}
 :where(input,select,textarea){border-color:var(--brand-line);color:var(--brand-ink)}
 :is(a,button,input,select,textarea,[tabindex]):focus-visible{outline:3px solid var(--orchid-focus);outline-offset:3px}
-@media(max-width:480px){html{font-size:15px}body{min-width:320px}}
+@media(max-width:480px){html{font-size:15px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}:where(*,::before,::after){animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 }
 
@@ -218,7 +218,7 @@ body{min-width:320px;min-height:100dvh;background:var(--brand-paper);color:var(-
 
 @layer nexamart-theme {
   :root{color-scheme:dark;--nx-surface-base:#100b18;--nx-surface-raised:#1a1025;--nx-surface-panel:#241630;--nx-surface-control:#2e1d3d;--nx-violet:#9360ef;--nx-violet-strong:#a770ff;--nx-orchid:#d3a5ff;--nx-text:#f8f2ff;--nx-text-muted:#c5b7ce;--nx-border:#4e3d5e;--nx-border-strong:#6f5980;--nx-success:#62d69a;--nx-warning:#f1c96b;--nx-danger:#f1849c;--brand-primary:var(--nx-violet);--brand-primary-hover:#7a45d7;--brand-accent:var(--nx-orchid);--brand-ink:var(--nx-text);--brand-paper:var(--nx-surface-base);--brand-surface:var(--nx-surface-panel);--brand-muted:var(--nx-text-muted);--brand-line:var(--nx-border);--brand-soft:var(--nx-surface-raised);--brand-focus:var(--nx-orchid);--ink:var(--nx-text);--paper:var(--nx-surface-base);--blue:var(--nx-violet);--muted:var(--nx-text-muted);--line:var(--nx-border);--mist:var(--nx-surface-control);--soft:var(--nx-surface-raised);--orchid-obsidian:var(--nx-surface-base);--orchid-plum:var(--nx-surface-raised);--orchid-surface:var(--nx-surface-panel);--orchid-violet:var(--nx-violet);--orchid-orchid:var(--nx-orchid);--orchid-text:var(--nx-text);--orchid-muted:var(--nx-text-muted);--orchid-border:var(--nx-border);--orchid-focus:var(--nx-orchid);--orchid-radius:9px;--orchid-motion-fast:140ms;--orchid-motion:180ms}
-  html{background:var(--nx-surface-base);scroll-behavior:smooth}body{min-width:320px;min-height:100dvh;background:var(--nx-surface-base);color:var(--nx-text);font-family:Manrope,Arial,sans-serif;line-height:1.5}
+  html{background:var(--nx-surface-base);scroll-behavior:smooth}body{min-width:0;min-height:100dvh;background:var(--nx-surface-base);color:var(--nx-text);font-family:Manrope,Arial,sans-serif;line-height:1.5}
   :where(a,button,input,select,textarea,[tabindex]):focus-visible{outline:3px solid var(--nx-orchid);outline-offset:3px}
   :where(input,select,textarea){border-color:var(--nx-border);background:var(--nx-surface-control);color:var(--nx-text)}
   .orchid-explore,.customer-account-workspace,.seller-workspace,.admin-workspace,.role-auth-shell{min-height:100dvh;background:var(--nx-surface-base);color:var(--nx-text)}

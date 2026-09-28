@@ -329,10 +329,13 @@
 
 .heroEmptyMedia {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
   height: 100%;
   place-items: center;
   padding: 1rem;
   color: var(--orchid-muted, #c5b7ce);
+  overflow-wrap: anywhere;
   text-align: center;
 }
 
@@ -1122,6 +1125,12 @@
     scroll-behavior: auto;
     animation: none !important;
     transition: none !important;
+  }
+}
+
+@media (max-width: 320px) {
+  :global(.storefront .marketplace-brand > span:last-child) {
+    display: none;
   }
 }
 
@@ -2089,6 +2098,12 @@
 
   .discoverySaveButton {
     width: 100%;
+  }
+}
+
+@media (max-width: 360px) {
+  .heroMediaFrame {
+    aspect-ratio: auto;
   }
 }
 

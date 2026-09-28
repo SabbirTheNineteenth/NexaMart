@@ -104,6 +104,10 @@ NEXAMART_DEMO_SEED=local-confirmed npm run demo:seed:local
 
 Run checks independently for the client and API after configuring their local environments.
 
+### Client zoom-layout regression audit
+
+The Client contains `scripts/zoom-layout-audit.mjs`, a local Chrome DevTools Protocol audit that checks page-level overflow, header collisions, clipped status panels, hydration boundaries, and runtime exceptions across its defined viewport/zoom matrix. Run it only against a freshly rebuilt local production Client and document any authenticated-route limitations; it does not bypass role-based access or fabricate catalog data.
+
 ```bash
 cd client
 npm test
