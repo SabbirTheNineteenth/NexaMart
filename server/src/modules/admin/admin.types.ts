@@ -30,7 +30,7 @@ export type AdminProduct = {
   updatedAt: string;
   expectedRevision: string;
 };
-export type AdminOrder = { id: string; reference: string; customer: { id: string; name: string }; total: number; status: "pending" | "confirmed" | "cancelled"; paymentStatus: "unpaid"; itemCount: number; createdAt: string };
+export type AdminOrder = { id: string; reference: string; customer: { id: string; name: string }; total: number; status: "pending" | "confirmed" | "cancelled"; paymentStatus: "unpaid" | "collected"; itemCount: number; createdAt: string };
 export type AdminSearchResult =
   | { type: "seller"; id: string; name: string; storeName: string; status: "pending" | "approved" | "rejected" | "suspended" | "active" }
   | { type: "product"; id: string; name: string; slug: string; isPublished: boolean }

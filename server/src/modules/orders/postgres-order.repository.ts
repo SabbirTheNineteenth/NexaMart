@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { and, asc, desc, eq, exists, gte, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
-import { orderEvents, orderItems, orders, products, productVariants, accounts, addresses, commissionRecords, promotions, sellerProfiles } from "../../db/schema/index.js";
+import { orderEvents, orderItems, orders, products, productVariants, accounts, addresses, commissionRecords, promotions, sellerProfiles, codOutbox } from "../../db/schema/index.js";
+import { createCodEventPayload } from "./cod.js";
 import { calculatePromotionPrice, selectActiveProductPromotion } from "../promotions/promotion-pricing.js";
 import type { CustomerOrderTracking, Order, SellerOrder } from "./order.types.js";
 import type { CheckoutItem, OrderRepository } from "./order.repository.js";
@@ -11,7 +12,7 @@ import type { SellerNotificationRepository } from "../notifications/seller-notif
 type StoredOrderItem = { productId: string | null; variantId: string | null; variantSku: string | null; variantOptions: Record<string, string> | null; quantity: number; unitPrice: string; baseUnitPrice?: string | null; promotionId?: string | null; promotionName?: string | null; discountPercent?: string | null };
 const toOrderItem = (item: StoredOrderItem) => ({ productId: item.productId ?? "", ...(item.variantId ? { variantId: item.variantId, variantSku: item.variantSku!, variantOptions: item.variantOptions! } : {}), quantity: item.quantity, unitPrice: Number(item.unitPrice), ...(item.baseUnitPrice ? { baseUnitPrice: Number(item.baseUnitPrice) } : {}), ...(item.promotionId && item.promotionName && item.discountPercent ? { promotionId: item.promotionId, promotionName: item.promotionName, discountPercent: Number(item.discountPercent) } : {}) });
 const orderItemSnapshotFields = { productId: orderItems.productId, variantId: orderItems.variantId, variantSku: orderItems.variantSku, variantOptions: orderItems.variantOptions, quantity: orderItems.quantity, unitPrice: orderItems.unitPrice, baseUnitPrice: orderItems.baseUnitPrice, promotionId: orderItems.promotionId, promotionName: orderItems.promotionName, discountPercent: orderItems.discountPercent };
-const asOrder = (order: { id: string; reference: string; customerId: string; total: string; status: "pending" | "confirmed" | "cancelled"; paymentStatus: "unpaid"; createdAt: Date }, items: StoredOrderItem[]): Order => ({ id: order.id, reference: order.reference, customerId: order.customerId, total: Number(order.total), status: order.status, paymentStatus: order.paymentStatus, createdAt: order.createdAt.toISOString(), items: items.map(toOrderItem) });
+const asOrder = (order: { id: string; reference: string; customerId: string; total: string; status: "pending" | "confirmed" | "cancelled"; paymentStatus: "unpaid" | "collected"; paymentMethod?: string; createdAt: Date }, items: StoredOrderItem[]): Order => ({ id: order.id, reference: order.reference, customerId: order.customerId, total: Number(order.total), status: order.status, paymentMethod: "cod", paymentStatus: order.paymentStatus, createdAt: order.createdAt.toISOString(), items: items.map(toOrderItem) });
 
 export class PostgresOrderRepository implements OrderRepository {
   constructor(private readonly notifications: Pick<SellerNotificationRepository, "recordOrderLineCreated"> = new PostgresSellerNotificationRepository()) {}
@@ -53,6 +54,10 @@ export class PostgresOrderRepository implements OrderRepository {
       const commissionRatePercent = 10;
       await tx.insert(commissionRecords).values(insertedItems.map((item) => { const grossAmount = Number(item.unitPrice) * item.quantity; const commissionAmount = grossAmount * (commissionRatePercent / 100); return { orderItemId: item.id, sellerId: item.sellerId!, grossAmount: grossAmount.toFixed(2), ratePercent: commissionRatePercent.toFixed(2), commissionAmount: commissionAmount.toFixed(2), netAmount: (grossAmount - commissionAmount).toFixed(2) }; }));
       await tx.insert(orderEvents).values([{ orderId: order.id, actorId: input.customerId, eventType: "order_created", toStatus: "pending", sequence: 1 }, ...insertedItems.map((item, index) => ({ orderId: order.id, orderItemId: item.id, actorId: input.customerId, eventType: "fulfillment_pending", toStatus: "pending", sequence: index + 2 }))]);
+      for (const item of insertedItems) {
+        const [event] = await tx.insert(codOutbox).values({ eventType: "cod.order.created", payload: {} }).returning({ id: codOutbox.id, createdAt: codOutbox.createdAt });
+        await tx.update(codOutbox).set({ payload: createCodEventPayload({ eventId: event.id, eventType: "cod.order.created", occurredAt: event.createdAt.toISOString(), orderId: order.id, reference: order.reference, sellerId: item.sellerId, amount: (Number(item.unitPrice) * item.quantity).toFixed(2), status: order.status, paymentStatus: order.paymentStatus }) }).where(eq(codOutbox.id, event.id));
+      }
       return asOrder(order, purchased.map((item) => ({ productId: item.productId, variantId: item.variantId ?? null, variantSku: item.variantSku ?? null, variantOptions: item.variantOptions ?? null, quantity: item.quantity, unitPrice: item.unitPrice.toFixed(2), baseUnitPrice: item.baseUnitPrice.toFixed(2), promotionId: item.promotionId ?? null, promotionName: item.promotionName ?? null, discountPercent: item.discountPercent?.toFixed(2) ?? null })));
     });
   }
@@ -69,7 +74,7 @@ export class PostgresOrderRepository implements OrderRepository {
       db.select({ id: orderItems.id, productName: orderItems.productName, productImageUrl: orderItems.productImageUrl, variantSku: orderItems.variantSku, variantOptions: orderItems.variantOptions, quantity: orderItems.quantity, unitPrice: orderItems.unitPrice, fulfillmentStatus: orderItems.fulfillmentStatus }).from(orderItems).where(eq(orderItems.orderId, order.id)),
       db.select({ id: orderEvents.id, orderItemId: orderEvents.orderItemId, eventType: orderEvents.eventType, fromStatus: orderEvents.fromStatus, toStatus: orderEvents.toStatus, note: orderEvents.note, createdAt: orderEvents.createdAt }).from(orderEvents).where(eq(orderEvents.orderId, order.id)).orderBy(asc(orderEvents.sequence)),
     ]);
-    return { id: order.id, reference: order.reference, status: order.status, paymentStatus: order.paymentStatus, createdAt: order.createdAt.toISOString(), items: items.map((item) => ({ id: item.id, productName: item.productName, productImageUrl: item.productImageUrl, ...(item.variantSku ? { variantSku: item.variantSku, variantOptions: item.variantOptions! } : {}), quantity: item.quantity, unitPrice: Number(item.unitPrice), fulfillmentStatus: item.fulfillmentStatus })), events: events.map((event) => ({ ...event, createdAt: event.createdAt.toISOString() })) };
+    return { id: order.id, reference: order.reference, status: order.status, paymentMethod: "cod", paymentStatus: order.paymentStatus, createdAt: order.createdAt.toISOString(), items: items.map((item) => ({ id: item.id, productName: item.productName, productImageUrl: item.productImageUrl, ...(item.variantSku ? { variantSku: item.variantSku, variantOptions: item.variantOptions! } : {}), quantity: item.quantity, unitPrice: Number(item.unitPrice), fulfillmentStatus: item.fulfillmentStatus })), events: events.map((event) => ({ ...event, createdAt: event.createdAt.toISOString() })) };
   }
 
   async listForSeller(sellerId: string): Promise<SellerOrder[]> {

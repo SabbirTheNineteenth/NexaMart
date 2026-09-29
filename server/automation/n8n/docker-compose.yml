@@ -1,0 +1,18 @@
+services:
+  n8n:
+    image: n8nio/n8n:1.113.3
+    ports:
+      - "127.0.0.1:5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_FUNCTION_ALLOW_BUILTIN=crypto
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      - N8N_WEBHOOK_SECRET=${N8N_WEBHOOK_SECRET}
+      - N8N_SERVICE_TOKEN=${N8N_SERVICE_TOKEN}
+      - NEXAMART_API_BASE=${NEXAMART_API_BASE}
+    volumes:
+      - n8n_data:/home/node/.n8n
+volumes:
+  n8n_data:

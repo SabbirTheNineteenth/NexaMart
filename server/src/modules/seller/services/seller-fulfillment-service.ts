@@ -2,7 +2,7 @@ import { and, eq, exists, sql } from "drizzle-orm";
 import { db } from "../../../db/client.js";
 import { commissionRecords, orderEvents, orderItems, sellerProfiles } from "../../../db/schema/index.js";
 
-type Status = "pending" | "processing" | "packed" | "shipped" | "delivered" | "cancelled" | "returned";
+type Status = "pending" | "processing" | "packed" | "shipped" | "delivered" | "cancelled" | "returned" | "failed_delivery" | "return_requested";
 type FulfillmentStatus = Exclude<Status, "pending">;
 const allowed: Record<FulfillmentStatus, readonly Status[]> = {
   processing: ["pending"],
@@ -11,6 +11,8 @@ const allowed: Record<FulfillmentStatus, readonly Status[]> = {
   delivered: ["shipped"],
   cancelled: ["pending", "processing"],
   returned: ["delivered"],
+  failed_delivery: ["shipped"],
+  return_requested: ["failed_delivery"],
 };
 
 export const isSellerFulfillmentTransitionAllowed = (fromStatus: Status, toStatus: FulfillmentStatus) => allowed[toStatus].includes(fromStatus);

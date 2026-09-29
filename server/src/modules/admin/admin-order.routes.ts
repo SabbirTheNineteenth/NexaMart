@@ -7,7 +7,7 @@ export type AdminOrderOversight = {
   reference: string;
   createdAt: string;
   status: "pending" | "confirmed" | "cancelled";
-  paymentStatus: "unpaid";
+  paymentStatus: "unpaid" | "collected";
   total: number;
   customer: { id: string; name: string };
   items: {
@@ -17,7 +17,7 @@ export type AdminOrderOversight = {
     variant?: { sku: string; options: Record<string, string> };
     quantity: number;
     unitPrice: number;
-    fulfillmentStatus: "pending" | "processing" | "packed" | "shipped" | "delivered" | "cancelled" | "returned";
+    fulfillmentStatus: "pending" | "processing" | "packed" | "shipped" | "delivered" | "cancelled" | "returned" | "failed_delivery" | "return_requested";
   }[];
 };
 

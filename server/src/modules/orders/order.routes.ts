@@ -4,7 +4,7 @@ import { createAuthGuard, getAuthenticatedAccount } from "../auth/auth.guard.js"
 import type { PublicAccount } from "../auth/auth.types.js";
 import type { Order } from "./order.types.js";
 
-const checkoutSchema = z.object({ shippingAddressId: z.string().uuid(), items: z.array(z.object({ productId: z.string().uuid(), variantId: z.string().uuid().optional(), quantity: z.number().int().positive().max(99) })).min(1) });
+const checkoutSchema = z.object({ paymentMethod: z.literal("cod").optional(), shippingAddressId: z.string().uuid(), items: z.array(z.object({ productId: z.string().uuid(), variantId: z.string().uuid().optional(), quantity: z.number().int().positive().max(99) })).min(1) });
 const idempotencyKeySchema = z.string().trim().min(8).max(128).regex(/^[A-Za-z0-9_-]+$/);
 const orderIdSchema = z.string().uuid();
 const expectedCheckoutConflictMessages = new Set(["A shipping address is unavailable", "A product or variant is unavailable or out of stock", "A product seller is unavailable"]);

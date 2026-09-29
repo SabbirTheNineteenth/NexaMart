@@ -1,0 +1,10 @@
+{
+  "name": "NexaMart COD pending confirmation reminder",
+  "nodes": [
+    { "parameters": { "rule": { "interval": [{ "field": "hours", "hoursInterval": 1 }] } }, "id": "schedule", "name": "Hourly reminder", "type": "n8n-nodes-base.scheduleTrigger", "typeVersion": 1.2, "position": [0, 0] },
+    { "parameters": { "method": "GET", "url": "={{$env.NEXAMART_API_BASE + '/api/cod/local/pending-confirmation'}}", "sendHeaders": true, "headerParameters": { "parameters": [{ "name": "Authorization", "value": "={{'Bearer ' + $env.N8N_SERVICE_TOKEN}}" }] }, "options": {} }, "id": "feed", "name": "Protected pending COD feed", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [230, 0] },
+    { "parameters": { "jsCode": "const orders = $input.first().json.orders || []; for (const order of orders) console.log('NexaMart COD pending confirmation', order.reference, order.id, order.createdAt); return [{json:{reminderCount:orders.length}}];" }, "id": "log", "name": "Local operator reminder", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [460, 0] }
+  ],
+  "connections": { "Hourly reminder": { "main": [[{ "node": "Protected pending COD feed", "type": "main", "index": 0 }]] }, "Protected pending COD feed": { "main": [[{ "node": "Local operator reminder", "type": "main", "index": 0 }]] } },
+  "settings": { "executionOrder": "v1" }, "active": false
+}

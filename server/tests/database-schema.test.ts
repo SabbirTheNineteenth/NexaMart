@@ -25,7 +25,7 @@ test("database schema defines persistent commerce entities", () => {
   assert.equal(auditRecords.createdAt.name, "created_at");
   assert.equal(orderItems.sellerId.name, "seller_id");
   assert.equal(orderItems.fulfillmentStatus.name, "fulfillment_status");
-  assert.deepEqual(fulfillmentStatus.enumValues, ["pending", "processing", "packed", "shipped", "delivered", "cancelled", "returned"]);
+  assert.deepEqual(fulfillmentStatus.enumValues, ["pending", "processing", "packed", "shipped", "delivered", "cancelled", "returned", "failed_delivery", "return_requested"]);
 });
 
 test("packed fulfillment status has an additive, unapplied PostgreSQL migration boundary", () => {

@@ -1,13 +1,13 @@
 import { relations, sql } from "drizzle-orm";
-import { boolean, index, integer, jsonb, numeric, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, check, index, integer, jsonb, numeric, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 
 const now = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
 const updatedAt = () => timestamp("updated_at", { withTimezone: true }).notNull().defaultNow();
 
 export const accountRole = pgEnum("account_role", ["customer", "seller", "admin"]);
 export const orderStatus = pgEnum("order_status", ["pending", "confirmed", "cancelled"]);
-export const paymentStatus = pgEnum("payment_status", ["unpaid"]);
-export const fulfillmentStatus = pgEnum("fulfillment_status", ["pending", "processing", "packed", "shipped", "delivered", "cancelled", "returned"]);
+export const paymentStatus = pgEnum("payment_status", ["unpaid", "collected"]);
+export const fulfillmentStatus = pgEnum("fulfillment_status", ["pending", "processing", "packed", "shipped", "delivered", "cancelled", "returned", "failed_delivery", "return_requested"]);
 export const sellerProfileStatus = pgEnum("seller_profile_status", ["pending", "approved", "rejected", "suspended", "active"]);
 export const commissionStatus = pgEnum("commission_status", ["accrued", "eligible", "paid", "void"]);
 export const payoutStatus = pgEnum("payout_status", ["pending", "approved", "paid", "rejected"]);
@@ -179,12 +179,13 @@ export const orders = pgTable("orders", {
   customerId: uuid("customer_id").notNull().references(() => accounts.id, { onDelete: "restrict" }),
   status: orderStatus("status").notNull().default("pending"),
   paymentStatus: paymentStatus("payment_status").notNull().default("unpaid"),
+  paymentMethod: varchar("payment_method", { length: 16 }).notNull().default("cod"),
   idempotencyKey: varchar("idempotency_key", { length: 128 }).notNull(),
   shippingAddressSnapshot: jsonb("shipping_address_snapshot").$type<{ recipientName: string; phone: string; line1: string; line2?: string; city: string; region?: string; postalCode?: string; country: string }>().notNull(),
   total: numeric("total", { precision: 12, scale: 2 }).notNull(),
   createdAt: now(),
   updatedAt: updatedAt(),
-}, (table) => [uniqueIndex("orders_customer_idempotency_key_unique").on(table.customerId, table.idempotencyKey)]);
+}, (table) => [uniqueIndex("orders_customer_idempotency_key_unique").on(table.customerId, table.idempotencyKey), check("orders_cod_payment_method_check", sql`${table.paymentMethod} = 'cod'`)]);
 
 export const orderItems = pgTable("order_items", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -204,6 +205,7 @@ export const orderItems = pgTable("order_items", {
   promotionName: varchar("promotion_name", { length: 120 }),
   discountPercent: numeric("discount_percent", { precision: 5, scale: 2 }),
   fulfillmentStatus: fulfillmentStatus("fulfillment_status").notNull().default("pending"),
+  codCollectedAt: timestamp("cod_collected_at", { withTimezone: true }),
 }, (table) => [index("order_items_variant_id_index").on(table.variantId)]);
 
 export const commissionRecords = pgTable("commission_records", {
@@ -264,12 +266,25 @@ export const orderEvents = pgTable("order_events", {
   sequence: integer("sequence").notNull(),
   orderItemId: uuid("order_item_id").references(() => orderItems.id, { onDelete: "cascade" }),
   actorId: uuid("actor_id").references(() => accounts.id, { onDelete: "set null" }),
+  source: varchar("source", { length: 16 }).notNull().default("account"),
+  externalEventId: varchar("external_event_id", { length: 128 }),
   eventType: varchar("event_type", { length: 80 }).notNull(),
   fromStatus: varchar("from_status", { length: 32 }),
   toStatus: varchar("to_status", { length: 32 }),
   note: text("note"),
   createdAt: now(),
-}, (table) => [index("order_events_order_created_at_index").on(table.orderId, table.createdAt), uniqueIndex("order_events_order_sequence_unique").on(table.orderId, table.sequence)]);
+}, (table) => [index("order_events_order_created_at_index").on(table.orderId, table.createdAt), uniqueIndex("order_events_order_sequence_unique").on(table.orderId, table.sequence), uniqueIndex("order_events_external_event_id_unique").on(table.externalEventId).where(sql`${table.externalEventId} is not null`)]);
+
+export const codOutbox = pgTable("cod_outbox", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  eventType: varchar("event_type", { length: 64 }).notNull(),
+  payload: jsonb("payload").$type<Record<string, unknown>>().notNull(),
+  attempts: integer("attempts").notNull().default(0),
+  nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true }).notNull().defaultNow(),
+  deliveredAt: timestamp("delivered_at", { withTimezone: true }),
+  lastError: text("last_error"),
+  createdAt: now(),
+}, (table) => [index("cod_outbox_pending_index").on(table.deliveredAt, table.nextAttemptAt)]);
 
 export const sellerNotifications = pgTable("seller_notifications", {
   id: uuid("id").defaultRandom().primaryKey(),
