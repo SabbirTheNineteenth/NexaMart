@@ -1,7 +1,8 @@
 import { and, eq, isNull, lte, sql } from "drizzle-orm";
 import { db } from "../../../db/client.js";
-import { auditRecords, codOutbox, commissionRecords, orderEvents, orderItems, orders, sellerProfiles } from "../../../db/schema/index.js";
+import { auditRecords, codOutbox, commissionRecords, orderEvents, orderItems, orders, sellerProfiles, serviceAuditRecords } from "../../../db/schema/index.js";
 import { allCodLinesCollected, canActOnCodLine, codTransitionAllowed, createCodEventPayload, postCodWebhook, type CodAction, type CodEventType } from "../cod.js";
+import { codActorColumns } from "../cod-actor.js";
 
 export class CodOperationError extends Error {
   constructor(readonly code: "NOT_FOUND" | "INVALID_TRANSITION" | "INVALID_ACTION", message: string) { super(message); }
@@ -47,8 +48,10 @@ export class CodOperationsService {
       if (collected) await tx.update(orders).set({ paymentStatus: "collected" }).where(eq(orders.id, line.orderId));
       await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`order-event-sequence:${line.orderId}`}))`);
       const sequence = Number((await tx.execute(sql`select coalesce(max("sequence"), 0) + 1 as "sequence" from "order_events" where "order_id" = ${line.orderId}`)).rows[0].sequence);
-      await tx.insert(orderEvents).values({ orderId: line.orderId, orderItemId: line.id, actorId: input.actor.id, source: input.actor.kind === "n8n" ? "n8n" : "account", externalEventId: input.actor.externalEventId, eventType: input.action === "delivered" ? "cod_delivered_collected" : `fulfillment_${input.action}`, fromStatus: line.fulfillmentStatus, toStatus: input.action, sequence });
-      await tx.insert(auditRecords).values({ actorId: input.actor.id, action: `cod.${input.action}`, resourceType: "order_item", resourceId: line.id, metadata: { orderId: line.orderId, source: input.actor.kind, externalEventId: input.actor.externalEventId ?? null } });
+      await tx.insert(orderEvents).values({ orderId: line.orderId, orderItemId: line.id, ...codActorColumns(input.actor), source: input.actor.kind === "n8n" ? "n8n" : "account", externalEventId: input.actor.externalEventId, eventType: input.action === "delivered" ? "cod_delivered_collected" : `fulfillment_${input.action}`, fromStatus: line.fulfillmentStatus, toStatus: input.action, sequence });
+      const audit = { action: `cod.${input.action}`, resourceType: "order_item", resourceId: line.id, metadata: { orderId: line.orderId, source: input.actor.kind, externalEventId: input.actor.externalEventId ?? null } };
+      if (input.actor.kind === "n8n") await tx.insert(serviceAuditRecords).values({ ...audit, serviceActorId: input.actor.id });
+      else await tx.insert(auditRecords).values({ ...audit, actorId: input.actor.id });
       const eventType = eventForStatus[input.action];
       if (eventType) {
         const [event] = await tx.insert(codOutbox).values({ eventType, payload: {} }).returning({ id: codOutbox.id, createdAt: codOutbox.createdAt });

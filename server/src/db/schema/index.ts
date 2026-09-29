@@ -27,6 +27,12 @@ export const accounts = pgTable("accounts", {
   updatedAt: updatedAt(),
 });
 
+export const serviceActors = pgTable("service_actors", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  key: varchar("key", { length: 64 }).notNull().unique(),
+  createdAt: now(),
+});
+
 export const sessions = pgTable("sessions", {
   id: uuid("id").defaultRandom().primaryKey(),
   accountId: uuid("account_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
@@ -266,6 +272,7 @@ export const orderEvents = pgTable("order_events", {
   sequence: integer("sequence").notNull(),
   orderItemId: uuid("order_item_id").references(() => orderItems.id, { onDelete: "cascade" }),
   actorId: uuid("actor_id").references(() => accounts.id, { onDelete: "set null" }),
+  serviceActorId: uuid("service_actor_id").references(() => serviceActors.id, { onDelete: "restrict" }),
   source: varchar("source", { length: 16 }).notNull().default("account"),
   externalEventId: varchar("external_event_id", { length: 128 }),
   eventType: varchar("event_type", { length: 80 }).notNull(),
@@ -273,7 +280,7 @@ export const orderEvents = pgTable("order_events", {
   toStatus: varchar("to_status", { length: 32 }),
   note: text("note"),
   createdAt: now(),
-}, (table) => [index("order_events_order_created_at_index").on(table.orderId, table.createdAt), uniqueIndex("order_events_order_sequence_unique").on(table.orderId, table.sequence), uniqueIndex("order_events_external_event_id_unique").on(table.externalEventId).where(sql`${table.externalEventId} is not null`)]);
+}, (table) => [index("order_events_order_created_at_index").on(table.orderId, table.createdAt), uniqueIndex("order_events_order_sequence_unique").on(table.orderId, table.sequence), uniqueIndex("order_events_external_event_id_unique").on(table.externalEventId).where(sql`${table.externalEventId} is not null`), check("order_events_n8n_service_actor_check", sql`${table.source} <> 'n8n' OR (${table.actorId} IS NULL AND ${table.serviceActorId} IS NOT NULL)`)]);
 
 export const codOutbox = pgTable("cod_outbox", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -308,6 +315,16 @@ export const auditRecords = pgTable("audit_records", {
   metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
   createdAt: now(),
 }, (table) => [index("audit_records_created_at_index").on(table.createdAt)]);
+
+export const serviceAuditRecords = pgTable("service_audit_records", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  serviceActorId: uuid("service_actor_id").notNull().references(() => serviceActors.id, { onDelete: "restrict" }),
+  action: varchar("action", { length: 100 }).notNull(),
+  resourceType: varchar("resource_type", { length: 80 }).notNull(),
+  resourceId: uuid("resource_id").notNull(),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
+  createdAt: now(),
+}, (table) => [index("service_audit_records_created_at_index").on(table.createdAt)]);
 
 export const accountRelations = relations(accounts, ({ one, many }) => ({ sellerProfile: one(sellerProfiles), products: many(products), promotions: many(promotions), addresses: many(addresses), cartItems: many(cartItems), orders: many(orders), commissions: many(commissionRecords), payouts: many(payoutRecords), sellerNotifications: many(sellerNotifications) }));
 export const addressRelations = relations(addresses, ({ one }) => ({ account: one(accounts, { fields: [addresses.accountId], references: [accounts.id] }) }));

@@ -10,6 +10,7 @@
     "db:migrate": "drizzle-kit migrate",
     "admin:create": "tsx src/scripts/create-admin.ts",
     "seller:provision": "tsx src/scripts/provision-seller.ts",
+    "n8n:actor:provision:local": "tsx src/scripts/provision-n8n-cod-actor.ts",
     "demo:seed": "tsx src/scripts/demo-seed.ts",
     "demo:seed:local": "tsx src/scripts/local-demo-catalog-seed.ts",
     "qa:customer:local": "tsx src/scripts/local-customer-qa-fixture.ts",
