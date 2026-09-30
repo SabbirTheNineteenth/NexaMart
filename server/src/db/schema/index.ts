@@ -31,7 +31,15 @@ export const customerTelegramLinkChallenges = pgTable("customer_telegram_link_ch
   accountId: uuid("account_id").primaryKey().references(() => accounts.id, { onDelete: "cascade" }),
   codeHash: varchar("code_hash", { length: 64 }).notNull().unique(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  lastError: varchar("last_error", { length: 16 }),
   createdAt: now(),
+});
+
+export const customerTelegramContacts = pgTable("customer_telegram_contacts", {
+  accountId: uuid("account_id").primaryKey().references(() => accounts.id, { onDelete: "cascade" }),
+  phone: varchar("phone", { length: 16 }).notNull(),
+  createdAt: now(),
+  updatedAt: updatedAt(),
 });
 
 export const customerTelegramLinks = pgTable("customer_telegram_links", {

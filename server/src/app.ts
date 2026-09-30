@@ -91,7 +91,7 @@ export type AppDependencies = {
   authAdmission?: AuthAdmissionConfiguration;
 };
 
-const unsafeMethods = new Set(["POST", "PATCH", "DELETE"]);
+const unsafeMethods = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 function hasSessionCookie(cookieHeader: string | undefined): boolean {
   return /(?:^|;\s*)nexamart_session=[^;]+(?:;|$)/.test(cookieHeader ?? "");
@@ -163,7 +163,7 @@ export function createApp(environment: Environment = process.env, dependencies: 
     c.header("X-Frame-Options", "DENY");
     await next();
   });
-  app.use("*", cors({ origin: clientOrigin, credentials: true, allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"], allowHeaders: ["Content-Type", "Idempotency-Key"] }));
+  app.use("*", cors({ origin: clientOrigin, credentials: true, allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], allowHeaders: ["Content-Type", "Idempotency-Key"] }));
   app.use("*", async (c, next) => {
     if (
       unsafeMethods.has(c.req.method)

@@ -13,5 +13,15 @@ test("customer Account loads real Telegram link state and offers explicit bot st
 });
 
 test("Account never accepts an arbitrary Telegram chat ID or claims a message was sent", () => {
-  assert.doesNotMatch(account, /name="chatId"|name="telegramPhone"|Telegram notification sent/);
+  assert.doesNotMatch(account, /name="chatId"|Telegram notification sent/);
+});
+
+test("Account saves Telegram contact separately from an explicit bot link", () => {
+  assert.match(account, /name="telegramPhone"/);
+  assert.match(account, /putJSON<.*Telegram.*>\("\/telegram\/contact"/);
+  assert.match(account, /number alone|number is not|number does not/i);
+  assert.match(account, /Link Telegram/);
+  assert.match(account, /botWindow\?\.location\.replace\(result\.url\)/);
+  assert.match(account, /Unlink Telegram/);
+  assert.match(account, /link_pending/);
 });

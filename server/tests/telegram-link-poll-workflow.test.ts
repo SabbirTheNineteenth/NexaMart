@@ -51,3 +51,13 @@ test("expired link codes are handled and do not block later bot starts", async (
   assert.equal(store.offset, 6);
   assert.deepEqual(result[0]!.json, { processed: 2, linked: 1 });
 });
+
+test("unexpected link completion response retains the update for retry", async () => {
+  const store: Record<string, unknown> = {};
+  await assert.rejects(runCode(() => store, env, { httpRequest: async (options: Record<string, unknown>) =>
+    String(options.url).includes("getUpdates")
+      ? { ok: true, result: [{ update_id: 8, message: { text: `/start ${linkCode}`, chat: { id: 123, type: "private" }, from: { id: 123 } } }] }
+      : { status: "unexpected" }
+  }), /completion response unavailable/);
+  assert.equal(store.offset, undefined);
+});

@@ -16,7 +16,8 @@ for (const update of response.result) {
     try {
       result = await helpers.httpRequest({ method: 'POST', url: `${$env.NEXAMART_API_BASE}/api/telegram/local/link`, headers: { Authorization: `Bearer ${$env.N8N_SERVICE_TOKEN}` }, body: { code: start[1], chatId, telegramUserId: userId, chatType: 'private' }, json: true });
     } catch { throw new Error('NexaMart Telegram link completion failed'); }
-    if (result?.status === 'linked') linked++;
+    if (!['linked', 'invalid', 'conflict'].includes(result?.status)) throw new Error('NexaMart Telegram link completion response unavailable');
+    if (result.status === 'linked') linked++;
   }
   if (Number.isSafeInteger(update?.update_id)) store.offset = update.update_id + 1;
 }

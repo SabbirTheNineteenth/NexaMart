@@ -38,6 +38,10 @@ export function postJSON<T>(path: string, body: unknown, headers?: HeadersInit):
   return request<T>(path, { method: "POST", headers: { "Content-Type": "application/json", ...headers }, body: JSON.stringify(body) });
 }
 
+export function putJSON<T>(path: string, body: unknown): Promise<T> {
+  return request<T>(path, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+}
+
 export function patchJSON<T>(path: string, body?: unknown): Promise<T> {
   return request<T>(path, { method: "PATCH", headers: body === undefined ? {} : { "Content-Type": "application/json" }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
 }

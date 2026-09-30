@@ -3,18 +3,23 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { createAuthGuard, getAuthenticatedAccount } from "../auth/auth.guard.js";
 import type { PublicAccount } from "../auth/auth.types.js";
+import type { TelegramLinkState } from "./postgres-telegram-link.repository.js";
 
 type SessionResolver = { resolve(token: string): Promise<PublicAccount | null> };
 type Links = {
-  status(accountId: string): Promise<"linked" | "not_linked">;
+  status(accountId: string): Promise<TelegramLinkState>;
   request(accountId: string, botUsername: string): Promise<{ url: string }>;
   complete(input: { code: string; chatId: string; telegramUserId: string }): Promise<"linked" | "invalid" | "conflict">;
+  unlink(accountId: string): Promise<void>;
+  saveContact(accountId: string, phone: string): Promise<string>;
+  removeContact(accountId: string): Promise<void>;
   recipient(orderId: string): Promise<{ linked: false } | { linked: true; chatId: string } | null>;
 };
 const uuid = z.string().uuid();
 const code = z.string().regex(/^[A-Za-z0-9_-]{43}$/);
 const chatId = z.string().regex(/^[1-9][0-9]{0,19}$/);
 const completion = z.object({ code, chatId, telegramUserId: chatId, chatType: z.literal("private") }).strict();
+const contactBody = z.object({ phone: z.string().trim().regex(/^\+[1-9]\d{7,14}$/) }).strict();
 
 function bearerMatches(value: string | undefined, expected: string): boolean {
   const actual = /^Bearer ([^\s]+)$/.exec(value ?? "")?.[1];
@@ -26,14 +31,30 @@ export function createTelegramRoutes(input: { sessions: SessionResolver; links: 
   const guard = createAuthGuard(input.sessions);
   const available = !!input.botUsername && !!input.serviceToken;
   routes.get("/link", guard.requireAccount, guard.requireRole("customer"), async (c) => {
-    if (!available) return c.json({ status: "unavailable" });
-    try { return c.json({ status: await input.links.status(getAuthenticatedAccount(c)!.id) }); }
+    try {
+      const state = await input.links.status(getAuthenticatedAccount(c)!.id);
+      return c.json(available ? state : { status: "unavailable", phone: state.phone });
+    }
     catch { return c.json({ error: "Unable to load Telegram link status" }, 500); }
   });
   routes.post("/link/request", guard.requireAccount, guard.requireRole("customer"), async (c) => {
     if (!available) return c.json({ error: "Telegram linking is unavailable" }, 503);
     try { return c.json(await input.links.request(getAuthenticatedAccount(c)!.id, input.botUsername!)); }
     catch { return c.json({ error: "Unable to create Telegram link" }, 500); }
+  });
+  routes.delete("/link", guard.requireAccount, guard.requireRole("customer"), async (c) => {
+    try { await input.links.unlink(getAuthenticatedAccount(c)!.id); return c.json({ status: "not_linked" }); }
+    catch { return c.json({ error: "Unable to unlink Telegram" }, 500); }
+  });
+  routes.put("/contact", guard.requireAccount, guard.requireRole("customer"), async (c) => {
+    const parsed = contactBody.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: "Enter a valid international phone number" }, 400);
+    try { return c.json({ phone: await input.links.saveContact(getAuthenticatedAccount(c)!.id, parsed.data.phone) }); }
+    catch { return c.json({ error: "Unable to save Telegram contact" }, 500); }
+  });
+  routes.delete("/contact", guard.requireAccount, guard.requireRole("customer"), async (c) => {
+    try { await input.links.removeContact(getAuthenticatedAccount(c)!.id); return c.json({ phone: null }); }
+    catch { return c.json({ error: "Unable to remove Telegram contact" }, 500); }
   });
   routes.use("/local/*", async (c, next) => {
     if (!input.serviceToken || !bearerMatches(c.req.header("authorization"), input.serviceToken)) return c.json({ error: "Service authentication required" }, 401);

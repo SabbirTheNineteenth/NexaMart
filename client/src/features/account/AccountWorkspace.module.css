@@ -135,7 +135,13 @@
 .telegramPanel p { margin: 0; color: var(--account-muted); font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
 .telegramActions { display: flex; flex-wrap: wrap; gap: 8px; }
 .telegramActions :global(.account-switch) { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; max-width: 100%; overflow-wrap: anywhere; text-align: center; }
-@media (max-width: 420px) { .telegramActions { display: grid; grid-template-columns: minmax(0, 1fr); }.telegramActions :global(.account-switch) { width: 100%; } }
+.telegramContactForm { display: grid; gap: 7px; min-width: 0; padding: 12px 0; border-block: 1px solid #e9e0f4; }
+.telegramContactForm label { color: var(--account-ink); font-size: 13px; font-weight: 700; }
+.telegramContactControls { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.telegramContactControls input { flex: 1 1 180px; min-width: 0; min-height: 40px; padding: 8px 10px; border: 1px solid #c9badd; border-radius: 8px; color: var(--account-ink); background: #fff; }
+.telegramContactControls input:focus-visible { outline: 2px solid #7641b6; outline-offset: 2px; }
+.telegramContactControls :global(.account-switch) { min-height: 40px; }
+@media (max-width: 420px) { .telegramActions, .telegramContactControls { display: grid; grid-template-columns: minmax(0, 1fr); }.telegramActions :global(.account-switch), .telegramContactControls :global(.account-switch) { width: 100%; } }
 .workspaceMain :global(.account-orders), .workspaceMain :global(.customer-reviews),
 .workspaceMain :global(.account-addresses), .workspaceMain :global(.account-wishlist) { width: 100%; margin: 0; }
 .workspaceRail .accountNavigation { position: static; display: grid; gap: 4px; padding: 10px; border: 1px solid var(--account-line); border-radius: 12px; background: #fff !important; }

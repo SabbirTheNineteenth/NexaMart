@@ -7,7 +7,7 @@ const appEnvironment = { NODE_ENV: "production", CLIENT_ORIGIN: configuredOrigin
 const sessionCookie = "nexamart_session=session-token";
 const appDependencies = { authAdmission: { limiter: { capability: "shared-atomic" as const, consume: () => ({ allowed: true as const }) } } };
 
-function createMutationProbe(method: "POST" | "PATCH" | "DELETE") {
+function createMutationProbe(method: "POST" | "PUT" | "PATCH" | "DELETE") {
   const app = createApp(appEnvironment, appDependencies);
   let handlerReached = false;
   app.on(method, "/__csrf-probe", (c) => {
@@ -18,7 +18,7 @@ function createMutationProbe(method: "POST" | "PATCH" | "DELETE") {
   return { app, wasHandlerReached: () => handlerReached };
 }
 
-for (const method of ["POST", "PATCH", "DELETE"] as const) {
+for (const method of ["POST", "PUT", "PATCH", "DELETE"] as const) {
   test(`rejects a foreign-origin cookie-authenticated ${method} before the mounted handler`, async () => {
     const { app, wasHandlerReached } = createMutationProbe(method);
 

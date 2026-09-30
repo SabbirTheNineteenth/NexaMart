@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { deleteJSON, getJSON, postJSON } from "@/lib/api";
+import { putJSON } from "@/lib/api";
 import { ApiError, patchJSON } from "@/lib/api";
 import { productImageSource } from "@/features/catalog/product-presentation";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -11,6 +12,7 @@ import styles from "./AccountWorkspace.module.css";
 import { customerFulfillmentStatusLabel, customerOrderApprovalLabel, customerOrderItemSummary, customerPaymentMethodLabel, customerPaymentStatusLabel, customerTrackingEmptyMessage, customerTrackingErrorMessage, customerTrackingTimelineEvents } from "./customer-order.utils";
 import { buildAddressUpdate, validateAddressUpdate, type AddressEditFields } from "./address-editing";
 import type { Account, CustomerOrder, CustomerOrderTracking, CustomerReviewEligibility, ShippingAddress, WishlistItem } from "@/types/account";
+import { normalizeTelegramContactPhone } from "./telegram-contact";
 
 type TrackingState = { state: "loading" } | { state: "loaded"; order: CustomerOrderTracking } | { state: "error"; message: string };
 type ReviewState = { state: "loading" } | { state: "loaded"; items: CustomerReviewEligibility[] } | { state: "error" };
@@ -21,9 +23,10 @@ type AddressEditState = { state: "saving" } | { state: "success" } | { state: "e
 type AddressDefaultState = { state: "saving" } | { state: "success" } | { state: "error"; message: string };
 type AddressRemovalState = { state: "confirming" } | { state: "removing" } | { state: "success" } | { state: "error"; message: string };
 type OrdersState = { state: "loading" } | { state: "loaded"; items: CustomerOrder[] } | { state: "error"; message: string };
-type TelegramLinkStatus = { status: "linked" | "not_linked" | "unavailable" };
+type TelegramLinkStatus = { status: "linked" | "not_linked" | "link_pending" | "error" | "unavailable"; phone: string | null; reason?: "expired" | "chat_in_use" };
 type TelegramLinkRequest = { url: string };
-type TelegramLinkState = { state: "loading" | "linked" | "not_linked" | "unavailable" | "requesting" } | { state: "ready"; url: string } | { state: "error"; message: string };
+type TelegramContactResponse = { phone: string };
+type TelegramLinkState = { state: TelegramLinkStatus["status"] | "loading" | "requesting" | "ready" | "unlinking"; url?: string; message?: string; reason?: TelegramLinkStatus["reason"] };
 type AddressesState = { state: "loading" } | { state: "loaded"; items: ShippingAddress[] } | { state: "error"; message: string };
 type LogoutState = { state: "idle" } | { state: "pending" } | { state: "error"; message: string };
 type AccountResolutionState = { state: "loading" } | { state: "authenticated" } | { state: "signed-out" } | { state: "error"; message: string };
@@ -42,6 +45,8 @@ export function AccountWorkspace() {
   const [accountRefreshNonce, setAccountRefreshNonce] = useState(0);
   const [ordersState, setOrdersState] = useState<OrdersState>({ state: "loading" });
   const [telegramLink, setTelegramLink] = useState<TelegramLinkState>({ state: "loading" });
+  const [telegramPhone, setTelegramPhone] = useState("");
+  const [telegramContactState, setTelegramContactState] = useState<{ state: "idle" | "saving" | "saved" | "error"; message?: string }>({ state: "idle" });
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [wishlistState, setWishlistState] = useState<WishlistState>({ state: "loading" });
   const [wishlistRemovals, setWishlistRemovals] = useState<Record<string, WishlistRemovalState | undefined>>({});
@@ -79,19 +84,41 @@ export function AccountWorkspace() {
     setTelegramLink({ state: "loading" });
     try {
       const result = await getJSON<TelegramLinkStatus>("/telegram/link", signal);
-      if (isCurrentRequest(requestId)) setTelegramLink({ state: result.status });
+      if (isCurrentRequest(requestId)) { setTelegramLink({ state: result.status, reason: result.reason }); setTelegramPhone(result.phone ?? ""); }
     } catch (reason) {
       if (isCurrentRequest(requestId)) setTelegramLink({ state: "error", message: reason instanceof Error ? reason.message : "Unable to load Telegram link status." });
     }
   };
   const requestTelegramLink = async () => {
+    const botWindow = window.open("about:blank", "_blank");
+    if (botWindow) botWindow.opener = null;
     setTelegramLink({ state: "requesting" });
     try {
       const result = await postJSON<TelegramLinkRequest>("/telegram/link/request", {});
       setTelegramLink({ state: "ready", url: result.url });
+      botWindow?.location.replace(result.url);
     } catch (reason) {
+      botWindow?.close();
       setTelegramLink({ state: "error", message: reason instanceof Error ? reason.message : "Unable to start Telegram linking." });
     }
+  };
+  const unlinkTelegram = async () => {
+    setTelegramLink({ state: "unlinking" });
+    try { await deleteJSON<{ status: "not_linked" }>("/telegram/link"); setTelegramLink({ state: "not_linked" }); }
+    catch (reason) { setTelegramLink({ state: "error", message: reason instanceof Error ? reason.message : "Unable to unlink Telegram." }); }
+  };
+  const saveTelegramContact = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const phone = normalizeTelegramContactPhone(telegramPhone);
+    if (!phone) { setTelegramContactState({ state: "error", message: "Enter an international number starting with + and country code." }); return; }
+    setTelegramContactState({ state: "saving" });
+    try { const result = await putJSON<TelegramContactResponse>("/telegram/contact", { phone }); setTelegramPhone(result.phone); setTelegramContactState({ state: "saved" }); }
+    catch (reason) { setTelegramContactState({ state: "error", message: reason instanceof Error ? reason.message : "Unable to save contact number." }); }
+  };
+  const removeTelegramContact = async () => {
+    setTelegramContactState({ state: "saving" });
+    try { await deleteJSON<{ phone: null }>("/telegram/contact"); setTelegramPhone(""); setTelegramContactState({ state: "saved", message: "Contact number removed." }); }
+    catch (reason) { setTelegramContactState({ state: "error", message: reason instanceof Error ? reason.message : "Unable to remove contact number." }); }
   };
   const loadAddresses = async (requestId = accountRequestRef.current, signal?: AbortSignal) => {
     setAddressesState({ state: "loading" });
@@ -335,7 +362,25 @@ export function AccountWorkspace() {
     <section className="trust account-data-summary" aria-label="Account overview"><span><strong>{ordersState.state === "loaded" ? ordersState.items.length : "—"}</strong> orders</span><span><strong>{addressesState.state === "loaded" ? addressesState.items.length : "—"}</strong> addresses</span>{account.role === "customer" && <span><strong>{wishlistState.state === "loaded" ? wishlist.length : "—"}</strong> saved pieces</span>}</section>
     </aside><div className={styles.workspaceMain}>
     <section id="orders" className="account-orders" aria-labelledby="customer-orders-heading"><p className="eyebrow">Order history</p><h2 id="customer-orders-heading">Everything you chose</h2><p className={styles.sectionDescription}>Review the purchases and fulfillment details available for this account.</p><button className="account-switch" type="button" disabled={ordersState.state === "loading"} onClick={() => { setTracking({}); void loadOrders(); }}>Refresh orders</button>
-      {account.role === "customer" && <div className={styles.telegramPanel} aria-label="Telegram order updates"><strong>Telegram order updates</strong><p>{telegramLink.state === "linked" ? "Bot linked to this account. Order updates can be sent to your private Telegram chat." : telegramLink.state === "unavailable" ? "Telegram delivery unavailable. Your order updates remain available here." : telegramLink.state === "loading" || telegramLink.state === "requesting" ? "Checking Telegram link…" : telegramLink.state === "error" ? telegramLink.message : "Not linked. Start the NexaMart bot in a private chat to enable order updates."}</p><div className={styles.telegramActions}>{(telegramLink.state === "not_linked" || telegramLink.state === "error") && <button className="account-switch" type="button" onClick={() => void requestTelegramLink()}>Create bot link</button>}{telegramLink.state === "ready" && <a className="account-switch" href={telegramLink.url} target="_blank" rel="noopener noreferrer">Open NexaMart bot</a>}<button className="account-switch" type="button" disabled={telegramLink.state === "loading" || telegramLink.state === "requesting"} onClick={() => void loadTelegramLink()}>Refresh Telegram link status</button></div></div>}
+      {account.role === "customer" && <section className={styles.telegramPanel} aria-label="Telegram order updates">
+        <strong>Telegram order updates</strong>
+        <p>Your number is optional contact information. A number alone does not identify your Telegram chat or enable notifications. Only starting and linking the NexaMart bot can do that.</p>
+        <form className={styles.telegramContactForm} onSubmit={(event) => void saveTelegramContact(event)}>
+          <label htmlFor="telegram-phone">Telegram contact number</label>
+          <div className={styles.telegramContactControls}><input id="telegram-phone" name="telegramPhone" type="tel" inputMode="tel" autoComplete="tel" value={telegramPhone} onChange={(event) => { setTelegramPhone(event.target.value); setTelegramContactState({ state: "idle" }); }} placeholder="+ country code and number" maxLength={16} aria-describedby="telegram-contact-help" disabled={telegramContactState.state === "saving"} /><button className="account-switch" type="submit" disabled={telegramContactState.state === "saving"}>Save number</button>{telegramPhone && <button className="account-switch" type="button" disabled={telegramContactState.state === "saving"} onClick={() => void removeTelegramContact()}>Remove number</button>}</div>
+          <p id="telegram-contact-help">Use international format. This number is not used to find or message a Telegram chat.</p>
+          {telegramContactState.state === "error" && <p role="alert">{telegramContactState.message}</p>}
+          {telegramContactState.state === "saved" && <p role="status">{telegramContactState.message ?? "Contact number saved."}</p>}
+        </form>
+        <p aria-live="polite">{telegramLink.state === "linked" ? "Linked to a verified private bot chat. New order-status updates may be sent there." : telegramLink.state === "unavailable" ? "Telegram delivery unavailable. Your order updates remain available here." : telegramLink.state === "loading" || telegramLink.state === "requesting" || telegramLink.state === "unlinking" ? "Checking Telegram link…" : telegramLink.state === "ready" || telegramLink.state === "link_pending" ? "Link pending. Open the bot and press Start within 10 minutes. Notifications are not enabled yet." : telegramLink.state === "error" ? telegramLink.reason === "expired" ? "The link expired. Create a new link and press Start in the bot." : telegramLink.reason === "chat_in_use" ? "That bot chat is linked to another account. Unlink it there, then try again." : telegramLink.message ?? "Unable to check the bot link. Refresh or create a new link." : "Not linked. Start the NexaMart bot in a private chat to receive order updates."}</p>
+        <div className={styles.telegramActions}>
+          {(telegramLink.state === "not_linked" || telegramLink.state === "link_pending" || telegramLink.state === "error" || telegramLink.state === "linked") && <button className="account-switch" type="button" onClick={() => void requestTelegramLink()}>{telegramLink.state === "linked" ? "Relink Telegram" : telegramLink.state === "link_pending" || telegramLink.state === "error" ? "Create new link" : "Link Telegram"}</button>}
+          {telegramLink.state === "ready" && telegramLink.url && <a className="account-switch" href={telegramLink.url} target="_blank" rel="noopener noreferrer">Open NexaMart bot</a>}
+          {(telegramLink.state === "linked" || telegramLink.state === "link_pending" || telegramLink.state === "ready" || telegramLink.state === "error") && <button className="account-switch" type="button" onClick={() => void unlinkTelegram()}>{telegramLink.state === "linked" ? "Unlink Telegram" : "Cancel link request"}</button>}
+          <button className="account-switch" type="button" disabled={telegramLink.state === "loading" || telegramLink.state === "requesting" || telegramLink.state === "unlinking"} onClick={() => void loadTelegramLink()}>Refresh Telegram link status</button>
+        </div>
+        {telegramLink.state === "linked" && <p>Relinking disconnects the current chat immediately until the new bot start is verified.</p>}
+      </section>}
       {ordersState.state === "loading" ? <p className="seller-state" aria-live="polite">Loading orders…</p> : ordersState.state === "error" ? <div role="alert"><p className="seller-error">{ordersState.message}</p><button className="account-switch" type="button" onClick={() => void loadOrders()}>Retry loading orders</button></div> : ordersState.items.length ? ordersState.items.map((order) => {
       const trackingState = tracking[order.id];
       const timeline = trackingState?.state === "loaded" ? customerTrackingTimelineEvents(trackingState.order.events) : [];
