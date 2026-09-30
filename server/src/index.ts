@@ -3,6 +3,8 @@ import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 import { createApp, type AppDependencies } from "./app.js";
 import { createUpstashAuthAdmissionLimiter } from "./modules/auth/upstash-auth-admission-limiter.js";
+import { CodOperationsService } from "./modules/orders/services/cod-operations-service.js";
+import { startLocalOutboxDispatchScheduler } from "./modules/orders/local-outbox-dispatch-scheduler.js";
 
 export type RuntimeEnvironment = Record<string, string | undefined>;
 
@@ -24,6 +26,7 @@ export function startServer(environment: RuntimeEnvironment = process.env, depen
       : dependencies,
   );
   const server = serve({ fetch: app.fetch, port });
+  startLocalOutboxDispatchScheduler(environment, server, () => new CodOperationsService().dispatch({ url: environment.N8N_WEBHOOK_URL!, secret: environment.N8N_WEBHOOK_SECRET! }));
   console.log(`NexaMart API listening on http://localhost:${port}`);
   return server;
 }
