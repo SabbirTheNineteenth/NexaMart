@@ -16,8 +16,9 @@ test("saved product cards give product details a readable column and keep media 
   assert.match(workspace, /className=\{styles\.wishlistMedia\}/);
   assert.match(styles, /\.wishlistMedia\s*\{[^}]*aspect-ratio:[^}]*overflow:\s*hidden/s);
   assert.match(styles, /\.wishlistMedia\s+:global\(\.wishlist-image\)\s*\{[^}]*display:\s*block;[^}]*width:\s*100%;[^}]*height:\s*100%;[^}]*object-fit:\s*cover/s);
-  assert.match(styles, /\.content :global\(\.wishlist-list article\) \{ grid-template-columns: 96px minmax\(0, 1fr\);/);
-  assert.match(styles, /\.content :global\(\.wishlist-action\) \{ grid-column: 2; justify-self: start;/);
+  assert.match(workspace, /className=\{styles\.wishlistDetails\}/);
+  assert.match(styles, /\.wishlistDetails \{ display: grid; min-width: 0; gap: 8px; \}/);
+  assert.match(styles, /\.content :global\(\.wishlist-action\) \{ min-width: 0; \}/);
 });
 
 test("address editor stays centered and address fields collapse to one column", () => {

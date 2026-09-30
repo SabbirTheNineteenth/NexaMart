@@ -172,7 +172,9 @@
 .wishlistMedia { width: 96px; max-width: 100%; aspect-ratio: 1; overflow: hidden; border-radius: 8px; background: #f0eaff; }
 .wishlistMedia :global(.wishlist-image) { display: block; width: 100%; height: 100%; object-fit: cover; }
 .wishlistMedia :global(.wishlist-image-fallback) { display: grid; width: 100%; height: 100%; place-items: center; color: var(--account-accent); font-size: 18px; font-weight: 800; }
-.content :global(.wishlist-action) { grid-column: 2; justify-self: start; min-width: 0; }
+.wishlistDetails { display: grid; min-width: 0; gap: 8px; }
+.wishlistDetails :global(strong), .wishlistDetails :global(small) { display: block; }
+.content :global(.wishlist-action) { min-width: 0; }
 .content :global(.wishlist-remove) { min-height: 44px; font-size: 13px; }
 @media (max-width: 900px) {
   .workspaceLayout { grid-template-columns: minmax(0, 1fr); gap: 20px; }
