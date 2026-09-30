@@ -30,7 +30,7 @@ type AdminOrders = { list(): Promise<AdminOrderOversight[]> };
 type Operations = Pick<CodOperationsService, "confirm" | "reject" | "transition">;
 const uuid = z.string().uuid();
 const noteSchema = z.object({ note: z.string().trim().max(500).optional() }).strict();
-const deliverySchema = z.object({ action: z.enum(["processing", "packed", "shipped", "delivered", "failed_delivery", "return_requested", "returned"]) }).strict();
+const deliverySchema = z.object({ action: z.enum(["processing", "packed", "shipped", "delivered", "failed_delivery", "return_requested", "returned"]), note: z.string().trim().min(1).max(500).optional() }).strict();
 const operationError = (c: { json: (value: { error: string }, status: 404 | 409 | 500) => Response }, error: unknown) => error instanceof CodOperationError ? c.json({ error: error.message }, error.code === "NOT_FOUND" ? 404 : 409) : c.json({ error: "Unable to update COD order" }, 500);
 
 export const createAdminOrderRoutes = ({ sessions, orders, operations }: { sessions: SessionResolver; orders: AdminOrders; operations: Operations }) => {
@@ -66,7 +66,7 @@ export const createAdminOrderRoutes = ({ sessions, orders, operations }: { sessi
     const body = deliverySchema.safeParse(await c.req.json().catch(() => null));
     if (!orderId.success || !orderItemId.success || !body.success) return c.json({ error: "Invalid delivery update" }, 400);
     try {
-      const fulfillment = await operations.transition({ orderId: orderId.data, orderItemId: orderItemId.data, action: body.data.action, actor: { kind: "admin", id: getAuthenticatedAccount(c)!.id } });
+      const fulfillment = await operations.transition({ orderId: orderId.data, orderItemId: orderItemId.data, action: body.data.action, actor: { kind: "admin", id: getAuthenticatedAccount(c)!.id }, ...(body.data.note ? { note: body.data.note } : {}) });
       return c.json({ fulfillment });
     } catch (error) { return operationError(c, error); }
   });

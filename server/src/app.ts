@@ -82,6 +82,8 @@ import { createSellerNotificationRoutes } from "./modules/notifications/seller-n
 import { PostgresSellerNotificationRepository } from "./modules/notifications/postgres-seller-notification.repository.js";
 import { createCodRoutes } from "./modules/orders/cod.routes.js";
 import { CodOperationsService } from "./modules/orders/services/cod-operations-service.js";
+import { createTelegramRoutes } from "./modules/notifications/telegram-link.routes.js";
+import { PostgresTelegramLinkRepository } from "./modules/notifications/postgres-telegram-link.repository.js";
 
 type Environment = Record<string, string | undefined>;
 
@@ -126,6 +128,7 @@ export function createApp(environment: Environment = process.env, dependencies: 
   const codWebhookUrl = (() => { try { return new URL(environment.N8N_WEBHOOK_URL ?? ""); } catch { return null; } })();
   if (codEnabled && (!environment.N8N_SERVICE_TOKEN || environment.N8N_SERVICE_TOKEN.length < 32 || !environment.N8N_WEBHOOK_SECRET || environment.N8N_WEBHOOK_SECRET.length < 32 || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(environment.N8N_ACTOR_ID ?? "") || !codWebhookUrl || !["http:", "https:"].includes(codWebhookUrl.protocol) || (environment.NODE_ENV === "production" && codWebhookUrl.protocol !== "https:"))) throw new Error("N8N_COD_ENABLED requires valid N8N_SERVICE_TOKEN, N8N_WEBHOOK_SECRET, N8N_ACTOR_ID, and N8N_WEBHOOK_URL");
   const codOperations = new CodOperationsService();
+  const telegramLinks = new PostgresTelegramLinkRepository();
   const orderService = new OrderService(new PostgresOrderRepository(sellerNotifications));
   const addressService = new AddressService(new PostgresAddressRepository());
   const reviewService = new ReviewService();
@@ -175,6 +178,7 @@ export function createApp(environment: Environment = process.env, dependencies: 
   app.get("/health", (c) => c.json({ ok: true, service: "nexamart" }));
   app.route("/catalog", catalogRoutes);
   app.route("/checkout", createOrderRoutes({ sessions: sessionService, orders: orderService }));
+  app.route("/telegram", createTelegramRoutes({ sessions: sessionService, links: telegramLinks, botUsername: codEnabled ? environment.TELEGRAM_BOT_USERNAME : undefined, serviceToken: codEnabled ? environment.N8N_SERVICE_TOKEN : undefined }));
   if (codEnabled) app.route("/cod", createCodRoutes({ sessions: sessionService, operations: codOperations, config: { token: environment.N8N_SERVICE_TOKEN!, actorId: environment.N8N_ACTOR_ID!, webhookUrl: environment.N8N_WEBHOOK_URL!, webhookSecret: environment.N8N_WEBHOOK_SECRET! } }));
   app.route("/addresses", createAddressRoutes({ sessions: sessionService, addresses: addressService }));
   app.route("/reviews", createReviewRoutes({ sessions: sessionService, reviews: reviewService }));

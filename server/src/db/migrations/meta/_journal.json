@@ -169,6 +169,13 @@
       "when": 1790640001000,
       "tag": "0023_n8n_service_actor",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1790640002000,
+      "tag": "0024_customer_telegram_links",
+      "breakpoints": true
     }
   ]
 }

@@ -3,9 +3,9 @@ import test from "node:test";
 import { codOutbox } from "../src/db/schema/index.js";
 import { CodOperationsService } from "../src/modules/orders/services/cod-operations-service.js";
 
-type Row = { id: string; payload: Record<string, unknown>; attempts: number; nextAttemptAt: Date; deliveredAt: Date | null; lastError: string | null };
+type Row = { id: string; eventType: string; payload: Record<string, unknown>; attempts: number; nextAttemptAt: Date; deliveredAt: Date | null; lastError: string | null; deliveryOutcome: string | null };
 function fixture(initial: Partial<Row> = {}) {
-  const row: Row = { id: "11111111-1111-4111-8111-111111111111", payload: { eventId: "event_123", eventType: "cod.order.created" }, attempts: 0, nextAttemptAt: new Date(0), deliveredAt: null, lastError: null, ...initial };
+  const row: Row = { id: "11111111-1111-4111-8111-111111111111", eventType: "cod.order.created", payload: { eventId: "event_123", eventType: "cod.order.created" }, attempts: 0, nextAttemptAt: new Date(0), deliveredAt: null, lastError: null, deliveryOutcome: null, ...initial };
   const database = {
     select() { return { from(table: unknown) { assert.equal(table, codOutbox); return { where() { return { async limit() { return row.deliveredAt === null && row.nextAttemptAt <= new Date() ? [{ ...row }] : []; } }; } }; } }; },
     update(table: unknown) { assert.equal(table, codOutbox); return { set(values: Partial<Row>) { return { where() {
@@ -55,4 +55,24 @@ test("concurrent dispatch calls claim one event once", async () => {
   const repeat = await f.service.dispatch(input(transport));
   assert.equal(repeat.attempted, 0);
   assert.equal(sent, 1);
+});
+
+test("Telegram delivery result is persisted only after matching webhook acknowledgement", async () => {
+  const f = fixture({ eventType: "order.status_updated" });
+  const transport = (async () => Response.json({ ok: true, eventId: f.row.id, deliveryOutcome: "skipped_unlinked" })) as typeof fetch;
+  assert.equal((await f.service.dispatch(input(transport))).delivered, 1);
+  assert.equal(f.row.deliveryOutcome, "skipped_unlinked");
+  assert.ok(f.row.deliveredAt);
+  assert.equal((await f.service.dispatch(input(transport))).attempted, 0);
+});
+
+test("missing Telegram acknowledgement remains failed and retryable", async () => {
+  const f = fixture({ eventType: "order.created" });
+  const invalid = (async () => Response.json({ ok: true, eventId: f.row.id })) as typeof fetch;
+  assert.equal((await f.service.dispatch(input(invalid))).failed, 1);
+  assert.equal(f.row.deliveredAt, null);
+  f.row.nextAttemptAt = new Date(0);
+  const success = (async () => Response.json({ ok: true, eventId: f.row.id, deliveryOutcome: "telegram_sent" })) as typeof fetch;
+  assert.equal((await f.service.dispatch(input(success))).delivered, 1);
+  assert.equal(f.row.deliveryOutcome, "telegram_sent");
 });

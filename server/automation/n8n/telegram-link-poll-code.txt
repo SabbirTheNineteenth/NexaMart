@@ -1,0 +1,23 @@
+const store = $getWorkflowStaticData('global');
+if (!$env.NEXAMART_TELEGRAM_BOT_TOKEN || !$env.N8N_SERVICE_TOKEN || !$env.NEXAMART_API_BASE) throw new Error('NexaMart Telegram link configuration unavailable');
+let response;
+try {
+  response = await helpers.httpRequest({ method: 'POST', url: `https://api.telegram.org/bot${$env.NEXAMART_TELEGRAM_BOT_TOKEN}/getUpdates`, body: { offset: Number(store.offset || 0), limit: 50, timeout: 0, allowed_updates: ['message'] }, json: true });
+} catch { throw new Error('Telegram link polling failed'); }
+if (response?.ok !== true || !Array.isArray(response.result)) throw new Error('Telegram link polling unavailable');
+let linked = 0;
+for (const update of response.result) {
+  const message = update?.message;
+  const chatId = String(message?.chat?.id ?? '');
+  const userId = String(message?.from?.id ?? '');
+  const start = /^\/start ([A-Za-z0-9_-]{43})$/.exec(String(message?.text ?? ''));
+  if (message?.chat?.type === 'private' && /^[1-9][0-9]{0,19}$/.test(chatId) && chatId === userId && start) {
+    let result;
+    try {
+      result = await helpers.httpRequest({ method: 'POST', url: `${$env.NEXAMART_API_BASE}/api/telegram/local/link`, headers: { Authorization: `Bearer ${$env.N8N_SERVICE_TOKEN}` }, body: { code: start[1], chatId, telegramUserId: userId, chatType: 'private' }, json: true });
+    } catch { throw new Error('NexaMart Telegram link completion failed'); }
+    if (result?.status === 'linked') linked++;
+  }
+  if (Number.isSafeInteger(update?.update_id)) store.offset = update.update_id + 1;
+}
+return [{ json: { processed: response.result.length, linked } }];

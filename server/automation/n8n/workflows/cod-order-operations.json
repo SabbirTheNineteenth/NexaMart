@@ -1,12 +1,292 @@
 {
   "name": "NexaMart COD order operations",
   "nodes": [
-    { "parameters": { "httpMethod": "POST", "path": "nexamart-cod", "responseMode": "responseNode", "options": { "rawBody": true } }, "id": "webhook", "name": "Signed COD webhook", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [0, 0], "webhookId": "nexamart-cod" },
-    { "parameters": { "jsCode": "const crypto = require('crypto'); const item = $input.first().json; const headers = item.headers || {}; const ts = Number(headers['x-nexamart-timestamp']); const signature = String(headers['x-nexamart-signature'] || ''); const raw = typeof item.body === 'string' ? item.body : JSON.stringify(item.body); const now = Math.floor(Date.now()/1000); const expected = crypto.createHmac('sha256', $env.N8N_WEBHOOK_SECRET).update(`${ts}.${raw}`).digest('hex'); const valid = Number.isSafeInteger(ts) && Math.abs(now-ts) <= 300 && /^[a-f0-9]{64}$/.test(signature) && crypto.timingSafeEqual(Buffer.from(expected,'hex'), Buffer.from(signature,'hex')); if (!valid) return [{json:{ok:false,statusCode:401,error:'Invalid signature or timestamp'}}]; let event; try { event = JSON.parse(raw); } catch { return [{json:{ok:false,statusCode:400,error:'Invalid JSON'}}]; } const allowed = ['cod.order.created','cod.order.confirmed','cod.order.dispatched','cod.order.delivered_collected','cod.order.delivery_failed','cod.order.returned']; if (!event.eventId || !allowed.includes(event.eventType)) return [{json:{ok:false,statusCode:400,error:'Invalid event'}}]; const seen = $getWorkflowStaticData('global'); if (seen[event.eventId]) return [{json:{ok:true,duplicate:true,eventType:event.eventType,eventId:event.eventId}}]; seen[event.eventId] = Date.now(); for (const [key,value] of Object.entries(seen)) if (Date.now()-value > 86400000) delete seen[key]; return [{json:{ok:true,duplicate:false,eventType:event.eventType,eventId:event.eventId,reference:event.reference,orderId:event.orderId,sellerId:event.sellerId,amount:event.amount,currency:event.currency,orderStatus:event.orderStatus,paymentStatus:event.paymentStatus}}];" }, "id": "verify", "name": "Verify signature and deduplicate", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [220, 0] },
-    { "parameters": { "rules": { "values": [ { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" }, "conditions": [{ "leftValue": "={{$json.eventType}}", "rightValue": "cod.order.created", "operator": { "type": "string", "operation": "equals" } }] } }, { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" }, "conditions": [{ "leftValue": "={{$json.eventType}}", "rightValue": "cod.order.confirmed", "operator": { "type": "string", "operation": "equals" } }] } }, { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" }, "conditions": [{ "leftValue": "={{$json.eventType}}", "rightValue": "cod.order.dispatched", "operator": { "type": "string", "operation": "equals" } }] } }, { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" }, "conditions": [{ "leftValue": "={{$json.eventType}}", "rightValue": "cod.order.delivered_collected", "operator": { "type": "string", "operation": "equals" } }] } }, { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" }, "conditions": [{ "leftValue": "={{$json.eventType}}", "rightValue": "cod.order.delivery_failed", "operator": { "type": "string", "operation": "equals" } }] } }, { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" }, "conditions": [{ "leftValue": "={{$json.eventType}}", "rightValue": "cod.order.returned", "operator": { "type": "string", "operation": "equals" } }] } } ] }, "options": { "fallbackOutput": "extra" } }, "id": "switch", "name": "Switch by event type", "type": "n8n-nodes-base.switch", "typeVersion": 3, "position": [440, 0] },
-    { "parameters": { "jsCode": "for (const item of $input.all()) if (!item.json.duplicate) console.log('NexaMart COD operator event', JSON.stringify(item.json)); return $input.all();" }, "id": "log", "name": "Local operator log", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [700, 0] },
-    { "parameters": { "respondWith": "json", "responseBody": "={{JSON.stringify({ok:$json.ok,duplicate:$json.duplicate||false,eventId:$json.eventId||null,error:$json.error||null})}}", "options": { "responseCode": "={{$json.statusCode||200}}" } }, "id": "respond", "name": "Respond to webhook", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1.1, "position": [930, 0] }
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "nexamart-cod",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "id": "webhook",
+      "name": "Signed COD webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "nexamart-cod"
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\nconst item = $input.first().json;\nconst headers = item.headers || {};\nconst ts = Number(headers['x-nexamart-timestamp']);\nconst signature = String(headers['x-nexamart-signature'] || '');\nconst raw = typeof item.body === 'string' ? item.body : JSON.stringify(item.body);\nconst now = Math.floor(Date.now() / 1000);\nconst expected = crypto.createHmac('sha256', $env.N8N_WEBHOOK_SECRET).update(`${ts}.${raw}`).digest('hex');\nconst valid = Number.isSafeInteger(ts) && Math.abs(now - ts) <= 300 && /^[a-f0-9]{64}$/.test(signature)\n  && crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(signature, 'hex'));\nif (!valid) return [{ json: { ok: false, statusCode: 401, error: 'Invalid signature or timestamp' } }];\n\nlet event;\ntry { event = JSON.parse(raw); } catch { return [{ json: { ok: false, statusCode: 400, error: 'Invalid JSON' } }]; }\nconst allowed = ['cod.order.created', 'cod.order.confirmed', 'cod.order.dispatched', 'cod.order.delivered_collected', 'cod.order.delivery_failed', 'cod.order.returned', 'order.created', 'order.status_updated'];\nif (!event || typeof event.eventId !== 'string' || !allowed.includes(event.eventType)) return [{ json: { ok: false, statusCode: 400, error: 'Invalid event' } }];\n\nconst seen = $getWorkflowStaticData('global');\nconst prior = Object.prototype.hasOwnProperty.call(seen, event.eventId) ? seen[event.eventId] : null;\nif (prior) return [{ json: { ok: true, duplicate: true, eventType: event.eventType, eventId: event.eventId, deliveryOutcome: typeof prior === 'object' ? prior.deliveryOutcome : 'accepted' } }];\nconst clean = (value, limit = 180) => String(value ?? '').replace(/[\\u0000-\\u001f\\u007f]/g, ' ').trim().slice(0, limit);\nconst payment = event.paymentStatus === 'collected' ? 'Collected on delivery' : 'Pending; pay on delivery';\nlet deliveryOutcome = 'accepted';\n\nif (event.eventType === 'order.created' || event.eventType === 'order.status_updated') {\n  if (!/^[0-9a-f-]{36}$/i.test(event.eventId) || !/^[0-9a-f-]{36}$/i.test(event.orderId)\n      || typeof event.reference !== 'string' || event.paymentMethod !== 'cod'\n      || !['unpaid', 'collected'].includes(event.paymentStatus)) {\n    return [{ json: { ok: false, statusCode: 400, error: 'Invalid notification event' } }];\n  }\n  let chatId;\n  let message;\n  if (event.eventType === 'order.created') {\n    if (event.orderStatus !== 'pending' || event.paymentStatus !== 'unpaid' || event.currency !== 'BDT'\n        || !Array.isArray(event.items) || event.items.length < 1 || event.items.length > 100\n        || event.items.some(line => typeof line.name !== 'string' || !Number.isInteger(line.quantity) || line.quantity < 1)\n        || !/^\\d+(\\.\\d{2})?$/.test(String(event.total))) {\n      return [{ json: { ok: false, statusCode: 400, error: 'Invalid order snapshot' } }];\n    }\n    chatId = $env.NEXAMART_ADMIN_TELEGRAM_CHAT_ID;\n    if (!chatId) throw new Error('Admin Telegram destination unavailable');\n    const summary = event.items.map(line => `${line.quantity} x ${clean(line.name)}`).join(', ').slice(0, 1000);\n    message = `New NexaMart order ${clean(event.reference, 32)}\\nItems: ${summary}\\nTotal: BDT ${clean(event.total, 24)}\\nPayment: Cash on Delivery; ${payment}\\nApproval: Awaiting Admin approval\\nFulfillment: Pending`;\n  } else {\n    if (!/^[0-9a-f-]{36}$/i.test(event.orderItemId) || typeof event.itemName !== 'string'\n        || !['processing', 'packed', 'shipped', 'delivered', 'failed_delivery', 'return_requested', 'returned'].includes(event.fulfillmentStatus)) {\n      return [{ json: { ok: false, statusCode: 400, error: 'Invalid status snapshot' } }];\n    }\n    let recipient;\n    try {\n      recipient = await helpers.httpRequest({ method: 'GET', url: `${$env.NEXAMART_API_BASE}/api/telegram/local/recipient/${event.orderId}`, headers: { Authorization: `Bearer ${$env.N8N_SERVICE_TOKEN}` }, json: true });\n    } catch { throw new Error('Customer recipient lookup failed'); }\n    if (recipient?.linked === false) {\n      deliveryOutcome = 'skipped_unlinked';\n    } else if (recipient?.linked === true && /^[1-9][0-9]{0,19}$/.test(String(recipient.chatId))) {\n      chatId = recipient.chatId;\n      const status = clean(event.fulfillmentStatus.replaceAll('_', ' '), 40);\n      const note = typeof event.note === 'string' && event.note.trim() ? `\\nNote: ${clean(event.note, 500)}` : '';\n      message = `NexaMart order ${clean(event.reference, 32)}\\n${clean(event.itemName)}: ${status}\\nPayment: Cash on Delivery; ${payment}${note}`;\n    } else {\n      throw new Error('Customer recipient unavailable');\n    }\n  }\n  if (chatId && message) {\n    if (!$env.NEXAMART_TELEGRAM_BOT_TOKEN) throw new Error('Telegram bot unavailable');\n    let sent;\n    try {\n      sent = await helpers.httpRequest({ method: 'POST', url: `https://api.telegram.org/bot${$env.NEXAMART_TELEGRAM_BOT_TOKEN}/sendMessage`, body: { chat_id: chatId, text: message }, json: true });\n    } catch { throw new Error('Telegram delivery failed'); }\n    if (sent?.ok !== true) throw new Error('Telegram delivery failed');\n    deliveryOutcome = 'telegram_sent';\n  }\n}\n\nseen[event.eventId] = { at: Date.now(), deliveryOutcome };\nfor (const [key, value] of Object.entries(seen)) if (Date.now() - (typeof value === 'object' ? value.at : value) > 86400000) delete seen[key];\nreturn [{ json: { ok: true, duplicate: false, eventType: event.eventType, eventId: event.eventId, deliveryOutcome,\n  ...(event.eventType.startsWith('cod.') ? { reference: event.reference, orderId: event.orderId, sellerId: event.sellerId, amount: event.amount, currency: event.currency, orderStatus: event.orderStatus, paymentStatus: event.paymentStatus } : {}) } }];"
+      },
+      "id": "verify",
+      "name": "Verify signature and deduplicate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.eventType}}",
+                    "rightValue": "cod.order.created",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.eventType}}",
+                    "rightValue": "cod.order.confirmed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.eventType}}",
+                    "rightValue": "cod.order.dispatched",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.eventType}}",
+                    "rightValue": "cod.order.delivered_collected",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.eventType}}",
+                    "rightValue": "cod.order.delivery_failed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.eventType}}",
+                    "rightValue": "cod.order.returned",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "switch",
+      "name": "Switch by event type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of $input.all()) if (!item.json.duplicate) console.log('NexaMart COD operator event', JSON.stringify(item.json)); return $input.all();"
+      },
+      "id": "log",
+      "name": "Local operator log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{JSON.stringify({ok:$json.ok,duplicate:$json.duplicate||false,eventId:$json.eventId||null,deliveryOutcome:$json.deliveryOutcome||null,error:$json.error||null})}}",
+        "options": {
+          "responseCode": "={{$json.statusCode||200}}"
+        }
+      },
+      "id": "respond",
+      "name": "Respond to webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        930,
+        0
+      ]
+    }
   ],
-  "connections": { "Signed COD webhook": { "main": [[{ "node": "Verify signature and deduplicate", "type": "main", "index": 0 }]] }, "Verify signature and deduplicate": { "main": [[{ "node": "Switch by event type", "type": "main", "index": 0 }]] }, "Switch by event type": { "main": [[{ "node": "Local operator log", "type": "main", "index": 0 }], [{ "node": "Local operator log", "type": "main", "index": 0 }], [{ "node": "Local operator log", "type": "main", "index": 0 }], [{ "node": "Local operator log", "type": "main", "index": 0 }], [{ "node": "Local operator log", "type": "main", "index": 0 }], [{ "node": "Local operator log", "type": "main", "index": 0 }], [{ "node": "Respond to webhook", "type": "main", "index": 0 }]] }, "Local operator log": { "main": [[{ "node": "Respond to webhook", "type": "main", "index": 0 }]] } },
-  "settings": { "executionOrder": "v1" }, "active": false
+  "connections": {
+    "Signed COD webhook": {
+      "main": [
+        [
+          {
+            "node": "Verify signature and deduplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify signature and deduplicate": {
+      "main": [
+        [
+          {
+            "node": "Switch by event type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch by event type": {
+      "main": [
+        [
+          {
+            "node": "Local operator log",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Local operator log",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Local operator log",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Local operator log",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Local operator log",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Local operator log",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Local operator log": {
+      "main": [
+        [
+          {
+            "node": "Respond to webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
 }

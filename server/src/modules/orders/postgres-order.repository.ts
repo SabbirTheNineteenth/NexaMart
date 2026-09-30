@@ -3,6 +3,7 @@ import { and, asc, desc, eq, exists, gte, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import { orderEvents, orderItems, orders, products, productVariants, accounts, addresses, commissionRecords, promotions, sellerProfiles, codOutbox } from "../../db/schema/index.js";
 import { createCodEventPayload } from "./cod.js";
+import { buildOrderCreatedEvent } from "./order-telegram-events.js";
 import { calculatePromotionPrice, selectActiveProductPromotion } from "../promotions/promotion-pricing.js";
 import type { CustomerOrderTracking, Order, SellerOrder } from "./order.types.js";
 import type { CheckoutItem, OrderRepository } from "./order.repository.js";
@@ -63,6 +64,8 @@ export class PostgresOrderRepository implements OrderRepository {
         const [event] = await tx.insert(codOutbox).values({ eventType: "cod.order.created", payload: {} }).returning({ id: codOutbox.id, createdAt: codOutbox.createdAt });
         await tx.update(codOutbox).set({ payload: createCodEventPayload({ eventId: event.id, eventType: "cod.order.created", occurredAt: event.createdAt.toISOString(), orderId: order.id, reference: order.reference, sellerId: item.sellerId, amount: (Number(item.unitPrice) * item.quantity).toFixed(2), status: order.status, paymentStatus: order.paymentStatus }) }).where(eq(codOutbox.id, event.id));
       }
+      const [notificationEvent] = await tx.insert(codOutbox).values({ eventType: "order.created", payload: {} }).returning({ id: codOutbox.id, createdAt: codOutbox.createdAt });
+      await tx.update(codOutbox).set({ payload: buildOrderCreatedEvent({ eventId: notificationEvent.id, occurredAt: notificationEvent.createdAt.toISOString(), orderId: order.id, reference: order.reference, paymentMethod: "cod", paymentStatus: order.paymentStatus, status: "pending", total: order.total, items: purchased.map(({ productName, quantity }) => ({ productName, quantity })) }) }).where(eq(codOutbox.id, notificationEvent.id));
       return asOrder(order, purchased.map((item) => ({ productId: item.productId, variantId: item.variantId ?? null, variantSku: item.variantSku ?? null, variantOptions: item.variantOptions ?? null, quantity: item.quantity, unitPrice: item.unitPrice.toFixed(2), ...promotionSnapshotForOrderItem(item) })));
     });
   }

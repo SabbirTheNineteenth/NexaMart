@@ -21,6 +21,9 @@ type AddressEditState = { state: "saving" } | { state: "success" } | { state: "e
 type AddressDefaultState = { state: "saving" } | { state: "success" } | { state: "error"; message: string };
 type AddressRemovalState = { state: "confirming" } | { state: "removing" } | { state: "success" } | { state: "error"; message: string };
 type OrdersState = { state: "loading" } | { state: "loaded"; items: CustomerOrder[] } | { state: "error"; message: string };
+type TelegramLinkStatus = { status: "linked" | "not_linked" | "unavailable" };
+type TelegramLinkRequest = { url: string };
+type TelegramLinkState = { state: "loading" | "linked" | "not_linked" | "unavailable" | "requesting" } | { state: "ready"; url: string } | { state: "error"; message: string };
 type AddressesState = { state: "loading" } | { state: "loaded"; items: ShippingAddress[] } | { state: "error"; message: string };
 type LogoutState = { state: "idle" } | { state: "pending" } | { state: "error"; message: string };
 type AccountResolutionState = { state: "loading" } | { state: "authenticated" } | { state: "signed-out" } | { state: "error"; message: string };
@@ -38,6 +41,7 @@ export function AccountWorkspace() {
   const [accountResolution, setAccountResolution] = useState<AccountResolutionState>({ state: "loading" });
   const [accountRefreshNonce, setAccountRefreshNonce] = useState(0);
   const [ordersState, setOrdersState] = useState<OrdersState>({ state: "loading" });
+  const [telegramLink, setTelegramLink] = useState<TelegramLinkState>({ state: "loading" });
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [wishlistState, setWishlistState] = useState<WishlistState>({ state: "loading" });
   const [wishlistRemovals, setWishlistRemovals] = useState<Record<string, WishlistRemovalState | undefined>>({});
@@ -71,6 +75,24 @@ export function AccountWorkspace() {
       setOrdersState({ state: "error", message: reason instanceof Error ? reason.message : "Unable to load orders." });
     }
   };
+  const loadTelegramLink = async (requestId = accountRequestRef.current, signal?: AbortSignal) => {
+    setTelegramLink({ state: "loading" });
+    try {
+      const result = await getJSON<TelegramLinkStatus>("/telegram/link", signal);
+      if (isCurrentRequest(requestId)) setTelegramLink({ state: result.status });
+    } catch (reason) {
+      if (isCurrentRequest(requestId)) setTelegramLink({ state: "error", message: reason instanceof Error ? reason.message : "Unable to load Telegram link status." });
+    }
+  };
+  const requestTelegramLink = async () => {
+    setTelegramLink({ state: "requesting" });
+    try {
+      const result = await postJSON<TelegramLinkRequest>("/telegram/link/request", {});
+      setTelegramLink({ state: "ready", url: result.url });
+    } catch (reason) {
+      setTelegramLink({ state: "error", message: reason instanceof Error ? reason.message : "Unable to start Telegram linking." });
+    }
+  };
   const loadAddresses = async (requestId = accountRequestRef.current, signal?: AbortSignal) => {
     setAddressesState({ state: "loading" });
     try {
@@ -96,6 +118,7 @@ export function AccountWorkspace() {
         setAccountResolution({ state: "authenticated" });
         if (current.role === "customer") {
           void loadOrders(requestId, controller.signal);
+          void loadTelegramLink(requestId, controller.signal);
           void loadAddresses(requestId, controller.signal);
         }
       } catch (reason) {
@@ -311,7 +334,9 @@ export function AccountWorkspace() {
     <nav className={`${styles.accountNavigation} orchid-navigation account-section-navigation`} aria-label="Account sections"><a href="#orders">Orders</a>{account.role === "customer" && <a href="#reviews">Reviews</a>}<a href="#addresses">Addresses</a>{account.role === "customer" && <a href="#wishlist">Saved items</a>}</nav>
     <section className="trust account-data-summary" aria-label="Account overview"><span><strong>{ordersState.state === "loaded" ? ordersState.items.length : "—"}</strong> orders</span><span><strong>{addressesState.state === "loaded" ? addressesState.items.length : "—"}</strong> addresses</span>{account.role === "customer" && <span><strong>{wishlistState.state === "loaded" ? wishlist.length : "—"}</strong> saved pieces</span>}</section>
     </aside><div className={styles.workspaceMain}>
-    <section id="orders" className="account-orders" aria-labelledby="customer-orders-heading"><p className="eyebrow">Order history</p><h2 id="customer-orders-heading">Everything you chose</h2><p className={styles.sectionDescription}>Review the purchases and fulfillment details available for this account.</p><button className="account-switch" type="button" disabled={ordersState.state === "loading"} onClick={() => { setTracking({}); void loadOrders(); }}>Refresh orders</button>{ordersState.state === "loading" ? <p className="seller-state" aria-live="polite">Loading orders…</p> : ordersState.state === "error" ? <div role="alert"><p className="seller-error">{ordersState.message}</p><button className="account-switch" type="button" onClick={() => void loadOrders()}>Retry loading orders</button></div> : ordersState.items.length ? ordersState.items.map((order) => {
+    <section id="orders" className="account-orders" aria-labelledby="customer-orders-heading"><p className="eyebrow">Order history</p><h2 id="customer-orders-heading">Everything you chose</h2><p className={styles.sectionDescription}>Review the purchases and fulfillment details available for this account.</p><button className="account-switch" type="button" disabled={ordersState.state === "loading"} onClick={() => { setTracking({}); void loadOrders(); }}>Refresh orders</button>
+      {account.role === "customer" && <div className={styles.telegramPanel} aria-label="Telegram order updates"><strong>Telegram order updates</strong><p>{telegramLink.state === "linked" ? "Bot linked to this account. Order updates can be sent to your private Telegram chat." : telegramLink.state === "unavailable" ? "Telegram delivery unavailable. Your order updates remain available here." : telegramLink.state === "loading" || telegramLink.state === "requesting" ? "Checking Telegram link…" : telegramLink.state === "error" ? telegramLink.message : "Not linked. Start the NexaMart bot in a private chat to enable order updates."}</p><div className={styles.telegramActions}>{(telegramLink.state === "not_linked" || telegramLink.state === "error") && <button className="account-switch" type="button" onClick={() => void requestTelegramLink()}>Create bot link</button>}{telegramLink.state === "ready" && <a className="account-switch" href={telegramLink.url} target="_blank" rel="noopener noreferrer">Open NexaMart bot</a>}<button className="account-switch" type="button" disabled={telegramLink.state === "loading" || telegramLink.state === "requesting"} onClick={() => void loadTelegramLink()}>Refresh Telegram link status</button></div></div>}
+      {ordersState.state === "loading" ? <p className="seller-state" aria-live="polite">Loading orders…</p> : ordersState.state === "error" ? <div role="alert"><p className="seller-error">{ordersState.message}</p><button className="account-switch" type="button" onClick={() => void loadOrders()}>Retry loading orders</button></div> : ordersState.items.length ? ordersState.items.map((order) => {
       const trackingState = tracking[order.id];
       const timeline = trackingState?.state === "loaded" ? customerTrackingTimelineEvents(trackingState.order.events) : [];
       return <article key={order.id} className="customer-order">

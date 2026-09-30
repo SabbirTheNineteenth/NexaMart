@@ -10,13 +10,13 @@ const lineId = "22222222-2222-4222-8222-222222222222";
 const otherLineId = "33333333-3333-4333-8333-333333333333";
 const actorId = "44444444-4444-4444-8444-444444444444";
 const serviceToken = "local-test-token-with-no-real-credential";
-type Line = { id: string; orderId: string; sellerId: string; fulfillmentStatus: "shipped" | "delivered" | "packed"; codCollectedAt: Date | null; quantity: number; unitPrice: string };
+type Line = { id: string; orderId: string; sellerId: string; productName: string; fulfillmentStatus: "shipped" | "delivered" | "packed"; codCollectedAt: Date | null; quantity: number; unitPrice: string };
 
 function fixture(secondLine: "delivered" | "shipped" = "delivered") {
   const order = { id: orderId, reference: "NX-TEST", status: "confirmed", paymentMethod: "cod", paymentStatus: "unpaid", total: "20.00" };
   const lines: Line[] = [
-    { id: lineId, orderId, sellerId: actorId, fulfillmentStatus: "shipped", codCollectedAt: null, quantity: 1, unitPrice: "10.00" },
-    { id: otherLineId, orderId, sellerId: actorId, fulfillmentStatus: secondLine, codCollectedAt: secondLine === "delivered" ? new Date("2026-09-30T00:00:00.000Z") : null, quantity: 1, unitPrice: "10.00" },
+    { id: lineId, orderId, sellerId: actorId, productName: "Cotton shirt", fulfillmentStatus: "shipped", codCollectedAt: null, quantity: 1, unitPrice: "10.00" },
+    { id: otherLineId, orderId, sellerId: actorId, productName: "Cotton shirt", fulfillmentStatus: secondLine, codCollectedAt: secondLine === "delivered" ? new Date("2026-09-30T00:00:00.000Z") : null, quantity: 1, unitPrice: "10.00" },
   ];
   const events: Record<string, unknown>[] = [];
   const serviceAudits: Record<string, unknown>[] = [];
@@ -71,7 +71,9 @@ test("Admin delivery alone records delivery without COD collection", async () =>
   assert.equal(f.lines[0]!.codCollectedAt, null);
   assert.equal(f.order.paymentStatus, "unpaid");
   assert.equal(f.events[0]!.eventType, "fulfillment_delivered");
-  assert.equal(f.outbox.length, 0);
+  assert.equal(f.outbox.length, 1);
+  assert.equal(f.outbox[0]!.eventType, "order.status_updated");
+  assert.equal((f.outbox[0]!.payload as Record<string, unknown>).paymentStatus, "unpaid");
   const collected = await f.operations.transition({ orderId, orderItemId: lineId, action: "delivered", collectionEvidence: true, actor: { kind: "admin", id: actorId } });
   assert.equal(collected.duplicate, false);
   assert.ok(f.lines[0]!.codCollectedAt instanceof Date);

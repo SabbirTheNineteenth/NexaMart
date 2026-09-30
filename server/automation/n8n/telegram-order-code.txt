@@ -1,0 +1,78 @@
+const crypto = require('crypto');
+const item = $input.first().json;
+const headers = item.headers || {};
+const ts = Number(headers['x-nexamart-timestamp']);
+const signature = String(headers['x-nexamart-signature'] || '');
+const raw = typeof item.body === 'string' ? item.body : JSON.stringify(item.body);
+const now = Math.floor(Date.now() / 1000);
+const expected = crypto.createHmac('sha256', $env.N8N_WEBHOOK_SECRET).update(`${ts}.${raw}`).digest('hex');
+const valid = Number.isSafeInteger(ts) && Math.abs(now - ts) <= 300 && /^[a-f0-9]{64}$/.test(signature)
+  && crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(signature, 'hex'));
+if (!valid) return [{ json: { ok: false, statusCode: 401, error: 'Invalid signature or timestamp' } }];
+
+let event;
+try { event = JSON.parse(raw); } catch { return [{ json: { ok: false, statusCode: 400, error: 'Invalid JSON' } }]; }
+const allowed = ['cod.order.created', 'cod.order.confirmed', 'cod.order.dispatched', 'cod.order.delivered_collected', 'cod.order.delivery_failed', 'cod.order.returned', 'order.created', 'order.status_updated'];
+if (!event || typeof event.eventId !== 'string' || !allowed.includes(event.eventType)) return [{ json: { ok: false, statusCode: 400, error: 'Invalid event' } }];
+
+const seen = $getWorkflowStaticData('global');
+const prior = Object.prototype.hasOwnProperty.call(seen, event.eventId) ? seen[event.eventId] : null;
+if (prior) return [{ json: { ok: true, duplicate: true, eventType: event.eventType, eventId: event.eventId, deliveryOutcome: typeof prior === 'object' ? prior.deliveryOutcome : 'accepted' } }];
+const clean = (value, limit = 180) => String(value ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, limit);
+const payment = event.paymentStatus === 'collected' ? 'Collected on delivery' : 'Pending; pay on delivery';
+let deliveryOutcome = 'accepted';
+
+if (event.eventType === 'order.created' || event.eventType === 'order.status_updated') {
+  if (!/^[0-9a-f-]{36}$/i.test(event.eventId) || !/^[0-9a-f-]{36}$/i.test(event.orderId)
+      || typeof event.reference !== 'string' || event.paymentMethod !== 'cod'
+      || !['unpaid', 'collected'].includes(event.paymentStatus)) {
+    return [{ json: { ok: false, statusCode: 400, error: 'Invalid notification event' } }];
+  }
+  let chatId;
+  let message;
+  if (event.eventType === 'order.created') {
+    if (event.orderStatus !== 'pending' || event.paymentStatus !== 'unpaid' || event.currency !== 'BDT'
+        || !Array.isArray(event.items) || event.items.length < 1 || event.items.length > 100
+        || event.items.some(line => typeof line.name !== 'string' || !Number.isInteger(line.quantity) || line.quantity < 1)
+        || !/^\d+(\.\d{2})?$/.test(String(event.total))) {
+      return [{ json: { ok: false, statusCode: 400, error: 'Invalid order snapshot' } }];
+    }
+    chatId = $env.NEXAMART_ADMIN_TELEGRAM_CHAT_ID;
+    if (!chatId) throw new Error('Admin Telegram destination unavailable');
+    const summary = event.items.map(line => `${line.quantity} x ${clean(line.name)}`).join(', ').slice(0, 1000);
+    message = `New NexaMart order ${clean(event.reference, 32)}\nItems: ${summary}\nTotal: BDT ${clean(event.total, 24)}\nPayment: Cash on Delivery; ${payment}\nApproval: Awaiting Admin approval\nFulfillment: Pending`;
+  } else {
+    if (!/^[0-9a-f-]{36}$/i.test(event.orderItemId) || typeof event.itemName !== 'string'
+        || !['processing', 'packed', 'shipped', 'delivered', 'failed_delivery', 'return_requested', 'returned'].includes(event.fulfillmentStatus)) {
+      return [{ json: { ok: false, statusCode: 400, error: 'Invalid status snapshot' } }];
+    }
+    let recipient;
+    try {
+      recipient = await helpers.httpRequest({ method: 'GET', url: `${$env.NEXAMART_API_BASE}/api/telegram/local/recipient/${event.orderId}`, headers: { Authorization: `Bearer ${$env.N8N_SERVICE_TOKEN}` }, json: true });
+    } catch { throw new Error('Customer recipient lookup failed'); }
+    if (recipient?.linked === false) {
+      deliveryOutcome = 'skipped_unlinked';
+    } else if (recipient?.linked === true && /^[1-9][0-9]{0,19}$/.test(String(recipient.chatId))) {
+      chatId = recipient.chatId;
+      const status = clean(event.fulfillmentStatus.replaceAll('_', ' '), 40);
+      const note = typeof event.note === 'string' && event.note.trim() ? `\nNote: ${clean(event.note, 500)}` : '';
+      message = `NexaMart order ${clean(event.reference, 32)}\n${clean(event.itemName)}: ${status}\nPayment: Cash on Delivery; ${payment}${note}`;
+    } else {
+      throw new Error('Customer recipient unavailable');
+    }
+  }
+  if (chatId && message) {
+    if (!$env.NEXAMART_TELEGRAM_BOT_TOKEN) throw new Error('Telegram bot unavailable');
+    let sent;
+    try {
+      sent = await helpers.httpRequest({ method: 'POST', url: `https://api.telegram.org/bot${$env.NEXAMART_TELEGRAM_BOT_TOKEN}/sendMessage`, body: { chat_id: chatId, text: message }, json: true });
+    } catch { throw new Error('Telegram delivery failed'); }
+    if (sent?.ok !== true) throw new Error('Telegram delivery failed');
+    deliveryOutcome = 'telegram_sent';
+  }
+}
+
+seen[event.eventId] = { at: Date.now(), deliveryOutcome };
+for (const [key, value] of Object.entries(seen)) if (Date.now() - (typeof value === 'object' ? value.at : value) > 86400000) delete seen[key];
+return [{ json: { ok: true, duplicate: false, eventType: event.eventType, eventId: event.eventId, deliveryOutcome,
+  ...(event.eventType.startsWith('cod.') ? { reference: event.reference, orderId: event.orderId, sellerId: event.sellerId, amount: event.amount, currency: event.currency, orderStatus: event.orderStatus, paymentStatus: event.paymentStatus } : {}) } }];

@@ -130,6 +130,12 @@
 .workspaceLayout { display: grid; grid-template-columns: 208px minmax(0, 1fr); align-items: start; gap: 28px; }
 .workspaceRail { display: grid; gap: 16px; position: sticky; top: 16px; }
 .workspaceMain { display: grid; gap: 24px; }
+.telegramPanel { display: grid; gap: 8px; min-width: 0; margin: 18px 0; padding: 16px; border: 1px solid #d9cdec; border-radius: 12px; background: #faf8ff; }
+.telegramPanel strong { color: var(--account-ink); font-size: 14px; }
+.telegramPanel p { margin: 0; color: var(--account-muted); font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.telegramActions { display: flex; flex-wrap: wrap; gap: 8px; }
+.telegramActions :global(.account-switch) { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; max-width: 100%; overflow-wrap: anywhere; text-align: center; }
+@media (max-width: 420px) { .telegramActions { display: grid; grid-template-columns: minmax(0, 1fr); }.telegramActions :global(.account-switch) { width: 100%; } }
 .workspaceMain :global(.account-orders), .workspaceMain :global(.customer-reviews),
 .workspaceMain :global(.account-addresses), .workspaceMain :global(.account-wishlist) { width: 100%; margin: 0; }
 .workspaceRail .accountNavigation { position: static; display: grid; gap: 4px; padding: 10px; border: 1px solid var(--account-line); border-radius: 12px; background: #fff !important; }

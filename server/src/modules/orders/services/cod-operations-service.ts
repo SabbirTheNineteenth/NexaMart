@@ -3,6 +3,7 @@ import { db } from "../../../db/client.js";
 import { auditRecords, codOutbox, commissionRecords, orderEvents, orderItems, orders, sellerProfiles, serviceAuditRecords } from "../../../db/schema/index.js";
 import { allCodLinesCollected, canActOnCodLine, codTransitionAllowed, createCodEventPayload, postCodWebhook, type CodAction, type CodEventType } from "../cod.js";
 import { codActorColumns } from "../cod-actor.js";
+import { buildOrderStatusUpdatedEvent } from "../order-telegram-events.js";
 
 export class CodOperationError extends Error {
   constructor(readonly code: "NOT_FOUND" | "INVALID_TRANSITION" | "INVALID_ACTION", message: string) { super(message); }
@@ -15,7 +16,7 @@ const eventForStatus: Partial<Record<CodAction, CodEventType>> = {
 export class CodOperationsService {
   constructor(private readonly database = db) {}
 
-  async transition(input: { orderItemId: string; orderId?: string; action: CodAction; actor: Actor; collectionEvidence?: boolean }) {
+  async transition(input: { orderItemId: string; orderId?: string; action: CodAction; actor: Actor; collectionEvidence?: boolean; note?: string }) {
     return this.database.transaction(async (tx) => {
       await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`cod-line:${input.orderItemId}`}))`);
       if (input.actor.externalEventId) {
@@ -26,7 +27,7 @@ export class CodOperationsService {
           return { orderId: prior.orderId, orderItemId: input.orderItemId, fulfillmentStatus: input.action, duplicate: true };
         }
       }
-      const [line] = await tx.select({ id: orderItems.id, orderId: orderItems.orderId, sellerId: orderItems.sellerId, fulfillmentStatus: orderItems.fulfillmentStatus, codCollectedAt: orderItems.codCollectedAt, quantity: orderItems.quantity, unitPrice: orderItems.unitPrice })
+      const [line] = await tx.select({ id: orderItems.id, orderId: orderItems.orderId, sellerId: orderItems.sellerId, productName: orderItems.productName, fulfillmentStatus: orderItems.fulfillmentStatus, codCollectedAt: orderItems.codCollectedAt, quantity: orderItems.quantity, unitPrice: orderItems.unitPrice })
         .from(orderItems).where(eq(orderItems.id, input.orderItemId)).limit(1);
       if (!line || (input.orderId && line.orderId !== input.orderId) || !canActOnCodLine(input.actor.kind, input.actor.id, line.sellerId)) throw new CodOperationError("NOT_FOUND", "Order item not found");
       if (input.actor.kind === "seller") {
@@ -50,7 +51,7 @@ export class CodOperationsService {
       if (collected) await tx.update(orders).set({ paymentStatus: "collected" }).where(eq(orders.id, line.orderId));
       await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`order-event-sequence:${line.orderId}`}))`);
       const sequence = Number((await tx.execute(sql`select coalesce(max("sequence"), 0) + 1 as "sequence" from "order_events" where "order_id" = ${line.orderId}`)).rows[0].sequence);
-      await tx.insert(orderEvents).values({ orderId: line.orderId, orderItemId: line.id, ...codActorColumns(input.actor), source: input.actor.kind === "n8n" ? "n8n" : "account", externalEventId: input.actor.externalEventId, eventType: collectionEvidence ? "cod_delivered_collected" : `fulfillment_${input.action}`, fromStatus: line.fulfillmentStatus, toStatus: input.action, sequence });
+      await tx.insert(orderEvents).values({ orderId: line.orderId, orderItemId: line.id, ...codActorColumns(input.actor), source: input.actor.kind === "n8n" ? "n8n" : "account", externalEventId: input.actor.externalEventId, eventType: collectionEvidence ? "cod_delivered_collected" : `fulfillment_${input.action}`, fromStatus: line.fulfillmentStatus, toStatus: input.action, note: input.actor.kind === "admin" ? input.note : undefined, sequence });
       const audit = { action: collectionEvidence ? "cod.delivery_collected" : `cod.${input.action}`, resourceType: "order_item", resourceId: line.id, metadata: { orderId: line.orderId, source: input.actor.kind, externalEventId: input.actor.externalEventId ?? null } };
       if (input.actor.kind === "n8n") await tx.insert(serviceAuditRecords).values({ ...audit, serviceActorId: input.actor.id });
       else await tx.insert(auditRecords).values({ ...audit, actorId: input.actor.id });
@@ -58,6 +59,10 @@ export class CodOperationsService {
       if (eventType) {
         const [event] = await tx.insert(codOutbox).values({ eventType, payload: {} }).returning({ id: codOutbox.id, createdAt: codOutbox.createdAt });
         await tx.update(codOutbox).set({ payload: createCodEventPayload({ eventId: event.id, eventType, occurredAt: event.createdAt.toISOString(), orderId: order.id, reference: order.reference, sellerId: line.sellerId, amount: (Number(line.unitPrice) * line.quantity).toFixed(2), status: order.status, paymentStatus: collected ? "collected" : "unpaid" }) }).where(eq(codOutbox.id, event.id));
+      }
+      if (input.actor.kind === "admin") {
+        const [notificationEvent] = await tx.insert(codOutbox).values({ eventType: "order.status_updated", payload: {} }).returning({ id: codOutbox.id, createdAt: codOutbox.createdAt });
+        await tx.update(codOutbox).set({ payload: buildOrderStatusUpdatedEvent({ eventId: notificationEvent.id, occurredAt: notificationEvent.createdAt.toISOString(), orderId: order.id, orderItemId: line.id, reference: order.reference, itemName: line.productName, fulfillmentStatus: input.action, paymentMethod: "cod", paymentStatus: collected ? "collected" : order.paymentStatus, note: input.note }) }).where(eq(codOutbox.id, notificationEvent.id));
       }
       return { orderId: line.orderId, orderItemId: line.id, fulfillmentStatus: input.action, duplicate: false };
     });
@@ -114,7 +119,14 @@ export class CodOperationsService {
       try {
         const response = await postCodWebhook(input.url, input.secret, claimed.payload, transport);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        await this.database.update(codOutbox).set({ deliveredAt: new Date(), lastError: null }).where(and(eq(codOutbox.id, claimed.id), isNull(codOutbox.deliveredAt), eq(codOutbox.attempts, claimed.attempts)));
+        let deliveryOutcome: "accepted" | "telegram_sent" | "skipped_unlinked" = "accepted";
+        if (claimed.eventType === "order.created" || claimed.eventType === "order.status_updated") {
+          const acknowledgement = await response.json().catch(() => null) as { ok?: unknown; deliveryOutcome?: unknown; eventId?: unknown } | null;
+          if (acknowledgement?.ok !== true || acknowledgement.eventId !== claimed.id || (acknowledgement.deliveryOutcome !== "telegram_sent" && acknowledgement.deliveryOutcome !== "skipped_unlinked")) throw new Error("Unexpected webhook acknowledgement");
+          if (claimed.eventType === "order.created" && acknowledgement.deliveryOutcome !== "telegram_sent") throw new Error("Unexpected webhook acknowledgement");
+          deliveryOutcome = acknowledgement.deliveryOutcome;
+        }
+        await this.database.update(codOutbox).set({ deliveredAt: new Date(), lastError: null, deliveryOutcome }).where(and(eq(codOutbox.id, claimed.id), isNull(codOutbox.deliveredAt), eq(codOutbox.attempts, claimed.attempts)));
         delivered++;
       } catch (error) {
         const safeError = error instanceof Error && /^HTTP [1-5][0-9]{2}$/.test(error.message) ? error.message : "Transport failed";

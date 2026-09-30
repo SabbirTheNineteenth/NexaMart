@@ -27,6 +27,20 @@ export const accounts = pgTable("accounts", {
   updatedAt: updatedAt(),
 });
 
+export const customerTelegramLinkChallenges = pgTable("customer_telegram_link_challenges", {
+  accountId: uuid("account_id").primaryKey().references(() => accounts.id, { onDelete: "cascade" }),
+  codeHash: varchar("code_hash", { length: 64 }).notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: now(),
+});
+
+export const customerTelegramLinks = pgTable("customer_telegram_links", {
+  accountId: uuid("account_id").primaryKey().references(() => accounts.id, { onDelete: "cascade" }),
+  chatId: varchar("chat_id", { length: 32 }).notNull().unique(),
+  codeHash: varchar("code_hash", { length: 64 }).notNull().unique(),
+  createdAt: now(),
+});
+
 export const serviceActors = pgTable("service_actors", {
   id: uuid("id").defaultRandom().primaryKey(),
   key: varchar("key", { length: 64 }).notNull().unique(),
@@ -290,6 +304,7 @@ export const codOutbox = pgTable("cod_outbox", {
   nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true }).notNull().defaultNow(),
   deliveredAt: timestamp("delivered_at", { withTimezone: true }),
   lastError: text("last_error"),
+  deliveryOutcome: varchar("delivery_outcome", { length: 32 }),
   createdAt: now(),
 }, (table) => [index("cod_outbox_pending_index").on(table.deliveredAt, table.nextAttemptAt)]);
 
