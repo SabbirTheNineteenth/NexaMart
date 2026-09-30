@@ -45,7 +45,7 @@ test("address edit validation reports required and country-code errors before sa
 test("each saved address provides an accessible form that PATCHes one address and replaces only its returned local value", () => {
   assert.match(workspace, /import \{ deleteJSON, getJSON, postJSON \} from "@\/lib\/api";/);
   assert.match(workspace, /import \{ ApiError, patchJSON \} from "@\/lib\/api";/);
-  assert.match(workspace, /addressEditors\[address\.id\] && <form id=\{`address-editor-\$\{address\.id\}`\} className=\{styles\.addressEditorForm\} onSubmit=\{\(event\) => void editAddress\(event, address\)\} aria-label=\{`Edit shipping address for \$\{address\.recipientName\}`\}>/);
+  assert.match(workspace, /addressEditors\[address\.id\] && <form id=\{`address-editor-\$\{address\.id\}`\} className=\{styles\.addressEditorForm\} onSubmit=\{\(event\) => void editAddress\(event, address\)\} aria-label=\{`Edit shipping address for \$\{address\.recipientName\}`\}/);
   assert.match(workspace, /name="recipientName"/);
   assert.match(workspace, /name="phone"/);
   assert.match(workspace, /name="line1"/);

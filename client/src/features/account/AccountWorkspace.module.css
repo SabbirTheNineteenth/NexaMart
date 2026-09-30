@@ -16,7 +16,7 @@
 .content :global(.account-orders),.content :global(.account-addresses){padding:20px}.content :global(.account-orders article),.content :global(.account-addresses article){gap:14px}.content :global(.account-orders > .eyebrow),.content :global(.account-addresses > .eyebrow),.content :global(.account-wishlist > .eyebrow),.content :global(.customer-reviews > .eyebrow){color:var(--nx-orchid)}
 .content :global(.account-orders h2),.content :global(.account-addresses h2),.content :global(.account-wishlist h2),.content :global(.customer-reviews h2){margin-top:0;letter-spacing:-.035em}
 .content :global(.customer-order),.content :global(.account-address-editor),.content :global(.wishlist-list article),.content :global(.customer-review){transition:border-color 180ms ease,background 180ms ease,transform 180ms ease}.content :global(.customer-order:hover),.content :global(.account-address-editor:hover),.content :global(.wishlist-list article:hover),.content :global(.customer-review:hover){background:var(--nx-surface-raised)}
-.content :global(.customer-order-tracking),.content :global(.account-address-editor form){width:100%}.content :global(.customer-order-tracking){margin-top:4px}.content :global(.fulfillment-timeline){padding:14px;border-radius:10px;background:var(--nx-surface-raised)}
+.content :global(.customer-order-tracking){width:100%;margin-top:4px}.content :global(.fulfillment-timeline){padding:14px;border-radius:10px;background:var(--nx-surface-raised)}
 .shell :global(button),.shell :global(.account-switch),.shell :global(.primary-button),.shell :global(.wishlist-remove),.shell :global(.account-address-remove){min-height:44px;transition:background 180ms ease,color 180ms ease,border-color 180ms ease,transform 180ms ease}.shell :global(input),.shell :global(select){min-height:44px}.shell :global(textarea){min-height:88px}.shell :global(button:not(:disabled):hover),.shell :global(.account-switch:hover),.shell :global(.wishlist-remove:hover),.shell :global(.account-address-remove:hover){transform:translateY(-1px)}
 .shell :global(button:focus-visible),.shell :global(a:focus-visible),.shell :global(input:focus-visible),.shell :global(select:focus-visible),.shell :global(textarea:focus-visible){outline:3px solid var(--nx-focus,var(--nx-orchid));outline-offset:3px}
 .content :global(.seller-state),.content :global([role="alert"]){border-radius:10px}.content :global(.seller-state){padding:12px;background:var(--nx-surface-raised)}.content :global([role="alert"]){padding:12px;border-left:3px solid var(--nx-orchid);background:var(--nx-surface-raised)}
@@ -73,7 +73,7 @@
 .emptyState { display: grid; gap: 5px; padding: 18px; border: 1px dashed #cfc1df; border-radius: 10px; background: #faf8fd; color: var(--account-ink); }.emptyState p { margin: 0; color: var(--account-muted); font-size: 14px; line-height: 1.5; }
 .content :global(.seller-state) { border: 1px solid #e3dbea; background: #faf8fd; color: var(--account-muted); }.content :global([role="alert"]) { border-left-color: #9a3151; background: #fff7fa; color: #6f2943; }.content :global(.seller-error) { color: #8d2948; }.content :global(.seller-profile-success),.content :global(.customer-review-success) { color: #28633e; }
 .content :global(.customer-order),.content :global(.account-address-editor),.content :global(.customer-review),.content :global(.wishlist-list article) { border-color: var(--account-line); background: #fff; }.content :global(.customer-order:hover),.content :global(.account-address-editor:hover),.content :global(.customer-review:hover),.content :global(.wishlist-list article:hover) { background: #fcfaff; }
-.content :global(.account-address-editor form),.addressCreateForm { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; margin-top: 18px; padding: 18px; border: 1px solid #e4ddeb; border-radius: 10px; background: #fbf9fe; }.content :global(.account-address-editor form label),.addressCreateForm label { display: grid; gap: 7px; color: #463a50; font-size: 13px; font-weight: 750; }.content :global(.account-address-editor form .wide),.addressCreateForm .wide { grid-column: 1 / -1; }.content :global(.account-address-editor form :is(input,select,textarea)),.addressCreateForm :global(input) { width: 100%; min-height: 44px; border: 1px solid #cfc3dd; border-radius: 8px; background: #fff; color: var(--account-ink); padding: 10px 12px; }.addressCreateForm > :global(.primary-button),.content :global(.account-address-editor form > .account-switch) { width: auto; justify-self: start; }
+.content :global(.account-address-editor form),.addressCreateForm { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px 16px; margin-top: 18px; padding: 18px; border: 1px solid #e4ddeb; border-radius: 10px; background: #fbf9fe; }.content :global(.account-address-editor form label),.addressCreateForm label { display: grid; gap: 7px; color: #463a50; font-size: 13px; font-weight: 750; }.content :global(.account-address-editor form .wide),.addressCreateForm .wide { grid-column: 1 / -1; }.content :global(.account-address-editor form :is(input,select,textarea)),.addressCreateForm :global(input) { width: 100%; min-height: 44px; border: 1px solid #cfc3dd; border-radius: 8px; background: #fff; color: var(--account-ink); padding: 10px 12px; }.addressCreateForm > :global(.primary-button),.content :global(.account-address-editor form > .account-switch) { width: auto; justify-self: start; }
 .shell :global(.primary-button) { width: auto; border-radius: 8px; background: var(--account-accent); color: #fff; }.shell :global(.account-switch) { border: 1px solid #cbbfda; border-radius: 8px; background: #fff; color: #4c287b; padding: 9px 13px; font-weight: 750; }.shell :global(.account-address-remove),.shell :global(.wishlist-remove) { border-color: #ddb8c5; background: #fff7fa; color: #8d2948; }
 @media (max-width: 700px) { .shell { width: min(100% - 28px, 1160px); }.content :global(.account-data-summary) { grid-template-columns: 1fr; }.content :global(.account-data-summary span + span) { border-top: 1px solid var(--account-line); border-left: 0; }.content :global(.account-address-editor form),.addressCreateForm { grid-template-columns: 1fr; }.content :global(.account-address-editor form .wide),.addressCreateForm .wide { grid-column: auto; } }
 @media (max-width: 420px) { .shell { width: 100%; padding-right: 14px; padding-left: 14px; }.accountHeader { align-items: flex-start; min-height: auto; padding: 14px 0; }.headerActions { width: 100%; flex-wrap: wrap; }.headerActions :global(.account-switch) { flex: 1 1 auto; }.content :global(.account-orders),.content :global(.customer-reviews),.content :global(.account-addresses),.content :global(.account-wishlist) { padding: 18px 16px; }.accountNavigation { overflow-x: auto; }.accountNavigation :global(a) { flex: 0 0 auto; } }
@@ -108,8 +108,7 @@
 .addressCardActions :global(.account-switch), .addressCardActions :global(.account-address-remove) { width: auto; min-height: 38px; padding: 8px 12px; font-size: 12px; }
 .addressCardActions :global(.account-address-remove) { margin-left: auto; }
 .addressEditorForm, .addressCreateForm { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 14px 16px; }
-.addressEditorForm { margin-top: 2px; width: min(100%, 680px); margin-right: auto; margin-left: auto; border-color: #d9cdec; background: #faf8ff; }
-.content .addressEditorForm { width: min(100%, 680px)!important; margin-right: auto; margin-left: auto; }
+.addressEditorForm { width: min(100%, 680px); margin-inline: auto; border-color: #d9cdec; background: #faf8ff; }
 .addressFormHeading { display: grid; grid-column: 1 / -1; gap: 4px; padding-bottom: 2px; }
 .addressFormHeading strong { color: var(--account-ink); font-size: 15px; }
 .addressFormHeading p { margin: 0; color: var(--account-muted); font-size: 13px; line-height: 1.45; }
@@ -118,3 +117,85 @@
 .addressFormAction :global(.seller-profile-success), .addressFormAction :global(.seller-error) { margin: 0; }
 @media (max-width: 700px) { .content :global(.account-address-editor) { padding: 16px; }.addressEditorForm, .addressCreateForm { grid-template-columns: 1fr; }.addressFormHeading, .addressFormAction { grid-column: auto; }.addressCardActions :global(.account-address-remove) { margin-left: 0; } }
 @media (max-width: 420px) { .content :global(.account-address-summary) { display: grid; gap: 10px; }.addressCardActions { align-items: stretch; }.addressCardActions :global(.account-switch), .addressCardActions :global(.account-address-remove), .addressFormAction :global(.primary-button) { width: 100%; } }
+
+/* Customer workspace: one centered canvas with a compact navigation rail. */
+.shell { width: min(calc(100% - 32px), 1160px); margin-inline: auto; padding-inline: 0; }
+.overview h1 { max-width: none; overflow-wrap: anywhere; }
+.overview p { overflow-wrap: anywhere; }
+.shell, .shell :global(*) { box-sizing: border-box; }
+.content, .workspaceLayout, .workspaceRail, .workspaceMain,
+.content :global(.account-orders), .content :global(.customer-reviews),
+.content :global(.account-addresses), .content :global(.account-wishlist),
+.content :global(.account-address-editor), .content :global(.wishlist-list article) { min-width: 0; }
+.workspaceLayout { display: grid; grid-template-columns: 208px minmax(0, 1fr); align-items: start; gap: 28px; }
+.workspaceRail { display: grid; gap: 16px; position: sticky; top: 16px; }
+.workspaceMain { display: grid; gap: 24px; }
+.workspaceMain :global(.account-orders), .workspaceMain :global(.customer-reviews),
+.workspaceMain :global(.account-addresses), .workspaceMain :global(.account-wishlist) { width: 100%; margin: 0; }
+.workspaceRail .accountNavigation { position: static; display: grid; gap: 4px; padding: 10px; border: 1px solid var(--account-line); border-radius: 12px; background: #fff !important; }
+.workspaceRail .accountNavigation :global(a) { width: 100%; min-height: 44px; justify-content: flex-start; padding: 10px 12px; border-color: var(--account-line); background: #fff; color: var(--account-ink); font-size: 14px; }
+.workspaceRail .accountNavigation :global(a:hover), .workspaceRail .accountNavigation :global(a:focus-visible) { border-color: var(--account-accent); background: #f0eaff; color: #482481; }
+.workspaceRail :global(.account-data-summary) { display: grid; grid-template-columns: 1fr; }
+.workspaceRail :global(.account-data-summary span) { min-width: 0; padding: 12px 16px; font-size: 13px; text-align: left; }
+.workspaceRail :global(.account-data-summary span + span) { border-left: 0; border-top: 1px solid var(--account-line); }
+.workspaceRail :global(.account-data-summary strong) { display: inline; margin: 0 5px 0 0; font-size: 19px; }
+.workspaceMain :global(.account-orders), .workspaceMain :global(.customer-reviews),
+.workspaceMain :global(.account-addresses), .workspaceMain :global(.account-wishlist) { padding: 24px; }
+.workspaceMain :global(.eyebrow) { font-size: 11px; }
+.workspaceMain :global(h2) { margin-bottom: 6px; font-size: clamp(23px, 2.4vw, 29px); }
+.workspaceMain :global(h3) { font-size: 17px; line-height: 1.4; }
+.workspaceMain :global(.seller-state), .workspaceMain :global([role="alert"]),
+.workspaceMain :global(.account-order-payment) { font-size: 14px; line-height: 1.55; }
+.workspaceMain :global(.customer-order), .workspaceMain :global(.customer-review) { gap: 12px; padding-block: 18px; }
+.workspaceMain :global(.customer-order strong), .workspaceMain :global(.wishlist-list strong) { color: var(--account-ink); font-size: 15px; line-height: 1.45; overflow-wrap: anywhere; }
+.workspaceMain :global(.customer-order small), .workspaceMain :global(.wishlist-list small) { color: var(--account-muted); font-size: 13px; line-height: 1.5; }
+.workspaceMain :global(.account-address-list) { gap: 16px; margin-bottom: 24px; }
+.workspaceMain :global(.account-address-editor) { width: 100%; grid-template-columns: minmax(0, 1fr); padding: 20px; gap: 16px; }
+.workspaceMain :global(.account-address-summary strong) { font-size: 17px; }
+.workspaceMain :global(.account-address-summary small) { color: var(--account-muted); font-size: 14px; line-height: 1.6; }
+.addressCardActions { gap: 10px; padding-top: 16px; }
+.addressCardActions :global(.account-switch), .addressCardActions :global(.account-address-remove) { min-height: 44px; padding: 10px 14px; font-size: 13px; }
+.addressEditorForm, .addressCreateForm { min-width: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 16px; padding: 24px; }
+.addressEditorForm { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr); width: min(100%, 680px); margin-inline: auto; justify-self: center; }
+.addressEditorForm :global(.account-address-form-grid) { width: 100%; min-width: 0; }
+.addressCreateForm { width: 100%; margin-top: 24px; }
+.addressFormHeading { padding-bottom: 8px; border-bottom: 1px solid var(--account-line); }
+.addressFormHeading strong { font-size: 18px; }
+.addressFormHeading p { font-size: 14px; line-height: 1.55; }
+.content :global(.account-address-editor form label), .addressCreateForm label { min-width: 0; font-size: 14px; line-height: 1.4; }
+.content :global(.account-address-editor form :is(input,select,textarea)), .addressCreateForm :global(input) { width: 100%; min-width: 0; min-height: 46px; font-size: 15px; }
+.addressFormAction { gap: 12px; padding-top: 8px; }
+.addressFormAction :global(.primary-button), .addressFormAction :global(.account-switch) { min-height: 44px; font-size: 14px; }
+.content :global(.wishlist-list) { min-width: 0; }
+.content :global(.wishlist-list article) { grid-template-columns: 84px minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 16px; }
+.content :global(.wishlist-list article > div) { min-width: 0; }
+.wishlistMedia { width: 84px; max-width: 100%; aspect-ratio: 1; overflow: hidden; border-radius: 8px; background: #f0eaff; }
+.wishlistMedia :global(.wishlist-image) { display: block; width: 100%; height: 100%; object-fit: cover; }
+.wishlistMedia :global(.wishlist-image-fallback) { display: grid; width: 100%; height: 100%; place-items: center; color: var(--account-accent); font-size: 18px; font-weight: 800; }
+.content :global(.wishlist-action) { min-width: 0; }
+.content :global(.wishlist-remove) { min-height: 44px; font-size: 13px; }
+@media (max-width: 900px) {
+  .workspaceLayout { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .workspaceRail { position: static; }
+  .workspaceRail .accountNavigation { display: flex; flex-wrap: wrap; }
+  .workspaceRail .accountNavigation :global(a) { width: auto; }
+  .workspaceRail :global(.account-data-summary) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .workspaceRail :global(.account-data-summary span + span) { border-top: 0; border-left: 1px solid var(--account-line); }
+}
+@media (max-width: 700px) {
+  .workspaceMain :global(.account-orders), .workspaceMain :global(.customer-reviews),
+  .workspaceMain :global(.account-addresses), .workspaceMain :global(.account-wishlist) { padding: 20px; }
+  .addressEditorForm, .addressCreateForm { grid-template-columns: 1fr; padding: 20px; }
+  .content :global(.account-address-editor form .wide), .addressCreateForm :global(.wide) { grid-column: auto; }
+}
+@media (max-width: 420px) {
+  .shell { width: min(calc(100% - 24px), 1160px); padding-inline: 0; }
+  .workspaceRail :global(.account-data-summary) { grid-template-columns: 1fr; }
+  .workspaceRail :global(.account-data-summary span + span) { border-left: 0; border-top: 1px solid var(--account-line); }
+  .workspaceMain :global(.account-orders), .workspaceMain :global(.customer-reviews),
+  .workspaceMain :global(.account-addresses), .workspaceMain :global(.account-wishlist) { padding: 16px; }
+  .workspaceMain :global(.account-address-editor) { padding: 16px; }
+  .content :global(.wishlist-list article) { grid-template-columns: 64px minmax(0, 1fr); gap: 12px; padding: 14px 0; }
+  .wishlistMedia { width: 64px; }
+  .content :global(.wishlist-action) { grid-column: 1 / -1; justify-items: start; }
+}

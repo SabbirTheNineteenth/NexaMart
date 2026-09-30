@@ -29,8 +29,9 @@ function WishlistMedia({ item }: { item: WishlistItem }) {
   const source = productImageSource(item.image, item.id);
   const [failed, setFailed] = useState(false);
 
-  if (!source || failed) return <div className="wishlist-image-fallback" role="img" aria-label={`${item.name} product image unavailable`}>NM</div>;
-  return <img className="wishlist-image" src={source} alt={item.name} loading="lazy" onError={() => setFailed(true)} />;
+  return <div className={styles.wishlistMedia}>{!source || failed
+    ? <div className="wishlist-image-fallback" role="img" aria-label={`${item.name} product image unavailable`}>NM</div>
+    : <img className="wishlist-image" src={source} alt={item.name} loading="lazy" onError={() => setFailed(true)} />}</div>;
 }
 export function AccountWorkspace() {
   const [account, setAccount] = useState<Account | null>(null);
@@ -191,6 +192,7 @@ export function AccountWorkspace() {
       setWishlistRemovals({});
       setAddressesState({ state: "loading" });
       setAddressEdits({});
+      setAddressEditors({});
       setAddressDefaults({});
       setAddressRemovals({});
       setTracking({});
@@ -305,8 +307,10 @@ export function AccountWorkspace() {
     <a className={styles.skipLink} href="#account-content">Skip to account content</a>
     <div id="account-content" className={styles.content} tabIndex={-1}>
     <section className={styles.workspaceHero}><div className={styles.overview}><p className="eyebrow">Your NexaMart account</p><h1>Hi, {account.name}.</h1><p>{account.email}</p><p className={styles.purpose}>Manage purchases, delivery details, reviews, and saved products in one place.</p></div></section>
+    <div className={styles.workspaceLayout}><aside className={styles.workspaceRail} aria-label="Account overview and sections">
     <nav className={`${styles.accountNavigation} orchid-navigation account-section-navigation`} aria-label="Account sections"><a href="#orders">Orders</a>{account.role === "customer" && <a href="#reviews">Reviews</a>}<a href="#addresses">Addresses</a>{account.role === "customer" && <a href="#wishlist">Saved items</a>}</nav>
     <section className="trust account-data-summary" aria-label="Account overview"><span><strong>{ordersState.state === "loaded" ? ordersState.items.length : "—"}</strong> orders</span><span><strong>{addressesState.state === "loaded" ? addressesState.items.length : "—"}</strong> addresses</span>{account.role === "customer" && <span><strong>{wishlistState.state === "loaded" ? wishlist.length : "—"}</strong> saved pieces</span>}</section>
+    </aside><div className={styles.workspaceMain}>
     <section id="orders" className="account-orders" aria-labelledby="customer-orders-heading"><p className="eyebrow">Order history</p><h2 id="customer-orders-heading">Everything you chose</h2><p className={styles.sectionDescription}>Review the purchases and fulfillment details available for this account.</p>{ordersState.state === "loading" ? <p className="seller-state" aria-live="polite">Loading orders…</p> : ordersState.state === "error" ? <div role="alert"><p className="seller-error">{ordersState.message}</p><button className="account-switch" type="button" onClick={() => void loadOrders()}>Retry loading orders</button></div> : ordersState.items.length ? ordersState.items.map((order) => {
       const trackingState = tracking[order.id];
       const timeline = trackingState?.state === "loaded" ? customerTrackingTimelineEvents(trackingState.order.events) : [];
@@ -339,13 +343,13 @@ export function AccountWorkspace() {
           <div className="account-address-summary"><div><strong>{address.recipientName}</strong><small>{address.line1}{address.line2 ? `, ${address.line2}` : ""}, {address.city}{address.region ? `, ${address.region}` : ""} {address.postalCode}, {address.country}</small></div>{address.isDefault && <span className="status order-confirmed" aria-label="Default shipping address">Default</span>}</div>
           <div className={styles.addressCardActions}>
             {!address.isDefault && <button className="account-switch account-address-default-action" type="button" aria-label={`Set ${address.recipientName} as default shipping address`} onClick={() => void setDefaultAddress(address)} disabled={defaultAction?.state === "saving"}>{defaultAction?.state === "saving" ? "Setting default address…" : "Set as default"}</button>}
-            <button className="account-switch" type="button" aria-expanded={Boolean(addressEditors[address.id])} aria-controls={`address-editor-${address.id}`} onClick={() => setAddressEditors((current) => ({ ...current, [address.id]: !current[address.id] }))}>{addressEditors[address.id] ? "Close editor" : "Edit address"}</button>
+            <button id={`address-edit-toggle-${address.id}`} className="account-switch" type="button" aria-expanded={Boolean(addressEditors[address.id])} aria-controls={`address-editor-${address.id}`} onClick={() => { const opening = !addressEditors[address.id]; setAddressEditors((current) => current[address.id] ? {} : { [address.id]: true }); if (opening) requestAnimationFrame(() => document.querySelector<HTMLInputElement>(`#address-editor-${address.id} input`)?.focus()); }}>{addressEditors[address.id] ? "Close editor" : "Edit address"}</button>
             {account.role === "customer" && (removal?.state === "confirming" ? <div className="account-address-removal-confirmation" role="alert"><p>Remove this address?</p><div><button className="account-address-remove" type="button" onClick={() => void removeAddress(address)}>Confirm removal</button><button className="account-switch" type="button" onClick={() => cancelAddressRemoval(address)}>Cancel</button></div></div> : <button className="account-address-remove" type="button" aria-label={`Remove shipping address for ${address.recipientName}`} onClick={() => requestAddressRemoval(address)} disabled={removal?.state === "removing"}>{removal?.state === "removing" ? "Removing address…" : "Remove"}</button>)}
           </div>
           {defaultAction?.state === "success" && <p className="seller-profile-success" role="status">Default shipping address saved.</p>}
           {defaultAction?.state === "error" && <p className="seller-error" role="alert">{defaultAction.message}</p>}
           {removal?.state === "error" && <p className="seller-error" role="alert">{removal.message}</p>}
-          {addressEditors[address.id] && <form id={`address-editor-${address.id}`} className={styles.addressEditorForm} onSubmit={(event) => void editAddress(event, address)} aria-label={`Edit shipping address for ${address.recipientName}`}>
+          {addressEditors[address.id] && <form id={`address-editor-${address.id}`} className={styles.addressEditorForm} onSubmit={(event) => void editAddress(event, address)} aria-label={`Edit shipping address for ${address.recipientName}`} aria-describedby={edit?.state === "error" ? `address-error-${address.id}` : undefined}>
             <div className="account-address-form-grid">
               <label>Recipient<input required name="recipientName" minLength={2} maxLength={160} autoComplete="name" defaultValue={address.recipientName} disabled={edit?.state === "saving"} /></label>
               <label>Phone<input required name="phone" minLength={5} maxLength={40} inputMode="tel" autoComplete="tel" defaultValue={address.phone} disabled={edit?.state === "saving"} /></label>
@@ -356,16 +360,16 @@ export function AccountWorkspace() {
               <label>Postal code (optional)<input name="postalCode" maxLength={32} autoComplete="postal-code" defaultValue={address.postalCode ?? ""} disabled={edit?.state === "saving"} /></label>
               <label>Country code<input required name="country" minLength={2} maxLength={2} pattern="[A-Za-z]{2}" autoComplete="country" defaultValue={address.country} disabled={edit?.state === "saving"} /></label>
             </div>
-            <div className={styles.addressFormAction}><button className="primary-button" type="submit" disabled={edit?.state === "saving"}>{edit?.state === "saving" ? "Saving address…" : "Save changes"}</button>{edit?.state === "success" && <p className="seller-profile-success" role="status">Address saved.</p>}{edit?.state === "error" && <p className="seller-error" role="alert">{edit.message}</p>}</div>
+            <div className={styles.addressFormAction}><button className="primary-button" type="submit" disabled={edit?.state === "saving"}>{edit?.state === "saving" ? "Saving address…" : "Save changes"}</button><button className="account-switch" type="button" onClick={() => { setAddressEditors({}); requestAnimationFrame(() => document.getElementById(`address-edit-toggle-${address.id}`)?.focus()); }} disabled={edit?.state === "saving"}>Cancel</button>{edit?.state === "success" && <p className="seller-profile-success" role="status">Address saved.</p>}{edit?.state === "error" && <p id={`address-error-${address.id}`} className="seller-error" role="alert">{edit.message}</p>}</div>
           </form>}
         </article>;
       })}</div> : <p className="seller-state">No shipping addresses have been saved to this account yet. Add a shipping address before placing an order.</p>}
-      <form className={styles.addressCreateForm} onSubmit={addAddress}><div className={styles.addressFormHeading}><strong>Add a new address</strong><p>Use an address you can receive deliveries at.</p></div><label>Recipient<input required name="recipientName" minLength={2} autoComplete="name" /></label><label>Phone<input required name="phone" minLength={5} inputMode="tel" autoComplete="tel" /></label><label className="wide">Address<input required name="line1" minLength={2} autoComplete="street-address" /></label><label>City<input required name="city" minLength={2} autoComplete="address-level2" /></label><label>Country code<input required name="country" defaultValue="BD" minLength={2} maxLength={2} autoComplete="country" /></label>{error && <p className="seller-error" role="alert">{error}</p>}{addressCreateSuccess && <p className="seller-profile-success" role="status">{addressCreateSuccess}</p>}<div className={styles.addressFormAction}><button className="primary-button" disabled={saving}>{saving ? "Saving…" : "Save shipping address"}</button></div></form>
+      <form className={styles.addressCreateForm} onSubmit={addAddress} aria-label="Add shipping address" aria-describedby={error ? "address-create-error" : undefined}><div className={styles.addressFormHeading}><strong>Add a new address</strong><p>Use an address you can receive deliveries at.</p></div><label>Recipient<input required name="recipientName" minLength={2} autoComplete="name" /></label><label>Phone<input required name="phone" minLength={5} inputMode="tel" autoComplete="tel" /></label><label className="wide">Address<input required name="line1" minLength={2} autoComplete="street-address" /></label><label>City<input required name="city" minLength={2} autoComplete="address-level2" /></label><label>Country code<input required name="country" defaultValue="BD" minLength={2} maxLength={2} autoComplete="country" /></label>{error && <p id="address-create-error" className="seller-error" role="alert">{error}</p>}{addressCreateSuccess && <p className="seller-profile-success" role="status">{addressCreateSuccess}</p>}<div className={styles.addressFormAction}><button className="primary-button" disabled={saving}>{saving ? "Saving…" : "Save shipping address"}</button></div></form>
     </section>
     {account.role === "customer" && <section id="wishlist" className="account-wishlist" aria-labelledby="customer-wishlist-heading"><p className="eyebrow">Saved pieces</p><h2 id="customer-wishlist-heading">Your shortlist</h2><p className={styles.sectionDescription}>Keep products here to revisit them from the catalog.</p>{wishlistState.state === "loading" ? <p className="seller-state" aria-live="polite">Loading saved pieces…</p> : wishlistState.state === "error" ? <div role="alert"><p className="seller-error">{wishlistState.message || "Unable to load saved pieces"}</p><button className="account-switch" type="button" aria-label="Retry loading saved pieces" onClick={() => void loadWishlist()}>Try again</button></div> : wishlist.length ? <div className="wishlist-list">{wishlist.map((item) => {
       const removal = wishlistRemovals[item.id];
           return <article key={item.id}><WishlistMedia item={item} /><div><strong>{item.name}</strong><small>${item.price.toFixed(2)}</small></div><div className="wishlist-action"><button className="wishlist-remove" aria-label={`Remove ${item.name} from saved pieces`} onClick={() => void removeWishlistItem(item)} disabled={removal?.state === "removing"}>{removal?.state === "removing" ? "Removing…" : "Remove"}</button>{removal?.state === "error" && <p className="seller-error" role="alert">{removal.message || "Unable to remove saved piece"}</p>}</div></article>;
     })}</div> : <div className={styles.emptyState}><strong>No saved pieces are available for this account yet.</strong><p>Save products from the catalog to revisit them here.</p></div>}</section>}
-    </div>
+    </div></div></div>
   </main>;
 }

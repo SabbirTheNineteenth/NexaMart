@@ -29,7 +29,8 @@ test("async create forms announce their own successful reconciliation politely w
 
   assert.match(productForm, /inputRef\.current\?\.focus\(\)/);
   assert.match(promotionForm, /inputRef\.current\?\.focus\(\)/);
-  assert.doesNotMatch(`${assets}\n${taxonomy}\n${workspace}`, /\.focus\(|autoFocus/);
+  const addressCreate = workspace.slice(workspace.indexOf("const addAddress ="), workspace.indexOf("const editAddress ="));
+  assert.doesNotMatch(`${assets}\n${taxonomy}\n${addressCreate}`, /\.focus\(|autoFocus/);
 });
 
 test("asset-create confirmations stay scoped to variants and gallery images", () => {
