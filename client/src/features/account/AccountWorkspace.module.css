@@ -190,9 +190,11 @@
   .addressEditorForm, .addressCreateForm { grid-template-columns: 1fr; padding: 20px; }
   .content :global(.account-address-editor form .wide), .addressCreateForm :global(.wide) { grid-column: auto; }
 }
+/* Fill the desktop canvas; only responsive gutters remain. */
+.shell { width: 100%; max-width: none; margin-inline: 0; padding-inline: clamp(16px, 3vw, 40px); }
+.accountHeader { width: 100%; max-width: none; }
 @media (max-width: 420px) {
-  .shell { width: min(calc(100% - 24px), 1160px); padding-inline: 0; }
-  .workspaceRail :global(.account-data-summary) { grid-template-columns: 1fr; }
+  .shell { width: 100%; padding-inline: 12px; }
   .workspaceRail :global(.account-data-summary span + span) { border-left: 0; border-top: 1px solid var(--account-line); }
   .workspaceMain :global(.account-orders), .workspaceMain :global(.customer-reviews),
   .workspaceMain :global(.account-addresses), .workspaceMain :global(.account-wishlist) { padding: 16px; }

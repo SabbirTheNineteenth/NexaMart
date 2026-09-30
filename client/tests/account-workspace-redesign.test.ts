@@ -40,3 +40,9 @@ test("account address mutations and the prior creation form reset remain intact"
   assert.match(workspace, /requestAnimationFrame\(\(\) => document\.querySelector<HTMLInputElement>\(`/);
   assert.match(workspace, /document\.getElementById\(`address-edit-toggle-\$\{address\.id\}`\)\?\.focus\(\)/);
 });
+
+test("customer workspace fills the viewport canvas while preserving responsive gutters", () => {
+  assert.match(styles, /\.shell \{ width: 100%; max-width: none; margin-inline: 0; padding-inline: clamp\(16px, 3vw, 40px\); \}/);
+  assert.match(styles, /\.accountHeader \{ width: 100%; max-width: none;/);
+  assert.match(styles, /@media \(max-width: 420px\) \{[\s\S]*?\.shell \{ width: 100%; padding-inline: 12px; \}/);
+});
