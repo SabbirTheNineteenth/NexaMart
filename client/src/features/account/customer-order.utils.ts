@@ -1,3 +1,5 @@
+import type { CustomerFulfillmentStatus, CustomerOrder } from "@/types/account";
+
 type TrackingEvent = {
   id: string;
   orderItemId?: string | null;
@@ -28,3 +30,9 @@ export const customerTrackingTimelineEvents = (events: TrackingEvent[]) => event
 export const customerTrackingEmptyMessage = () => "No fulfillment updates yet.";
 
 export const customerTrackingErrorMessage = (reason: unknown) => reason instanceof Error && reason.name !== "AbortError" ? reason.message : "Unable to load fulfillment updates";
+export const customerPaymentMethodLabel = (method: CustomerOrder["paymentMethod"]) => method === "cod" ? "Cash on Delivery" : "Payment method unavailable";
+export const customerPaymentStatusLabel = (status: CustomerOrder["paymentStatus"]) => status === "collected" ? "Collected on delivery" : "Pending · pay on delivery";
+export const customerFulfillmentStatusLabel = (status: CustomerFulfillmentStatus) => ({
+  pending: "Pending", processing: "Processing", packed: "Packed", shipped: "Shipped", delivered: "Delivered",
+  failed_delivery: "Failed delivery", return_requested: "Return requested", returned: "Returned", cancelled: "Cancelled",
+})[status];

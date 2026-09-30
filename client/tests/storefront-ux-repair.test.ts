@@ -49,7 +49,8 @@ test("Storefront gives the catalog hero one truthful, motion-safe real-product g
   assert.match(styles, /\.heroCopyEnter\s*\{[\s\S]*?animation: hero-copy-in 420ms/);
   assert.match(styles, /\.heroMediaEnter\s*\{[\s\S]*?animation: hero-media-in 520ms/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.heroGalleryMedia[\s\S]*?animation: none;/);
-  assert.doesNotMatch(storefront, /rating|delivery|discount|seller claim/i);
+  const hero = storefront.match(/<section className="marketplace-hero reference-collection-hero"[\s\S]*?<\/section>/)?.[0] ?? "";
+  assert.doesNotMatch(hero, /rating|delivery|discount|seller claim/i);
 });
 
 test("Storefront keeps its full marketplace shell API-backed, navigable, and motion-safe", () => {

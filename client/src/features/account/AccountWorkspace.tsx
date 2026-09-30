@@ -8,7 +8,7 @@ import { productImageSource } from "@/features/catalog/product-presentation";
 import { BrandLogo } from "@/components/BrandLogo";
 import { SkeletonCard } from "@/components/ui/Skeleton";
 import styles from "./AccountWorkspace.module.css";
-import { customerOrderItemSummary, customerTrackingEmptyMessage, customerTrackingErrorMessage, customerTrackingTimelineEvents } from "./customer-order.utils";
+import { customerFulfillmentStatusLabel, customerOrderItemSummary, customerPaymentMethodLabel, customerPaymentStatusLabel, customerTrackingEmptyMessage, customerTrackingErrorMessage, customerTrackingTimelineEvents } from "./customer-order.utils";
 import { buildAddressUpdate, validateAddressUpdate, type AddressEditFields } from "./address-editing";
 import type { Account, CustomerOrder, CustomerOrderTracking, CustomerReviewEligibility, ShippingAddress, WishlistItem } from "@/types/account";
 
@@ -309,15 +309,15 @@ export function AccountWorkspace() {
       const trackingState = tracking[order.id];
       const timeline = trackingState?.state === "loaded" ? customerTrackingTimelineEvents(trackingState.order.events) : [];
       return <article key={order.id} className="customer-order">
-        <div><strong>{order.reference}</strong><small>{customerOrderItemSummary(order.items)} · {new Date(order.createdAt).toLocaleDateString()}</small></div><strong>${order.total.toFixed(2)}</strong><span className={`status order-${order.status}`}>{order.status}</span>
+        <div><strong>{order.reference}</strong><small>{customerOrderItemSummary(order.items)} · {new Date(order.createdAt).toLocaleDateString()}</small></div><strong>${order.total.toFixed(2)}</strong><span className={`status order-${order.status}`}>Order {order.status}</span><span className="customer-order-payment">{customerPaymentMethodLabel(order.paymentMethod)} / {customerPaymentStatusLabel(order.paymentStatus)}</span>
         <div className="customer-order-tracking">
           {!trackingState && <button className="account-switch" onClick={() => void loadTracking(order)}>View fulfillment</button>}
           {trackingState?.state === "loading" && <p className="seller-state" aria-live="polite">Loading fulfillment updates…</p>}
           {trackingState?.state === "error" && <div role="alert"><p className="seller-error">{trackingState.message || "Unable to load fulfillment updates"}</p><button className="account-switch" onClick={() => void loadTracking(order)}>Try again</button></div>}
           {trackingState?.state === "loaded" && <section className="fulfillment-timeline" aria-label={`Fulfillment timeline for ${trackingState.order.reference}`}>
-            <h3>Fulfillment timeline</h3>
-            <ul className="fulfillment-items">{trackingState.order.items.map((item) => <li key={item.id}><span>{item.productName} ×{item.quantity}</span><strong>{item.fulfillmentStatus}</strong></li>)}</ul>
-            {timeline.length ? <ol>{timeline.map((event) => <li key={event.id}><strong>{event.title}</strong><span>{event.detail}</span><time dateTime={event.createdAt}>{new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(event.createdAt))}</time></li>)}</ol> : <p className="seller-state">{customerTrackingEmptyMessage()}</p>}
+            <h3>Fulfillment by item</h3><p className="customer-tracking-payment">{customerPaymentMethodLabel(trackingState.order.paymentMethod)} / {customerPaymentStatusLabel(trackingState.order.paymentStatus)} / Order {trackingState.order.status}</p>
+            <ul className="fulfillment-items">{trackingState.order.items.map((item) => <li key={item.id}><span>{item.productName} ×{item.quantity}</span><strong>{customerFulfillmentStatusLabel(item.fulfillmentStatus)}</strong></li>)}</ul>
+            <h4>Recorded updates</h4>{timeline.length ? <ol>{timeline.map((event) => <li key={event.id}><strong>{event.title}</strong><span>{event.detail}</span><time dateTime={event.createdAt}>{new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(event.createdAt))}</time></li>)}</ol> : <p className="seller-state">{customerTrackingEmptyMessage()}</p>}
           </section>}
         </div>
       </article>;

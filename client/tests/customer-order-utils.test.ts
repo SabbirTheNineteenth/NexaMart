@@ -1,6 +1,16 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { customerOrderItemSummary, customerTrackingEmptyMessage, customerTrackingErrorMessage, customerTrackingTimelineEvents } from "../src/features/account/customer-order.utils";
+import { customerFulfillmentStatusLabel, customerOrderItemSummary, customerPaymentMethodLabel, customerPaymentStatusLabel, customerTrackingEmptyMessage, customerTrackingErrorMessage, customerTrackingTimelineEvents } from "../src/features/account/customer-order.utils";
+
+test("COD labels reflect only the API payment status", () => {
+  assert.equal(customerPaymentMethodLabel("cod"), "Cash on Delivery");
+  assert.equal(customerPaymentStatusLabel("unpaid"), "Pending · pay on delivery");
+  assert.equal(customerPaymentStatusLabel("collected"), "Collected on delivery");
+});
+
+test("every COD line lifecycle status has its own readable label", () => {
+  assert.deepEqual(["pending", "processing", "packed", "shipped", "delivered", "failed_delivery", "return_requested", "returned", "cancelled"].map((status) => customerFulfillmentStatusLabel(status as never)), ["Pending", "Processing", "Packed", "Shipped", "Delivered", "Failed delivery", "Return requested", "Returned", "Cancelled"]);
+});
 
 test("customer order summary lists every purchased item", () => {
   assert.equal(customerOrderItemSummary([{ productId: "p-1", quantity: 2, unitPrice: 89 }, { productId: "p-2", quantity: 1, unitPrice: 15 }]), "3 items");

@@ -5,5 +5,5 @@ export function checkoutItems(items: CartItem[]) {
 }
 
 export function checkoutPayload(items: CartItem[], shippingAddressId: string) {
-  return { shippingAddressId, items: checkoutItems(items) };
+  return { paymentMethod: "cod" as const, shippingAddressId, items: checkoutItems(items) };
 }
