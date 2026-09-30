@@ -17,7 +17,8 @@ test("customers can set one saved shipping address as default only after the def
 });
 
 test("default-address actions name the address and expose selected, pending, success, and 404 states", () => {
-  assert.match(workspace, /account\.role === "customer" && \(address\.isDefault \? <span className="status order-confirmed"[^>]*>Default shipping address<\/span> : <button[^>]*aria-label=\{`Set \$\{address\.recipientName\} as default shipping address`\}/);
+  assert.match(workspace, /address\.isDefault && <span className="status order-confirmed"[^>]*>Default<\/span>/);
+  assert.match(workspace, /!address\.isDefault && <button[^>]*aria-label=\{`Set \$\{address\.recipientName\} as default shipping address`\}/);
   assert.match(workspace, /Setting default address…/);
   assert.match(workspace, /Default shipping address saved\./);
   assert.match(workspace, /Address was not found or is no longer available\./);

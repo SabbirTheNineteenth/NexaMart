@@ -27,3 +27,13 @@ test("account preserves real address and saved-item actions without changing def
   assert.match(workspace, /postJSON<\{ address: ShippingAddress \}>\("\/addresses\/",/);
   assert.doesNotMatch(workspace, /setDefaultAddress\([^)]*\)\s*;\s*await postJSON/);
 });
+
+test("saved addresses stay compact until a customer explicitly opens one editor", () => {
+  assert.match(workspace, /const \[addressEditors, setAddressEditors\] = useState<Record<string, boolean>>\(\{\}\);/);
+  assert.match(workspace, /Edit address/);
+  assert.match(workspace, /addressEditors\[address\.id\] && <form/);
+  assert.match(workspace, /Add a new address/);
+  assert.match(styles, /\.addressCardActions/);
+  assert.match(styles, /\.addressEditorForm/);
+  assert.match(styles, /\.addressFormAction/);
+});

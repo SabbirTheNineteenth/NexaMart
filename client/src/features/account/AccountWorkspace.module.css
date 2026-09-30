@@ -95,3 +95,25 @@
 .signedOutHeaderActions :global(.account-switch:hover),.signedOutActions :global(.account-switch:hover) { border-color: var(--account-accent); background: #f3edff; color: #482481; transform: none; }.signedOutActions :global(.primary-button:hover) { background: #5830a0; transform: none; }
 @media (max-width: 700px) { .signedOutHeader { padding: 0 14px; }.signedOutEntry { margin-top: 32px; }.signedOutActions { width: 100%; } }
 @media (max-width: 420px) { .signedOutHeader { align-items: center; min-height: 60px; padding: 10px 12px; }.signedOutHeader :global(.marketplace-brand) { font-size: 14px; }.signedOutHeaderActions :global(.account-switch) { min-height: 40px; padding: 8px 10px; }.signedOutEntry { gap: 20px; margin: 24px auto 36px; padding: 24px 20px; }.signedOutActions { flex-direction: column; align-items: stretch; }.signedOutActions :global(.primary-button),.signedOutActions :global(.account-switch) { width: 100%; }.entryCopy h1 { font-size: clamp(30px, 10vw, 40px); } }
+
+/* Address management is a compact operating surface, not an always-open form wall. */
+.content :global(.account-address-list) { display: grid; gap: 12px; margin: 0 0 20px; }
+.content :global(.account-address-editor) { display: grid; gap: 14px; padding: 18px; border: 1px solid var(--account-line); border-radius: 10px; background: #fff; }
+.content :global(.account-address-summary) { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin: 0; }
+.content :global(.account-address-summary > div) { min-width: 0; }
+.content :global(.account-address-summary strong) { display: block; color: var(--account-ink); font-size: 15px; }
+.content :global(.account-address-summary small) { max-width:70ch; line-height: 1.5; overflow-wrap: anywhere; }
+.content :global(.account-address-summary .status) { flex: 0 0 auto; margin: 0; white-space: nowrap; }
+.addressCardActions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-top: 14px; border-top: 1px solid #ece6f2; }
+.addressCardActions :global(.account-switch), .addressCardActions :global(.account-address-remove) { width: auto; min-height: 38px; padding: 8px 12px; font-size: 12px; }
+.addressCardActions :global(.account-address-remove) { margin-left: auto; }
+.addressEditorForm, .addressCreateForm { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 14px 16px; }
+.addressEditorForm { margin-top: 2px; border-color: #d9cdec; background: #faf8ff; }
+.addressFormHeading { display: grid; grid-column: 1 / -1; gap: 4px; padding-bottom: 2px; }
+.addressFormHeading strong { color: var(--account-ink); font-size: 15px; }
+.addressFormHeading p { margin: 0; color: var(--account-muted); font-size: 13px; line-height: 1.45; }
+.addressFormAction { display: flex; grid-column: 1 / -1; flex-wrap: wrap; align-items: center; gap: 10px; padding-top: 2px; }
+.addressFormAction :global(.primary-button) { width: auto; min-width: 150px; }
+.addressFormAction :global(.seller-profile-success), .addressFormAction :global(.seller-error) { margin: 0; }
+@media (max-width: 700px) { .content :global(.account-address-editor) { padding: 16px; }.addressEditorForm, .addressCreateForm { grid-template-columns: 1fr; }.addressFormHeading, .addressFormAction { grid-column: auto; }.addressCardActions :global(.account-address-remove) { margin-left: 0; } }
+@media (max-width: 420px) { .content :global(.account-address-summary) { display: grid; gap: 10px; }.addressCardActions { align-items: stretch; }.addressCardActions :global(.account-switch), .addressCardActions :global(.account-address-remove), .addressFormAction :global(.primary-button) { width: 100%; } }
