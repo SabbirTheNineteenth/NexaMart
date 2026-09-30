@@ -108,6 +108,8 @@ The order-created outbox event notifies the configured Admin Telegram chat. Admi
 
 Local n8n needs the dedicated NexaMart bot and active NexaMart workflows, the Server service token and signed webhook settings, `NODE_FUNCTION_ALLOW_BUILTIN=crypto`, and `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`. With COD automation enabled, `NEXAMART_LOCAL_OUTBOX_DISPATCH_ENABLED=1` starts a five-second in-process dispatch tick **only while that explicitly enabled local Server process is running**. The flag is inert in production, including Vercel/serverless. A separately provisioned external scheduler for production remains **unresolved and unimplemented**. See [local n8n operations](server/automation/n8n/README.md) for setup, retries, retention, and workflow verification.
 
+Pushing this repository shares the workflow JSON and application code; it does **not** transfer the local n8n database, published/active workflow state, bot-linked customer chats, or ignored `.env` settings. Configure and activate those separately in any target environment. A source-code push is not a production deployment or proof of production Telegram delivery.
+
 ## Quality checks
 
 Run checks independently for the client and API after configuring their local environments.
