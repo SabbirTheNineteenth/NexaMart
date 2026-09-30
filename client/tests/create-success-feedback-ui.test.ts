@@ -22,7 +22,9 @@ test("async create forms announce their own successful reconciliation politely w
   assert.match(taxonomy, /<p aria-live="polite" role=\{itemFeedback\.kind === "error" \? "alert" : "status"\}>\{itemFeedback\.message\}<\/p>/);
 
   assert.match(workspace, /const \[addressCreateSuccess, setAddressCreateSuccess\] = useState\(""\);/);
-  assert.match(workspace, /event\.currentTarget\.reset\(\); await loadAddresses\(\);\s*setAddressCreateSuccess\("Shipping address saved\."\);/);
+  assert.match(workspace, /const addressCreateForm = event\.currentTarget;\s*const form = new FormData\(addressCreateForm\);/);
+  assert.match(workspace, /addressCreateForm\.reset\(\);\s*await loadAddresses\(\);\s*setAddressCreateSuccess\("Shipping address saved\."\);/);
+  assert.doesNotMatch(workspace, /event\.currentTarget\.reset\(\)/);
   assert.match(workspace, /<p className="seller-profile-success" role="status">\{addressCreateSuccess\}<\/p>/);
 
   assert.match(productForm, /inputRef\.current\?\.focus\(\)/);

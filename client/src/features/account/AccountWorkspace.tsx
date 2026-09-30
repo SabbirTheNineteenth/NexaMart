@@ -199,10 +199,11 @@ export function AccountWorkspace() {
   };
   const addAddress = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault(); setError(""); setAddressCreateSuccess(""); setSaving(true);
-    const form = new FormData(event.currentTarget);
+    const addressCreateForm = event.currentTarget;
+    const form = new FormData(addressCreateForm);
     try {
       await postJSON<{ address: ShippingAddress }>("/addresses/", { recipientName: String(form.get("recipientName")), phone: String(form.get("phone")), line1: String(form.get("line1")), city: String(form.get("city")), country: String(form.get("country") || "BD") });
-      event.currentTarget.reset(); await loadAddresses();
+      addressCreateForm.reset(); await loadAddresses();
       setAddressCreateSuccess("Shipping address saved.");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Unable to save address"); }
     finally { setSaving(false); }
