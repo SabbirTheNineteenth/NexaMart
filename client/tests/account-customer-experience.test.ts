@@ -35,6 +35,6 @@ test("saved addresses stay compact until a customer explicitly opens one editor"
   assert.match(workspace, /Add a new address/);
   assert.match(styles, /\.addressCardActions/);
   assert.match(styles, /\.addressEditorForm/);
-  assert.match(styles, /\.addressEditorForm \{ margin-top: 2px; width: min\(100%, 680px\); margin-right: auto; margin-left: auto;/);
+  assert.match(styles, /\.content \.addressEditorForm \{ width: min\(100%, 680px\)!important;/);
   assert.match(styles, /\.addressFormAction/);
 });
