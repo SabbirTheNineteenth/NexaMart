@@ -1,4 +1,4 @@
-import { and, eq, isNull, lte, sql } from "drizzle-orm";
+import { and, eq, isNull, lt, lte, sql } from "drizzle-orm";
 import { db } from "../../../db/client.js";
 import { auditRecords, codOutbox, commissionRecords, orderEvents, orderItems, orders, sellerProfiles, serviceAuditRecords } from "../../../db/schema/index.js";
 import { allCodLinesCollected, canActOnCodLine, codTransitionAllowed, createCodEventPayload, postCodWebhook, type CodAction, type CodEventType } from "../cod.js";
@@ -20,9 +20,9 @@ export class CodOperationsService {
       await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`cod-line:${input.orderItemId}`}))`);
       if (input.actor.externalEventId) {
         await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`cod-event:${input.actor.externalEventId}`}))`);
-        const [prior] = await tx.select({ id: orderEvents.id, orderId: orderEvents.orderId, orderItemId: orderEvents.orderItemId, toStatus: orderEvents.toStatus }).from(orderEvents).where(eq(orderEvents.externalEventId, input.actor.externalEventId)).limit(1);
+        const [prior] = await tx.select({ id: orderEvents.id, orderId: orderEvents.orderId, orderItemId: orderEvents.orderItemId, toStatus: orderEvents.toStatus, source: orderEvents.source, serviceActorId: orderEvents.serviceActorId }).from(orderEvents).where(eq(orderEvents.externalEventId, input.actor.externalEventId)).limit(1);
         if (prior) {
-          if (prior.orderItemId !== input.orderItemId || prior.toStatus !== input.action) throw new CodOperationError("INVALID_ACTION", "Event identifier already used");
+          if (prior.orderItemId !== input.orderItemId || prior.toStatus !== input.action || prior.source !== "n8n" || prior.serviceActorId !== input.actor.id) throw new CodOperationError("INVALID_ACTION", "Event identifier already used");
           return { orderId: prior.orderId, orderItemId: input.orderItemId, fulfillmentStatus: input.action, duplicate: true };
         }
       }
@@ -33,7 +33,7 @@ export class CodOperationsService {
         const [active] = await tx.select({ id: sellerProfiles.accountId }).from(sellerProfiles).where(and(eq(sellerProfiles.accountId, input.actor.id), eq(sellerProfiles.status, "active"))).limit(1);
         if (!active) throw new CodOperationError("NOT_FOUND", "Order item not found");
       }
-      if (input.action === "delivered" && line.fulfillmentStatus === "delivered" && line.codCollectedAt) return { orderId: line.orderId, orderItemId: line.id, fulfillmentStatus: "delivered" as const, duplicate: true };
+      if (input.actor.kind !== "n8n" && input.action === "delivered" && line.fulfillmentStatus === "delivered" && line.codCollectedAt) return { orderId: line.orderId, orderItemId: line.id, fulfillmentStatus: "delivered" as const, duplicate: true };
       const [order] = await tx.select().from(orders).where(eq(orders.id, line.orderId)).limit(1);
       if (!order || order.paymentMethod !== "cod") throw new CodOperationError("INVALID_ACTION", "COD order required");
       if (order.status === "cancelled" || (input.action !== "cancelled" && order.status !== "confirmed") || !codTransitionAllowed(line.fulfillmentStatus, input.action)) throw new CodOperationError("INVALID_TRANSITION", "Invalid fulfillment transition");
@@ -81,19 +81,26 @@ export class CodOperationsService {
 
   async dispatch(input: { url: string; secret: string; transport?: typeof fetch }) {
     const transport = input.transport ?? fetch;
-    const due = await this.database.select().from(codOutbox).where(and(isNull(codOutbox.deliveredAt), lte(codOutbox.nextAttemptAt, new Date()))).limit(25);
-    let delivered = 0;
+    const due = await this.database.select().from(codOutbox).where(and(isNull(codOutbox.deliveredAt), lte(codOutbox.nextAttemptAt, new Date()), lt(codOutbox.attempts, 5))).limit(25);
+    let attempted = 0; let delivered = 0; let failed = 0; let exhausted = 0; let skipped = 0;
     for (const event of due) {
-      if (event.attempts >= 5) continue;
+      const [claimed] = await this.database.update(codOutbox).set({ attempts: sql`${codOutbox.attempts} + 1`, nextAttemptAt: new Date(Date.now() + 30_000), lastError: "Outcome pending" })
+        .where(and(eq(codOutbox.id, event.id), isNull(codOutbox.deliveredAt), lte(codOutbox.nextAttemptAt, new Date()), lt(codOutbox.attempts, 5)))
+        .returning();
+      if (!claimed) { skipped++; continue; }
+      attempted++;
       try {
-        const response = await postCodWebhook(input.url, input.secret, event.payload, transport);
+        const response = await postCodWebhook(input.url, input.secret, claimed.payload, transport);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        await this.database.update(codOutbox).set({ deliveredAt: new Date(), attempts: event.attempts + 1, lastError: null }).where(and(eq(codOutbox.id, event.id), isNull(codOutbox.deliveredAt)));
+        await this.database.update(codOutbox).set({ deliveredAt: new Date(), lastError: null }).where(and(eq(codOutbox.id, claimed.id), isNull(codOutbox.deliveredAt), eq(codOutbox.attempts, claimed.attempts)));
         delivered++;
-      } catch {
-        await this.database.update(codOutbox).set({ attempts: event.attempts + 1, nextAttemptAt: new Date(Date.now() + Math.min(300000, 1000 * 2 ** event.attempts)), lastError: "Delivery failed" }).where(and(eq(codOutbox.id, event.id), isNull(codOutbox.deliveredAt)));
+      } catch (error) {
+        const safeError = error instanceof Error && /^HTTP [1-5][0-9]{2}$/.test(error.message) ? error.message : "Transport failed";
+        await this.database.update(codOutbox).set({ nextAttemptAt: new Date(Date.now() + Math.min(300_000, 1000 * 2 ** (claimed.attempts - 1))), lastError: safeError }).where(and(eq(codOutbox.id, claimed.id), isNull(codOutbox.deliveredAt), eq(codOutbox.attempts, claimed.attempts)));
+        failed++;
+        if (claimed.attempts >= 5) exhausted++;
       }
     }
-    return { attempted: due.length, delivered };
+    return { attempted, delivered, failed, exhausted, skipped };
   }
 }

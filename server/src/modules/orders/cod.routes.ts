@@ -10,9 +10,13 @@ type SessionResolver = { resolve(token: string): Promise<PublicAccount | null> }
 type Config = { token: string; actorId: string; webhookUrl: string; webhookSecret: string };
 const uuid = z.string().uuid();
 const actionSchema = z.object({ action: z.enum(["processing", "packed", "shipped", "delivered", "failed_delivery", "return_requested", "returned", "cancelled"]) }).strict();
-const callbackSchema = z.object({ eventId: z.string().trim().min(8).max(128).regex(/^[A-Za-z0-9_-]+$/), orderItemId: uuid, action: z.enum(["cod.delivery_collected", "cod.delivery_failed", "cod.return_requested"]) }).strict();
+const callbackSchema = z.object({ eventId: z.string().min(8).max(128).regex(/^[A-Za-z0-9_-]+$/), orderItemId: uuid, action: z.enum(["cod.delivery_collected", "cod.delivery_failed", "cod.return_requested"]) }).strict();
 const callbackAction: Record<z.infer<typeof callbackSchema>["action"], CodAction> = { "cod.delivery_collected": "delivered", "cod.delivery_failed": "failed_delivery", "cod.return_requested": "return_requested" };
-const validToken = (actual: string | undefined, expected: string) => !!actual && actual.length === expected.length && timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
+const validToken = (authorization: string | undefined, expected: string) => {
+  const bearer = /^Bearer ([^\s]+)$/.exec(authorization ?? "");
+  const actual = bearer?.[1];
+  return !!actual && actual.length === expected.length && timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
+};
 const responseFor = (c: { json: (value: { error: string }, status: 404 | 409 | 500) => Response }, error: unknown) => {
   if (error instanceof CodOperationError) return c.json({ error: error.message }, error.code === "NOT_FOUND" ? 404 : 409);
   return c.json({ error: "COD operation failed" }, 500);
@@ -33,7 +37,7 @@ export function createCodRoutes(input: { sessions: SessionResolver; operations: 
     catch (error) { return responseFor(c, error); }
   });
   routes.use("/local/*", async (c, next) => {
-    if (!validToken(c.req.header("authorization")?.replace(/^Bearer /, ""), input.config.token)) return c.json({ error: "Service authentication required" }, 401);
+    if (!validToken(c.req.header("authorization"), input.config.token)) return c.json({ error: "Service authentication required" }, 401);
     await next();
   });
   routes.post("/local/callback", async (c) => {
