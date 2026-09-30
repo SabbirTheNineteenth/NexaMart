@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { customerFulfillmentStatusLabel, customerOrderItemSummary, customerPaymentMethodLabel, customerPaymentStatusLabel, customerTrackingEmptyMessage, customerTrackingErrorMessage, customerTrackingTimelineEvents } from "../src/features/account/customer-order.utils";
+import { customerFulfillmentStatusLabel, customerOrderApprovalLabel, customerOrderItemSummary, customerPaymentMethodLabel, customerPaymentStatusLabel, customerTrackingEmptyMessage, customerTrackingErrorMessage, customerTrackingTimelineEvents } from "../src/features/account/customer-order.utils";
 
 test("COD labels reflect only the API payment status", () => {
   assert.equal(customerPaymentMethodLabel("cod"), "Cash on Delivery");
   assert.equal(customerPaymentStatusLabel("unpaid"), "Pending · pay on delivery");
   assert.equal(customerPaymentStatusLabel("collected"), "Collected on delivery");
+  assert.equal(customerOrderApprovalLabel("pending"), "Awaiting Admin approval");
+  assert.equal(customerOrderApprovalLabel("confirmed"), "Approved for delivery");
+  assert.equal(customerOrderApprovalLabel("cancelled"), "Rejected / cancelled");
 });
 
 test("every COD line lifecycle status has its own readable label", () => {

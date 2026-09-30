@@ -29,6 +29,7 @@ function makeApp(account: typeof admin | typeof seller | null = admin, orderRead
   app.route("/admin/orders", createAdminOrderRoutes({
     sessions: { async resolve(token: string) { return token === "opaque-admin-session" ? account : null; } },
     orders: orderReader,
+    operations: {} as never,
   }));
   return app;
 }

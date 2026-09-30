@@ -1,6 +1,6 @@
-import { desc, eq, inArray } from "drizzle-orm";
+import { asc, desc, eq, inArray } from "drizzle-orm";
 import { db } from "../../db/client.js";
-import { accounts, orderItems, orders } from "../../db/schema/index.js";
+import { accounts, orderEvents, orderItems, orders } from "../../db/schema/index.js";
 import type { AdminOrderRepository } from "./admin-order.repository.js";
 import type { AdminOrderOversight } from "./admin-order.routes.js";
 
@@ -32,7 +32,15 @@ export class PostgresAdminOrderRepository implements AdminOrderRepository {
       quantity: orderItems.quantity,
       unitPrice: orderItems.unitPrice,
       fulfillmentStatus: orderItems.fulfillmentStatus,
+      codCollectedAt: orderItems.codCollectedAt,
     }).from(orderItems).where(inArray(orderItems.orderId, orderIds));
+    const persistedEvents = orderIds.length === 0 ? [] : await db.select({ id: orderEvents.id, orderId: orderEvents.orderId, eventType: orderEvents.eventType, fromStatus: orderEvents.fromStatus, toStatus: orderEvents.toStatus, note: orderEvents.note, createdAt: orderEvents.createdAt }).from(orderEvents).where(inArray(orderEvents.orderId, orderIds)).orderBy(asc(orderEvents.sequence));
+    const eventsByOrder = new Map<string, NonNullable<AdminOrderOversight["events"]>>();
+    for (const event of persistedEvents) {
+      const events = eventsByOrder.get(event.orderId) ?? [];
+      events.push({ id: event.id, eventType: event.eventType, fromStatus: event.fromStatus, toStatus: event.toStatus, note: event.note, createdAt: event.createdAt.toISOString() });
+      eventsByOrder.set(event.orderId, events);
+    }
     const itemsByOrder = new Map<string, AdminOrderOversight["items"]>();
     for (const item of persistedItems) {
       const items = itemsByOrder.get(item.orderId) ?? [];
@@ -44,6 +52,7 @@ export class PostgresAdminOrderRepository implements AdminOrderRepository {
         quantity: item.quantity,
         unitPrice: Number(item.unitPrice),
         fulfillmentStatus: item.fulfillmentStatus,
+        collectionRecorded: item.codCollectedAt !== null,
       });
       itemsByOrder.set(item.orderId, items);
     }
@@ -55,6 +64,7 @@ export class PostgresAdminOrderRepository implements AdminOrderRepository {
       paymentStatus: order.paymentStatus,
       total: Number(order.total),
       customer: { id: order.customerId, name: order.customerName },
+      events: eventsByOrder.get(order.id) ?? [],
       items: itemsByOrder.get(order.id) ?? [],
     }));
   }

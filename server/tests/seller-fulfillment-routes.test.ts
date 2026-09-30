@@ -3,11 +3,12 @@ import test from "node:test";
 import { Hono } from "hono";
 import { createSellerFulfillmentRoutes } from "../src/modules/seller/seller-fulfillment.routes.js";
 import { isSellerFulfillmentTransitionAllowed, SellerFulfillmentService } from "../src/modules/seller/services/seller-fulfillment-service.js";
+import { orders } from "../src/db/schema/index.js";
 
 const seller = { id: "seller-1", name: "Sabbir", email: "seller@example.com", role: "seller" as const, createdAt: "2026-09-11T00:00:00.000Z" };
 const customer = { ...seller, id: "customer-1", role: "customer" as const };
 
-const fulfillmentDatabase = (fulfillmentStatus: "pending" | "processing" | "packed" | "delivered", commissionStatus: "accrued" | "eligible" = "accrued", sellerActive?: boolean, stale = false) => {
+const fulfillmentDatabase = (fulfillmentStatus: "pending" | "processing" | "packed" | "delivered", commissionStatus: "accrued" | "eligible" = "accrued", sellerActive?: boolean, stale = false, orderStatus: "pending" | "confirmed" = "confirmed") => {
   const updates: unknown[] = [];
   const events: unknown[] = [];
   const operations: string[] = [];
@@ -19,7 +20,7 @@ const fulfillmentDatabase = (fulfillmentStatus: "pending" | "processing" | "pack
     select() {
       let joinedSellerProfile = false;
       const query = {
-        from() { return query; },
+        from(table: unknown) { if (table === orders) return { where() { return { limit: async () => [{ status: orderStatus }] }; } }; return query; },
         innerJoin() { joinedSellerProfile = true; return query; },
         where() { return query; },
         limit() { return Promise.resolve(sellerActive === false && joinedSellerProfile ? [] : [{ id: "item-1", orderId: "order-1", fulfillmentStatus }]); },
@@ -43,6 +44,13 @@ const fulfillmentDatabase = (fulfillmentStatus: "pending" | "processing" | "pack
   };
   return { database, updates, events, operations, commission, transaction: () => transaction };
 };
+
+test("seller cannot move a COD line before Admin approval", async () => {
+  const state = fulfillmentDatabase("pending", "accrued", true, false, "pending");
+  await assert.rejects(new SellerFulfillmentService(state.database as never).transition({ sellerId: seller.id, orderItemId: "item-1", status: "processing" }), { code: "INVALID_FULFILLMENT_TRANSITION" });
+  assert.deepEqual(state.updates, []);
+  assert.deepEqual(state.events, []);
+});
 
 test("seller cancellation voids its accrued commission in the fulfillment transaction while retaining the event", async () => {
   const state = fulfillmentDatabase("pending");

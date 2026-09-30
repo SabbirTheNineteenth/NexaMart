@@ -14,8 +14,9 @@ test("admin order oversight repository reads safe order, customer display, and i
   assert.match(source, /variantSku: orderItems\.variantSku/);
   assert.match(source, /variantOptions: orderItems\.variantOptions/);
   assert.match(source, /fulfillmentStatus: orderItems\.fulfillmentStatus/);
+  assert.match(source, /from\(orderEvents\)[\s\S]*orderBy\(asc\(orderEvents\.sequence\)\)/);
 });
 
 test("admin order oversight repository excludes private and mutable fulfillment data", () => {
-  assert.doesNotMatch(source, /accounts\.email|passwordHash|shippingAddressSnapshot|orderEvents|\.insert\(|\.update\(|\.delete\(/);
+  assert.doesNotMatch(source, /accounts\.email|passwordHash|shippingAddressSnapshot|\.insert\(|\.update\(|\.delete\(/);
 });

@@ -59,8 +59,34 @@ function fixture(secondLine: "delivered" | "shipped" = "delivered") {
     requestedEventId = eventId; requestedLineId = orderItemId;
     return app.request("http://localhost/api/cod/local/callback", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ eventId, action, orderItemId }) });
   };
-  return { app, order, lines, events, serviceAudits, humanAudits, outbox, callback };
+  return { app, order, lines, events, serviceAudits, humanAudits, outbox, callback, operations };
 }
+
+test("Admin delivery alone records delivery without COD collection", async () => {
+  const f = fixture();
+  await assert.rejects(f.operations.transition({ orderId, orderItemId: lineId, action: "delivered", collectionEvidence: true, actor: { kind: "admin", id: actorId } }), { code: "INVALID_TRANSITION" });
+  assert.equal(f.lines[0]!.fulfillmentStatus, "shipped");
+  const delivered = await f.operations.transition({ orderId, orderItemId: lineId, action: "delivered", actor: { kind: "admin", id: actorId } });
+  assert.equal(delivered.fulfillmentStatus, "delivered");
+  assert.equal(f.lines[0]!.codCollectedAt, null);
+  assert.equal(f.order.paymentStatus, "unpaid");
+  assert.equal(f.events[0]!.eventType, "fulfillment_delivered");
+  assert.equal(f.outbox.length, 0);
+  const collected = await f.operations.transition({ orderId, orderItemId: lineId, action: "delivered", collectionEvidence: true, actor: { kind: "admin", id: actorId } });
+  assert.equal(collected.duplicate, false);
+  assert.ok(f.lines[0]!.codCollectedAt instanceof Date);
+  assert.equal(f.order.paymentStatus, "collected");
+  assert.equal(f.events[1]!.eventType, "cod_delivered_collected");
+  assert.equal(f.humanAudits[1]!.action, "cod.delivery_collected");
+});
+
+test("Admin delivery cannot mutate a line under a different order identifier", async () => {
+  const f = fixture();
+  await assert.rejects(f.operations.transition({ orderId: "99999999-9999-4999-8999-999999999999", orderItemId: lineId, action: "delivered", actor: { kind: "admin", id: actorId } }), { code: "NOT_FOUND" });
+  assert.equal(f.lines[0]!.fulfillmentStatus, "shipped");
+  assert.equal(f.order.paymentStatus, "unpaid");
+  assert.deepEqual([f.events.length, f.humanAudits.length, f.outbox.length], [0, 0, 0]);
+});
 
 test("shipped COD callback collects in one service transaction and attributes only the machine actor", async () => {
   const f = fixture();

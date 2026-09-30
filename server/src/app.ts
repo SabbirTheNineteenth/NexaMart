@@ -196,7 +196,7 @@ export function createApp(environment: Environment = process.env, dependencies: 
   app.route("/admin/finance", createAdminFinanceRoutes({ sessions: sessionService, finance: adminFinanceService }));
   app.route("/admin/taxonomy", createAdminTaxonomyRoutes({ sessions: sessionService, taxonomy: taxonomyService }));
   app.route("/admin/categories", createAdminCategoryRoutes({ sessions: sessionService, categories: adminCategoryService }));
-  app.route("/admin/orders", createAdminOrderRoutes({ sessions: sessionService, orders: adminOrderService }));
+  app.route("/admin/orders", createAdminOrderRoutes({ sessions: sessionService, orders: adminOrderService, operations: codOperations }));
   app.route("/admin/products", createAdminProductRoutes({ sessions: sessionService, products: adminProductService }));
   app.route("/admin/promotions", createAdminPromotionRoutes({ sessions: sessionService, promotions: adminPromotionService }));
   app.route("/admin/audit-records", createAuditRoutes({ sessions: sessionService, audit: auditService }));

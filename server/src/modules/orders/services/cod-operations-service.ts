@@ -15,7 +15,7 @@ const eventForStatus: Partial<Record<CodAction, CodEventType>> = {
 export class CodOperationsService {
   constructor(private readonly database = db) {}
 
-  async transition(input: { orderItemId: string; action: CodAction; actor: Actor }) {
+  async transition(input: { orderItemId: string; orderId?: string; action: CodAction; actor: Actor; collectionEvidence?: boolean }) {
     return this.database.transaction(async (tx) => {
       await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`cod-line:${input.orderItemId}`}))`);
       if (input.actor.externalEventId) {
@@ -28,17 +28,19 @@ export class CodOperationsService {
       }
       const [line] = await tx.select({ id: orderItems.id, orderId: orderItems.orderId, sellerId: orderItems.sellerId, fulfillmentStatus: orderItems.fulfillmentStatus, codCollectedAt: orderItems.codCollectedAt, quantity: orderItems.quantity, unitPrice: orderItems.unitPrice })
         .from(orderItems).where(eq(orderItems.id, input.orderItemId)).limit(1);
-      if (!line || !canActOnCodLine(input.actor.kind, input.actor.id, line.sellerId)) throw new CodOperationError("NOT_FOUND", "Order item not found");
+      if (!line || (input.orderId && line.orderId !== input.orderId) || !canActOnCodLine(input.actor.kind, input.actor.id, line.sellerId)) throw new CodOperationError("NOT_FOUND", "Order item not found");
       if (input.actor.kind === "seller") {
         const [active] = await tx.select({ id: sellerProfiles.accountId }).from(sellerProfiles).where(and(eq(sellerProfiles.accountId, input.actor.id), eq(sellerProfiles.status, "active"))).limit(1);
         if (!active) throw new CodOperationError("NOT_FOUND", "Order item not found");
       }
-      if (input.actor.kind !== "n8n" && input.action === "delivered" && line.fulfillmentStatus === "delivered" && line.codCollectedAt) return { orderId: line.orderId, orderItemId: line.id, fulfillmentStatus: "delivered" as const, duplicate: true };
+      const collectionEvidence = input.action === "delivered" && (input.actor.kind === "n8n" || (input.actor.kind === "admin" && input.collectionEvidence === true));
+      if (collectionEvidence && input.actor.kind === "admin" && line.fulfillmentStatus === "delivered" && line.codCollectedAt) return { orderId: line.orderId, orderItemId: line.id, fulfillmentStatus: "delivered" as const, duplicate: true };
+      if (collectionEvidence && input.actor.kind === "admin" && line.fulfillmentStatus !== "delivered") throw new CodOperationError("INVALID_TRANSITION", "Delivery must be recorded before COD collection");
       const [order] = await tx.select().from(orders).where(eq(orders.id, line.orderId)).limit(1);
       if (!order || order.paymentMethod !== "cod") throw new CodOperationError("INVALID_ACTION", "COD order required");
-      if (order.status === "cancelled" || (input.action !== "cancelled" && order.status !== "confirmed") || !codTransitionAllowed(line.fulfillmentStatus, input.action)) throw new CodOperationError("INVALID_TRANSITION", "Invalid fulfillment transition");
+      if (order.status !== "confirmed" || !(codTransitionAllowed(line.fulfillmentStatus, input.action) || (collectionEvidence && line.fulfillmentStatus === "delivered" && !line.codCollectedAt))) throw new CodOperationError("INVALID_TRANSITION", "Invalid fulfillment transition");
       if (input.action === "delivered" && input.actor.kind === "n8n" && !input.actor.externalEventId) throw new CodOperationError("INVALID_ACTION", "Event identifier required");
-      const [updated] = await tx.update(orderItems).set({ fulfillmentStatus: input.action, ...(input.action === "delivered" ? { codCollectedAt: new Date() } : {}) })
+      const [updated] = await tx.update(orderItems).set({ fulfillmentStatus: input.action, ...(collectionEvidence ? { codCollectedAt: new Date() } : {}) })
         .where(and(eq(orderItems.id, line.id), eq(orderItems.fulfillmentStatus, line.fulfillmentStatus))).returning({ id: orderItems.id });
       if (!updated) throw new CodOperationError("INVALID_TRANSITION", "Invalid fulfillment transition");
       if (input.action === "cancelled" || input.action === "returned") await tx.update(commissionRecords).set({ status: "void" }).where(and(eq(commissionRecords.orderItemId, line.id), eq(commissionRecords.status, "accrued")));
@@ -48,11 +50,11 @@ export class CodOperationsService {
       if (collected) await tx.update(orders).set({ paymentStatus: "collected" }).where(eq(orders.id, line.orderId));
       await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`order-event-sequence:${line.orderId}`}))`);
       const sequence = Number((await tx.execute(sql`select coalesce(max("sequence"), 0) + 1 as "sequence" from "order_events" where "order_id" = ${line.orderId}`)).rows[0].sequence);
-      await tx.insert(orderEvents).values({ orderId: line.orderId, orderItemId: line.id, ...codActorColumns(input.actor), source: input.actor.kind === "n8n" ? "n8n" : "account", externalEventId: input.actor.externalEventId, eventType: input.action === "delivered" ? "cod_delivered_collected" : `fulfillment_${input.action}`, fromStatus: line.fulfillmentStatus, toStatus: input.action, sequence });
-      const audit = { action: `cod.${input.action}`, resourceType: "order_item", resourceId: line.id, metadata: { orderId: line.orderId, source: input.actor.kind, externalEventId: input.actor.externalEventId ?? null } };
+      await tx.insert(orderEvents).values({ orderId: line.orderId, orderItemId: line.id, ...codActorColumns(input.actor), source: input.actor.kind === "n8n" ? "n8n" : "account", externalEventId: input.actor.externalEventId, eventType: collectionEvidence ? "cod_delivered_collected" : `fulfillment_${input.action}`, fromStatus: line.fulfillmentStatus, toStatus: input.action, sequence });
+      const audit = { action: collectionEvidence ? "cod.delivery_collected" : `cod.${input.action}`, resourceType: "order_item", resourceId: line.id, metadata: { orderId: line.orderId, source: input.actor.kind, externalEventId: input.actor.externalEventId ?? null } };
       if (input.actor.kind === "n8n") await tx.insert(serviceAuditRecords).values({ ...audit, serviceActorId: input.actor.id });
       else await tx.insert(auditRecords).values({ ...audit, actorId: input.actor.id });
-      const eventType = eventForStatus[input.action];
+      const eventType = input.action === "delivered" && !collectionEvidence ? undefined : eventForStatus[input.action];
       if (eventType) {
         const [event] = await tx.insert(codOutbox).values({ eventType, payload: {} }).returning({ id: codOutbox.id, createdAt: codOutbox.createdAt });
         await tx.update(codOutbox).set({ payload: createCodEventPayload({ eventId: event.id, eventType, occurredAt: event.createdAt.toISOString(), orderId: order.id, reference: order.reference, sellerId: line.sellerId, amount: (Number(line.unitPrice) * line.quantity).toFixed(2), status: order.status, paymentStatus: collected ? "collected" : "unpaid" }) }).where(eq(codOutbox.id, event.id));
@@ -64,13 +66,33 @@ export class CodOperationsService {
   async confirm(input: { orderId: string; actorId: string }) {
     return this.database.transaction(async (tx) => {
       const [order] = await tx.update(orders).set({ status: "confirmed" }).where(and(eq(orders.id, input.orderId), eq(orders.status, "pending"))).returning();
-      if (!order) throw new CodOperationError("INVALID_TRANSITION", "Order is not awaiting confirmation");
+      if (!order) {
+        const [existing] = await tx.select({ id: orders.id }).from(orders).where(eq(orders.id, input.orderId)).limit(1);
+        throw existing ? new CodOperationError("INVALID_TRANSITION", "Order is not awaiting approval") : new CodOperationError("NOT_FOUND", "Order not found");
+      }
       await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`order-event-sequence:${order.id}`}))`);
       const sequence = Number((await tx.execute(sql`select coalesce(max("sequence"), 0) + 1 as "sequence" from "order_events" where "order_id" = ${order.id}`)).rows[0].sequence);
       await tx.insert(orderEvents).values({ orderId: order.id, actorId: input.actorId, eventType: "order_confirmed", fromStatus: "pending", toStatus: "confirmed", sequence });
       await tx.insert(auditRecords).values({ actorId: input.actorId, action: "cod.confirmed", resourceType: "order", resourceId: order.id, metadata: {} });
       const [event] = await tx.insert(codOutbox).values({ eventType: "cod.order.confirmed", payload: {} }).returning({ id: codOutbox.id, createdAt: codOutbox.createdAt });
       await tx.update(codOutbox).set({ payload: createCodEventPayload({ eventId: event.id, eventType: "cod.order.confirmed", occurredAt: event.createdAt.toISOString(), orderId: order.id, reference: order.reference, sellerId: null, amount: order.total, status: order.status, paymentStatus: order.paymentStatus }) }).where(eq(codOutbox.id, event.id));
+      return { orderId: order.id, status: order.status };
+    });
+  }
+
+  async reject(input: { orderId: string; actorId: string; note?: string }) {
+    return this.database.transaction(async (tx) => {
+      const [order] = await tx.update(orders).set({ status: "cancelled" }).where(and(eq(orders.id, input.orderId), eq(orders.status, "pending"), eq(orders.paymentMethod, "cod"))).returning();
+      if (!order) {
+        const [existing] = await tx.select({ id: orders.id }).from(orders).where(eq(orders.id, input.orderId)).limit(1);
+        throw existing ? new CodOperationError("INVALID_TRANSITION", "Order is not awaiting approval") : new CodOperationError("NOT_FOUND", "Order not found");
+      }
+      const lines = await tx.update(orderItems).set({ fulfillmentStatus: "cancelled" }).where(eq(orderItems.orderId, order.id)).returning({ id: orderItems.id });
+      for (const line of lines) await tx.update(commissionRecords).set({ status: "void" }).where(and(eq(commissionRecords.orderItemId, line.id), eq(commissionRecords.status, "accrued")));
+      await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`order-event-sequence:${order.id}`}))`);
+      const sequence = Number((await tx.execute(sql`select coalesce(max("sequence"), 0) + 1 as "sequence" from "order_events" where "order_id" = ${order.id}`)).rows[0].sequence);
+      await tx.insert(orderEvents).values({ orderId: order.id, actorId: input.actorId, eventType: "order_rejected", fromStatus: "pending", toStatus: "cancelled", note: input.note, sequence });
+      await tx.insert(auditRecords).values({ actorId: input.actorId, action: "cod.rejected", resourceType: "order", resourceId: order.id, metadata: { note: input.note ?? null } });
       return { orderId: order.id, status: order.status };
     });
   }

@@ -32,6 +32,11 @@ export const customerTrackingEmptyMessage = () => "No fulfillment updates yet.";
 export const customerTrackingErrorMessage = (reason: unknown) => reason instanceof Error && reason.name !== "AbortError" ? reason.message : "Unable to load fulfillment updates";
 export const customerPaymentMethodLabel = (method: CustomerOrder["paymentMethod"]) => method === "cod" ? "Cash on Delivery" : "Payment method unavailable";
 export const customerPaymentStatusLabel = (status: CustomerOrder["paymentStatus"]) => status === "collected" ? "Collected on delivery" : "Pending · pay on delivery";
+export const customerOrderApprovalLabel = (status: CustomerOrder["status"]) => ({
+  pending: "Awaiting Admin approval",
+  confirmed: "Approved for delivery",
+  cancelled: "Rejected / cancelled",
+})[status];
 export const customerFulfillmentStatusLabel = (status: CustomerFulfillmentStatus) => ({
   pending: "Pending", processing: "Processing", packed: "Packed", shipped: "Shipped", delivered: "Delivered",
   failed_delivery: "Failed delivery", return_requested: "Return requested", returned: "Returned", cancelled: "Cancelled",

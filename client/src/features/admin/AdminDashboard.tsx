@@ -8,6 +8,7 @@ import { BadgePercent, Banknote, ChartNoAxesCombined, ClipboardCheck, FileSearch
 import type { LucideIcon } from "lucide-react";
 import { getJSON, patchJSON, postJSON } from "@/lib/api";
 import { adminOverview } from "@/features/admin/admin-overview.utils";
+import { codOrderStatusLabel, nextCodDeliveryActions } from "@/features/admin/cod-order.utils";
 import { auditMetadataText, auditRecordsPath, type AuditRecordFilters } from "@/features/admin/audit-log.utils";
 import { adminSearchPath, normalizeAdminSearchInput } from "@/features/admin/admin-global-search";
 import { productPublicationError, replacePublishedProduct } from "@/features/admin/product-publication-moderation";
@@ -24,6 +25,7 @@ const initialData: AdminDashboardData = { accounts: [], products: [], orders: []
 const dateFormat = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" });
 const timestampFormat = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
 const moneyFormat = new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" });
+const codMoneyFormat = new Intl.NumberFormat(undefined, { style: "currency", currency: "BDT" });
 const fulfillmentStatuses = ["pending", "processing", "packed", "shipped", "delivered", "cancelled", "returned"] as const;
 const adminFinancialStatus = (status: string) => status === "paid" ? "recorded" : status;
 
@@ -184,6 +186,9 @@ export function AdminDashboard() {
   const [promotionLoading, setPromotionLoading] = useState(true);
   const [productLoading, setProductLoading] = useState(true);
   const [orderError, setOrderError] = useState("");
+  const [orderMutation, setOrderMutation] = useState<string | null>(null);
+  const [orderMutationMessage, setOrderMutationMessage] = useState("");
+  const [orderMutationError, setOrderMutationError] = useState("");
   const [promotionError, setPromotionError] = useState("");
   const [productError, setProductError] = useState("");
   const [auditError, setAuditError] = useState("");
@@ -455,6 +460,18 @@ export function AdminDashboard() {
     } finally {
       if (!signal?.aborted) setOrderLoading(false);
     }
+  }
+
+  async function changeCodOrder(path: string, method: "POST" | "PATCH", body: unknown, key: string, success: string) {
+    setOrderMutation(key); setOrderMutationError(""); setOrderMutationMessage("");
+    try {
+      if (method === "POST") await postJSON(path, body);
+      else await patchJSON(path, body);
+      await loadOrders();
+      setOrderMutationMessage(success);
+    } catch (reason) {
+      setOrderMutationError(reason instanceof Error ? reason.message : "Unable to update COD order.");
+    } finally { setOrderMutation(null); }
   }
 
   async function loadPromotions(signal?: AbortSignal) {
@@ -838,10 +855,15 @@ export function AdminDashboard() {
           {auditLoading ? <p className="admin-state">Loading audit records…</p> : auditError ? <div className="admin-empty" role="alert"><strong>Unable to load audit records.</strong><p>Try loading the audit records again.</p><button className="admin-audit-retry" type="button" onClick={() => void loadAuditRecords(appliedAuditFilters)}>Try again</button></div> : data.auditRecords.length ? <div className="admin-list admin-operations-table">{data.auditRecords.map((record) => <article className="admin-audit-record" key={record.id}><div><strong>{record.action}</strong><small>{record.resourceType} · {record.resourceId}</small><code>{auditMetadataText(record.metadata)}</code></div><time dateTime={record.createdAt}>{timestampFormat.format(new Date(record.createdAt))}</time></article>)}</div> : <div className="admin-empty"><strong>No audit records match the selected filters.</strong><p>Try changing or resetting the filters.</p></div>}
     </section></div>}
     {activeSection === "orders" && <div className="admin-operations-workspace"><section className="admin-panel admin-order-oversight" id="orders" aria-labelledby="order-oversight-heading">
-      <div className="admin-panel-head"><div><p className="eyebrow">Order records</p><h2 id="order-oversight-heading">Order oversight</h2><p className="admin-order-oversight-note">Read-only order snapshots. Payment and delivery changes are not available here.</p></div><span>{orderLoading ? "Loading" : `${data.orders.length} total`}</span></div>
+      <div className="admin-panel-head"><div><p className="eyebrow">COD operations</p><h2 id="order-oversight-heading">Order approval and delivery</h2><p className="admin-order-oversight-note">Approve COD orders before delivery. Record collection only after receiving payment on delivery.</p></div><span>{orderLoading ? "Loading" : `${data.orders.length} total`}</span></div>
+      {!orderLoading && !orderError && <p className="admin-order-queue-count">Awaiting Admin approval: {data.orders.filter((order) => order.status === "pending").length}</p>}
+      {orderMutationError && <p className="admin-order-feedback" role="alert">{orderMutationError}</p>}
+      {orderMutationMessage && <p className="admin-order-feedback" role="status">{orderMutationMessage}</p>}
+      {!orderLoading && !orderError && <section className="admin-cod-queue" aria-label="COD approval queue"><h3>COD approval queue</h3>{data.orders.some((order) => order.status === "pending") ? data.orders.filter((order) => order.status === "pending").map((order) => <article key={order.id}><div><strong>{order.reference}</strong><small>{order.customer.name} · {codMoneyFormat.format(order.total)} · Cash on Delivery · Uncollected</small></div><div className="admin-order-actions"><button type="button" disabled={orderMutation !== null} onClick={() => void changeCodOrder(`/admin/orders/${order.id}/approve`, "POST", {}, order.id, `${order.reference} approved for delivery.`)}>Approve</button><button type="button" disabled={orderMutation !== null} onClick={() => void changeCodOrder(`/admin/orders/${order.id}/reject`, "POST", {}, order.id, `${order.reference} rejected.`)}>Reject</button></div></article>) : <p>No COD orders are awaiting approval.</p>}</section>}
           {orderLoading ? <p className="admin-state">Loading order records…</p> : orderError ? <div className="admin-empty" role="alert"><strong>Unable to load order records.</strong><p>Try loading the order records again.</p><button className="admin-order-retry" type="button" onClick={() => void loadOrders()} aria-label="Retry loading order records">Try again</button></div> : data.orders.length ? <div className="admin-list admin-operations-table">{data.orders.map((order) => <article className="admin-order-record" key={order.id}>
-        <div className="admin-order-summary"><strong>{order.reference}</strong><small>Customer: {order.customer.name} · Created <time dateTime={order.createdAt}>{timestampFormat.format(new Date(order.createdAt))}</time></small><small>Order status: {order.status} · Payment: {order.paymentStatus} · Total: {moneyFormat.format(order.total)}</small></div>
-        <details className="admin-order-detail"><summary aria-label={`Show order-line details for ${order.reference}`}>Order-line details</summary><div className="admin-order-items" aria-label={`Items for ${order.reference}`}>{order.items.map((item) => <article className="admin-order-item" key={item.id}><div><strong>{item.product.name}</strong><small>Seller: {item.seller.name ?? "Unassigned"} · Quantity: {item.quantity} · Unit price: {moneyFormat.format(item.unitPrice)}</small>{item.variant && <small>SKU: {item.variant?.sku} · {Object.entries(item.variant.options).map(([name, value]) => `${name}: ${value}`).join(" · ")}</small>}</div><span className="admin-status">{item.fulfillmentStatus}</span></article>)}</div></details>
+        <div className="admin-order-summary"><strong>{order.reference}</strong><small>Customer: {order.customer.name} · Created <time dateTime={order.createdAt}>{timestampFormat.format(new Date(order.createdAt))}</time></small><small>{codOrderStatusLabel(order.status)} · Cash on Delivery · {order.paymentStatus === "collected" ? "Collected on delivery" : "Uncollected"} · Total: {codMoneyFormat.format(order.total)}</small></div>
+        <details className="admin-order-detail"><summary aria-label={`Show order-line details for ${order.reference}`}>Order-line details</summary><div className="admin-order-items" aria-label={`Items for ${order.reference}`}>{order.items.map((item) => <article className="admin-order-item" key={item.id}><div><strong>{item.product.name}</strong><small>Seller: {item.seller.name ?? "Unassigned"} · Quantity: {item.quantity} · Unit price: {codMoneyFormat.format(item.unitPrice)}</small>{item.variant && <small>SKU: {item.variant?.sku} · {Object.entries(item.variant.options).map(([name, value]) => `${name}: ${value}`).join(" · ")}</small>}</div><div className="admin-order-line-state"><span className="admin-status">{item.fulfillmentStatus.replaceAll("_", " ")}</span>{item.collectionRecorded && <small>COD collection recorded</small>}{order.status === "confirmed" && <div className="admin-order-actions">{nextCodDeliveryActions(item.fulfillmentStatus).map((action) => <button key={action} type="button" disabled={orderMutation !== null} onClick={() => void changeCodOrder(`/admin/orders/${order.id}/items/${item.id}/delivery`, "PATCH", { action }, item.id, `${order.reference}: ${item.product.name} ${action.replaceAll("_", " ")}.`)}>{action.replaceAll("_", " ")}</button>)}{item.fulfillmentStatus === "delivered" && !item.collectionRecorded && <button type="button" disabled={orderMutation !== null} onClick={() => void changeCodOrder(`/admin/orders/${order.id}/items/${item.id}/collect`, "POST", {}, item.id, `${order.reference}: COD collection recorded.`)}>Record COD collection</button>}</div>}</div></article>)}</div></details>
+        {order.events && <details className="admin-order-history"><summary>Recorded history</summary>{order.events.length ? <ol>{order.events.map((event) => <li key={event.id}><strong>{event.eventType.replaceAll("_", " ")}</strong><span>{event.fromStatus && event.toStatus ? ` ${event.fromStatus} ? ${event.toStatus}` : event.toStatus ?? ""}</span>{event.note && <span>{event.note}</span>}<time dateTime={event.createdAt}>{timestampFormat.format(new Date(event.createdAt))}</time></li>)}</ol> : <p>No recorded updates yet.</p>}</details>}
           </article>)}</div> : <div className="admin-empty"><strong>No orders are available for oversight.</strong><p>Orders will appear here after customers check out.</p></div>}
     </section></div>}
     {activeSection === "accounts" && <div className="admin-operations-workspace"><section className="admin-panel admin-accounts" aria-labelledby="accounts-heading">

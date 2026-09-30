@@ -1,4 +1,4 @@
-import type { FulfillmentStatus } from "@/types/account";
+import type { CustomerFulfillmentStatus, FulfillmentStatus } from "@/types/account";
 
 export type AdminAccount = {
   id: string;
@@ -37,7 +37,8 @@ export type AdminOrderItem = {
   variant?: { sku: string; options: Record<string, string> };
   quantity: number;
   unitPrice: number;
-  fulfillmentStatus: FulfillmentStatus;
+  fulfillmentStatus: CustomerFulfillmentStatus;
+  collectionRecorded?: boolean;
 };
 export type AdminOrder = {
   id: string;
@@ -45,7 +46,8 @@ export type AdminOrder = {
   customer: { id: string; name: string };
   total: number;
   status: "pending" | "confirmed" | "cancelled";
-  paymentStatus: "unpaid";
+  paymentStatus: "unpaid" | "collected";
+  events?: { id: string; eventType: string; fromStatus: string | null; toStatus: string | null; note: string | null; createdAt: string }[];
   items: AdminOrderItem[];
   createdAt: string;
 };

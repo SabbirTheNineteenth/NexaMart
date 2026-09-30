@@ -5,11 +5,13 @@ import test from "node:test";
 const dashboard = readFileSync(new URL("../src/features/admin/AdminDashboard.tsx", import.meta.url), "utf8");
 const adminTypes = readFileSync(new URL("../src/types/admin.ts", import.meta.url), "utf8");
 
-test("admin orders oversight loads safe immutable order snapshots from the dedicated endpoint", () => {
+test("Admin COD oversight loads API order snapshots and exposes approval controls", () => {
   assert.match(dashboard, /getJSON<\{ orders: AdminOrder\[\] \}>\("\/admin\/orders", signal\)/);
   assert.match(dashboard, /<section className="admin-panel admin-order-oversight"[^>]*aria-labelledby="order-oversight-heading">/);
-  assert.match(dashboard, /<h2 id="order-oversight-heading">Order oversight<\/h2>/);
-  assert.match(dashboard, /Read-only order snapshots\. Payment and delivery changes are not available here\./);
+  assert.match(dashboard, /<h2 id="order-oversight-heading">Order approval and delivery<\/h2>/);
+  assert.match(dashboard, /Awaiting Admin approval:/);
+  assert.match(dashboard, /changeCodOrder\(`\/admin\/orders\/\$\{order\.id\}\/approve`/);
+  assert.match(dashboard, /changeCodOrder\(`\/admin\/orders\/\$\{order\.id\}\/reject`/);
   assert.match(dashboard, /data\.orders\.map\(\(order\)/);
   assert.match(dashboard, /order\.reference/);
   assert.match(dashboard, /order\.customer\.name/);
@@ -33,9 +35,12 @@ test("admin orders oversight communicates loading, retryable errors, and empty r
   assert.match(dashboard, /aria-label="Retry loading order records"/);
 });
 
-test("admin order oversight has an accessible detail control without order mutation controls", () => {
+test("Admin order detail exposes per-line delivery and explicit collection controls", () => {
   assert.match(dashboard, /<details className="admin-order-detail">/);
   assert.match(dashboard, /aria-label=\{`Show order-line details for \$\{order\.reference\}`\}/);
+  assert.match(dashboard, /nextCodDeliveryActions\(item\.fulfillmentStatus\)/);
+  assert.match(dashboard, /item\.fulfillmentStatus === "delivered" && !item\.collectionRecorded/);
+  assert.match(dashboard, /Record COD collection/);
 });
 
 test("admin order types preserve the safe immutable server snapshot", () => {
@@ -43,16 +48,11 @@ test("admin order types preserve the safe immutable server snapshot", () => {
   assert.match(adminTypes, /seller: \{ id: string \| null; name: string \| null \};/);
   assert.match(adminTypes, /product: \{ id: string \| null; name: string; imageUrl: string \| null \};/);
   assert.match(adminTypes, /variant\?: \{ sku: string; options: Record<string, string> \};/);
-  assert.match(adminTypes, /fulfillmentStatus: FulfillmentStatus;/);
+  assert.match(adminTypes, /fulfillmentStatus: CustomerFulfillmentStatus;/);
   assert.match(adminTypes, /items: AdminOrderItem\[\];/);
 });
 
-test("admin order oversight exposes no order, payment, or delivery mutation controls", () => {
-  const start = dashboard.indexOf('className="admin-panel admin-order-oversight"');
-  const end = dashboard.indexOf('className="admin-panel admin-accounts"', start);
-  const panel = dashboard.slice(start, end);
-  assert.doesNotMatch(panel, /<button[^>]*>(?:Approve|Cancel|Refund|Ship|Deliver|Mark paid)/i);
-  assert.doesNotMatch(panel, /patchJSON\([^)]*(?:orders|payment|delivery)/i);
-  assert.doesNotMatch(panel, /postJSON\([^)]*(?:orders|payment|delivery)/i);
-  assert.doesNotMatch(panel, /deleteJSON\([^)]*(?:orders|payment|delivery)/i);
+test("Admin COD panel never offers online payment or payout actions", () => {
+  const panel = dashboard.slice(dashboard.indexOf('className="admin-panel admin-order-oversight"'), dashboard.indexOf('className="admin-panel admin-accounts"'));
+  assert.doesNotMatch(panel, /(?:Stripe|bKash|SSLCommerz|Refund|Mark paid)/i);
 });

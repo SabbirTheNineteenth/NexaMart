@@ -1,6 +1,6 @@
 import { and, eq, exists, sql } from "drizzle-orm";
 import { db } from "../../../db/client.js";
-import { commissionRecords, orderEvents, orderItems, sellerProfiles } from "../../../db/schema/index.js";
+import { commissionRecords, orderEvents, orderItems, orders, sellerProfiles } from "../../../db/schema/index.js";
 
 type Status = "pending" | "processing" | "packed" | "shipped" | "delivered" | "cancelled" | "returned" | "failed_delivery" | "return_requested";
 type FulfillmentStatus = Exclude<Status, "pending">;
@@ -34,6 +34,8 @@ export class SellerFulfillmentService {
         .from(orderItems).innerJoin(sellerProfiles, and(eq(sellerProfiles.accountId, orderItems.sellerId), eq(sellerProfiles.status, "active")))
         .where(and(eq(orderItems.id, input.orderItemId), eq(orderItems.sellerId, input.sellerId))).limit(1);
       if (!current) throw new SellerFulfillmentError("ORDER_ITEM_NOT_FOUND", "Order item not found");
+      const [order] = await tx.select({ status: orders.status }).from(orders).where(eq(orders.id, current.orderId)).limit(1);
+      if (order?.status !== "confirmed") throw new SellerFulfillmentError("INVALID_FULFILLMENT_TRANSITION", "Order is awaiting Admin approval");
       if (!isSellerFulfillmentTransitionAllowed(current.fulfillmentStatus, input.status)) throw new SellerFulfillmentError("INVALID_FULFILLMENT_TRANSITION", "Invalid fulfillment transition");
       const [updated] = await tx.update(orderItems).set({ fulfillmentStatus: input.status })
         .where(and(eq(orderItems.id, input.orderItemId), eq(orderItems.sellerId, input.sellerId), eq(orderItems.fulfillmentStatus, current.fulfillmentStatus), activeSeller))
