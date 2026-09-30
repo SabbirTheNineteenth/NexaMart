@@ -100,6 +100,14 @@ cd server
 NEXAMART_DEMO_SEED=local-confirmed npm run demo:seed:local
 ```
 
+## Local COD and Telegram operations
+
+Checkout persists a Cash on Delivery order as pending with payment unpaid. An Admin approves it before valid line fulfillment updates; Server and PostgreSQL own the status and collection rules. COD becomes collected only after authorized delivery and collection evidence is recorded for every line. A signed n8n callback may submit that explicit evidence, but n8n cannot change payment or fulfillment state on its own.
+
+The order-created outbox event notifies the configured Admin Telegram chat. Admin line updates publish `order.status_updated` after the Server transition succeeds. Customer Telegram delivery requires an authenticated customer to open the NexaMart-only bot link and press Start in a private chat. A saved Telegram number is optional contact metadata, never a chat lookup or delivery target. Unlinked customers continue to see their orders in Account; their Telegram update is recorded as skipped.
+
+Local n8n needs the dedicated NexaMart bot and active NexaMart workflows, the Server service token and signed webhook settings, `NODE_FUNCTION_ALLOW_BUILTIN=crypto`, and `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`. With COD automation enabled, `NEXAMART_LOCAL_OUTBOX_DISPATCH_ENABLED=1` starts a five-second in-process dispatch tick **only while that explicitly enabled local Server process is running**. The flag is inert in production, including Vercel/serverless. A separately provisioned external scheduler for production remains **unresolved and unimplemented**. See [local n8n operations](server/automation/n8n/README.md) for setup, retries, retention, and workflow verification.
+
 ## Quality checks
 
 Run checks independently for the client and API after configuring their local environments.
