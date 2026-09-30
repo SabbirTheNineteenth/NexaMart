@@ -12,10 +12,12 @@ test("customer workspace uses a bounded rail and collapses without fixed-width o
   assert.match(styles, /\.shell, \.shell :global\(\*\) \{ box-sizing: border-box; \}/);
 });
 
-test("saved product media is wrapped, bounded, and cropped inside each card", () => {
+test("saved product cards give product details a readable column and keep media bounded", () => {
   assert.match(workspace, /className=\{styles\.wishlistMedia\}/);
   assert.match(styles, /\.wishlistMedia\s*\{[^}]*aspect-ratio:[^}]*overflow:\s*hidden/s);
   assert.match(styles, /\.wishlistMedia\s+:global\(\.wishlist-image\)\s*\{[^}]*display:\s*block;[^}]*width:\s*100%;[^}]*height:\s*100%;[^}]*object-fit:\s*cover/s);
+  assert.match(styles, /\.content :global\(\.wishlist-list article\) \{ grid-template-columns: 96px minmax\(0, 1fr\);/);
+  assert.match(styles, /\.content :global\(\.wishlist-action\) \{ grid-column: 2; justify-self: start;/);
 });
 
 test("address editor stays centered and address fields collapse to one column", () => {

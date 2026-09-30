@@ -167,12 +167,12 @@
 .addressFormAction { gap: 12px; padding-top: 8px; }
 .addressFormAction :global(.primary-button), .addressFormAction :global(.account-switch) { min-height: 44px; font-size: 14px; }
 .content :global(.wishlist-list) { min-width: 0; }
-.content :global(.wishlist-list article) { grid-template-columns: 84px minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 16px; }
+.content :global(.wishlist-list article) { grid-template-columns: 96px minmax(0, 1fr); align-items: center; gap: 16px; padding: 16px; }
 .content :global(.wishlist-list article > div) { min-width: 0; }
-.wishlistMedia { width: 84px; max-width: 100%; aspect-ratio: 1; overflow: hidden; border-radius: 8px; background: #f0eaff; }
+.wishlistMedia { width: 96px; max-width: 100%; aspect-ratio: 1; overflow: hidden; border-radius: 8px; background: #f0eaff; }
 .wishlistMedia :global(.wishlist-image) { display: block; width: 100%; height: 100%; object-fit: cover; }
 .wishlistMedia :global(.wishlist-image-fallback) { display: grid; width: 100%; height: 100%; place-items: center; color: var(--account-accent); font-size: 18px; font-weight: 800; }
-.content :global(.wishlist-action) { min-width: 0; }
+.content :global(.wishlist-action) { grid-column: 2; justify-self: start; min-width: 0; }
 .content :global(.wishlist-remove) { min-height: 44px; font-size: 13px; }
 @media (max-width: 900px) {
   .workspaceLayout { grid-template-columns: minmax(0, 1fr); gap: 20px; }
