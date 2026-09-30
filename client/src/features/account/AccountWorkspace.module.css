@@ -108,7 +108,7 @@
 .addressCardActions :global(.account-switch), .addressCardActions :global(.account-address-remove) { width: auto; min-height: 38px; padding: 8px 12px; font-size: 12px; }
 .addressCardActions :global(.account-address-remove) { margin-left: auto; }
 .addressEditorForm, .addressCreateForm { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 14px 16px; }
-.addressEditorForm { margin-top: 2px; border-color: #d9cdec; background: #faf8ff; }
+.addressEditorForm { margin-top: 2px; width: min(100%, 680px); margin-right: auto; margin-left: auto; border-color: #d9cdec; background: #faf8ff; }
 .addressFormHeading { display: grid; grid-column: 1 / -1; gap: 4px; padding-bottom: 2px; }
 .addressFormHeading strong { color: var(--account-ink); font-size: 15px; }
 .addressFormHeading p { margin: 0; color: var(--account-muted); font-size: 13px; line-height: 1.45; }
